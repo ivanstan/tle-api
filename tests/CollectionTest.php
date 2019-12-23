@@ -4,6 +4,8 @@ namespace App\Tests;
 
 final class CollectionTest extends AbstractWebTestCase
 {
+    // ToDo add tests for page -1, 0, and page size -1, 0, 1
+
     private const TEST = [
         [
             'page' => 1,
