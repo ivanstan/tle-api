@@ -1,0 +1,210 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Open Data",
+    "version": "1.1.0"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {},
+  "components": {
+    "schemas": {
+      "ValueUnit": {
+        "properties": {
+          "value": {
+            "type": "float"
+          },
+          "unit": {
+            "type": "string"
+          }
+        }
+      },
+      "Pagination": {
+        "properties": {
+          "@id": {
+            "type": "string"
+          },
+          "@type": {
+            "type": "string"
+          },
+          "first": {
+            "type": "string"
+          },
+          "previous": {
+            "type": "string"
+          },
+          "next": {
+            "type": "string"
+          },
+          "last": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Exception": {
+        "properties": {
+          "response": {
+            "properties": {
+              "code": {
+                "type": "integer"
+              },
+              "message": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "METAR": {
+        "allOf": [
+          {
+            "properties": {
+              "icao": {
+                "type": "string",
+                "example": "LYBE"
+              },
+              "date": {
+                "type": "string",
+                "example": "2018-10-23T19:00:00+00:00"
+              },
+              "temperature": {
+                "$ref": "#/components/schemas/ValueUnit"
+              },
+              "dewPoint": {
+                "$ref": "#/components/schemas/ValueUnit"
+              },
+              "pressure": {
+                "$ref": "#/components/schemas/ValueUnit"
+              },
+              "raw": {
+                "type": "string",
+                "example": "METAR LYBE 171530Z 11004KT CAVOK 22/04 Q1018 NOSIG"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "TLE": {
+        "allOf": [
+          {
+            "properties": {
+              "@id": {
+                "type": "string",
+                "example": "https://ivanstanojevic.me/api/tle/43630"
+              },
+              "@type": {
+                "type": "string",
+                "example": "TleModel"
+              },
+              "satelliteId": {
+                "type": "integer",
+                "example": "43630"
+              },
+              "date": {
+                "type": "string",
+                "example": "2018-10-21T11:40:23+00:00"
+              },
+              "name": {
+                "type": "string",
+                "example": "HTV-7 (KOUNOTORI 7)"
+              },
+              "line1": {
+                "type": "string",
+                "example": "1 43630U 18073A   18285.64337553  .00002296  00000-0  42374-4 0  9998"
+              },
+              "line2": {
+                "type": "string",
+                "example": "2 43630  51.6412 153.3949 0003517 275.8456 137.9883 15.53813372136786"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      }
+    },
+    "responses": {
+      "404": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Exception"
+            },
+            "example": {
+              "response": {
+                "code": 404,
+                "message": "Not found"
+              }
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Exception"
+            },
+            "example": {
+              "response": {
+                "code": 500,
+                "message": "Server error"
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "search": {
+        "name": "search",
+        "in": "query",
+        "description": "Search string",
+        "schema": {
+          "type": "string",
+          "default": "*"
+        }
+      },
+      "sortDirection": {
+        "name": "sort-dir",
+        "in": "query",
+        "description": "Sort direction",
+        "schema": {
+          "type": "string",
+          "default": "asc",
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        }
+      },
+      "pageNumber": {
+        "name": "page",
+        "in": "query",
+        "description": "Page number",
+        "schema": {
+          "type": "integer",
+          "default": 1,
+          "minimum": "1"
+        }
+      },
+      "pageSize": {
+        "name": "page-size",
+        "in": "query",
+        "description": "Number of items per page",
+        "schema": {
+          "type": "integer",
+          "default": "50"
+        }
+      }
+    }
+  }
+}

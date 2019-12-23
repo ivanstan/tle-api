@@ -1,0 +1,14 @@
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+    globals:
+        app_name: '%app_name%'
+    date:
+        format: 'd-m-Y H:i'
+        interval_format: '%%d days'
+        timezone: 'Europe/Belgrade'
+    number_format:
+        decimals: 2
+        decimal_point: ','
+        thousands_separator: '.'
