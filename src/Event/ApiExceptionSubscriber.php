@@ -15,7 +15,7 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
     /**
      * Exception handler will fire on exception occurred on a path bellow /api.
      */
-    public const API_PATH = '/api';
+    public const API_PATH = '/';
 
     private $env;
 
@@ -49,7 +49,7 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
             $this->setResponse($event, Response::HTTP_FORBIDDEN, 'Forbidden');
         }
 
-        if ('dev' === $this->env) {
+        if ($this->env === 'dev') {
             $this->setResponse($event, $exception->getCode(), $exception->getMessage());
         }
     }

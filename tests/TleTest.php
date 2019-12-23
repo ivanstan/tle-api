@@ -6,13 +6,6 @@ use App\DataFixtures\TleFixtures;
 
 final class TleTest extends AbstractWebTestCase
 {
-    public function testDocumentationIsAvailable(): void
-    {
-        $response = $this->get('/api/tle/docs');
-
-        self::assertEquals(200, $response->getStatusCode(), 'Assert documentation is available');
-    }
-
     public function testTleSingleRecord(): void
     {
         $tle = TleFixtures::create();
@@ -68,7 +61,7 @@ final class TleTest extends AbstractWebTestCase
         self::assertEquals($response['totalItems'], 10);
 
         self::assertArrayHasKey('member', $response);
-        self::assertEquals(count($response['member']), $pageSize);
+        self::assertEquals(\count($response['member']), $pageSize);
 
         self::assertArrayHasKey('parameters', $response);
         $parameters = $response['parameters'];
@@ -105,33 +98,5 @@ final class TleTest extends AbstractWebTestCase
 
         self::assertArrayHasKey('last', $view);
         self::assertEquals($view['last'], 'http://localhost/api/tle?page-size=2&page=5');
-    }
-
-    public function testDocumentationIsCorrect(): void
-    {
-        $response = $this->get('/api/tle/json');
-
-        self::assertEquals(200, $response->getStatusCode(), 'Assert json documentation is available');
-
-        $response = $this->toArray($response);
-
-        $collectionSchema = $response['paths']['/api/tle']['get']['responses'][200]['content']['application/json']['schema']['properties'];
-        $paginationSchema = $response['components']['schemas']['Pagination']['properties'];
-        $tleSchema = $response['components']['schemas']['TLE']['allOf'][0]['properties'];
-
-        $tle = TleFixtures::create();
-
-        $response = $this->toArray($this->get('/api/tle/'.$tle->getId()));
-
-        self::assertCount(count($tleSchema), $response);
-        self::assertEquals(array_keys($tleSchema), array_keys($response));
-
-        $response = $this->toArray($this->get('/api/tle', ['page-size' => 2, 'page' => 2]));
-
-        self::assertCount(count($paginationSchema), $response['view']);
-        self::assertEquals(array_keys($paginationSchema), array_keys($response['view']));
-
-        self::assertCount(count($response), $collectionSchema);
-        self::assertEquals(array_keys($response), array_keys($collectionSchema));
     }
 }

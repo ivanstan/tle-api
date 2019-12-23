@@ -4,15 +4,15 @@ namespace App\DataFixtures;
 
 use App\Entity\Tle;
 use Doctrine\Bundle\FixturesBundle\Fixture;
-use Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Persistence\ObjectManager;
 
 final class TleFixtures extends Fixture
 {
-    private static $satelliteId = 43550;
-    private static $name = '1998-067NY';
-    private static $line1 = '1 43550U 98067NY  18321.21573649  .00013513  00000-0  18402-3 0  9990';
-    private static $line2 = '2 43550  51.6389 334.0891 0005785  67.0956 293.0647 15.57860024 19804';
-    public static $date = '2018-11-17T05:10:39+00:00';
+    private static int $satelliteId = 43550;
+    private static string $name = '1998-067NY';
+    private static string $line1 = '1 43550U 98067NY  18321.21573649  .00013513  00000-0  18402-3 0  9990';
+    private static string $line2 = '2 43550  51.6389 334.0891 0005785  67.0956 293.0647 15.57860024 19804';
+    public static string $date = '2018-11-17T05:10:39+00:00';
 
     public static function create(): Tle
     {
