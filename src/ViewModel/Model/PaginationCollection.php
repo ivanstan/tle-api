@@ -4,9 +4,9 @@ namespace App\ViewModel\Model;
 
 class PaginationCollection
 {
-    private $collection = [];
+    private array $collection = [];
 
-    private $total = 0;
+    private int $total = 0;
 
     public function getCollection(): array
     {

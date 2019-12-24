@@ -80,23 +80,5 @@ final class TleTest extends AbstractWebTestCase
 
         self::assertArrayHasKey('page-size', $parameters);
         self::assertEquals($parameters['page-size'], $pageSize);
-
-        self::assertArrayHasKey('view', $response);
-        $view = $response['view'];
-
-        self::assertArrayHasKey('@id', $view);
-        self::assertEquals($view['@id'], 'http://localhost/api/tle?page-size=2&page=1');
-
-        self::assertArrayHasKey('@type', $view);
-        self::assertEquals($view['@type'], 'PartialCollectionView');
-
-        self::assertArrayHasKey('first', $view);
-        self::assertEquals($view['first'], 'http://localhost/api/tle?page-size=2&page=1');
-
-        self::assertArrayHasKey('next', $view);
-        self::assertEquals($view['next'], 'http://localhost/api/tle?page-size=2&page=2');
-
-        self::assertArrayHasKey('last', $view);
-        self::assertEquals($view['last'], 'http://localhost/api/tle?page-size=2&page=5');
     }
 }

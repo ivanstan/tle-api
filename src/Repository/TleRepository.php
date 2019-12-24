@@ -6,14 +6,14 @@ use App\Entity\Tle;
 use App\ViewModel\Model\PaginationCollection;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\Persistence\ManagerRegistry;
 
 class TleRepository extends ServiceEntityRepository
 {
     public const SORT_ID = 'id';
     public const SORT_NAME = 'name';
 
-    public static $sort = [self::SORT_ID, self::SORT_NAME];
+    public static array $sort = [self::SORT_ID, self::SORT_NAME];
 
     public function __construct(ManagerRegistry $registry)
     {
@@ -45,7 +45,7 @@ class TleRepository extends ServiceEntityRepository
             $builder
                 ->where(
                     $builder->expr()->orX(
-                        $builder->expr()->like('tle.satelliteId', ':search'),
+                        $builder->expr()->like('tle.id', ':search'),
                         $builder->expr()->like('tle.name', ':search')
                     )
                 )

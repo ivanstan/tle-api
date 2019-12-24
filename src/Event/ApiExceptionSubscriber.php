@@ -4,7 +4,6 @@ namespace App\Event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -13,11 +12,11 @@ use Symfony\Component\HttpKernel\KernelEvents;
 class ApiExceptionSubscriber implements EventSubscriberInterface
 {
     /**
-     * Exception handler will fire on exception occurred on a path bellow /api.
+     * Exception handler will fire on exception occurred on a path bellow /.
      */
     public const API_PATH = '/';
 
-    private $env;
+    private string $env;
 
     public function __construct($env)
     {
@@ -42,24 +41,23 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
         }
 
         if ($exception instanceof NotFoundHttpException) {
-            $this->setResponse($event, Response::HTTP_NOT_FOUND, $exception->getMessage());
+            $this->setResponse($event, $exception->getMessage());
         }
 
         if ($exception instanceof AccessDeniedHttpException) {
-            $this->setResponse($event, Response::HTTP_FORBIDDEN, 'Forbidden');
+            $this->setResponse($event, 'Forbidden');
         }
 
         if ($this->env === 'dev') {
-            $this->setResponse($event, $exception->getCode(), $exception->getMessage());
+            $this->setResponse($event, $exception->getMessage());
         }
     }
 
-    private function setResponse(ExceptionEvent $event, int $code, string $message): void
+    private function setResponse(ExceptionEvent $event, string $message): void
     {
         $response = new JsonResponse(
             [
                 'response' => [
-                    'code' => $code,
                     'message' => $message,
                 ],
             ]

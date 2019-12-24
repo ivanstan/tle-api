@@ -54,6 +54,9 @@ final class CollectionTest extends AbstractWebTestCase
     {
         foreach (self::TEST as $test) {
             $response = $this->getCollection($test['page'], 2);
+
+            self::assertArrayHasKey('view', $response);
+
             $this->assertViewIsCorrect(
                 $test['expected'],
                 $response['view']

@@ -4,7 +4,6 @@ namespace App\Controller\Api;
 
 use App\Entity\Tle;
 use App\Repository\TleRepository;
-use App\ViewModel\Converter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

@@ -12,7 +12,6 @@ class ErrorPageTest extends AbstractWebTestCase
 
         $response = $this->toArray($response);
 
-        self::assertEquals(404, $response['response']['code'], 'Assert correct response code in json');
         self::assertEquals(
             'No route found for "GET /noop"',
             $response['response']['message'],

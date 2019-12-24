@@ -17,22 +17,15 @@ abstract class AbstractApiController extends AbstractController
     protected const SORT_PARAM = 'sort';
     protected const SORT_DIR_PARAM = 'sort-dir';
 
-    protected static $sortDirection = [self::SORT_ASC, self::SORT_DESC];
+    protected static array $sortDirection = [self::SORT_ASC, self::SORT_DESC];
 
     protected const PAGE_SIZE_PARAM = 'page-size';
     protected const PAGE_PARAM = 'page';
     protected const PAGE_SIZE = 50;
     protected const SEARCH_PARAM = 'search';
 
-    protected const DATE_FROM_PARAM = 'date-from';
-    protected const DATE_TO_PARAM = 'date-to';
-    protected const DATE_INTERVAL_PARAM = 'interval';
-
-    /** @var SerializerInterface */
-    protected $serializer;
-
-    /** @var RouterInterface */
-    protected $router;
+    protected SerializerInterface $serializer;
+    protected RouterInterface $router;
 
     /**
      * @required
@@ -173,10 +166,5 @@ abstract class AbstractApiController extends AbstractController
                 'Access-Control-Allow-Origin' => '*',
             ]
         );
-    }
-
-    public function getCurrentUrl(Request $request): string
-    {
-        return $request->getSchemeAndHttpHost().$request->getRequestUri();
     }
 }

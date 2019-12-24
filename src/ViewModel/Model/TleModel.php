@@ -1,4 +1,4 @@
-<?php /** @noinspection SummerTimeUnsafeTimeManipulationInspection */
+<?php
 
 namespace App\ViewModel\Model;
 
