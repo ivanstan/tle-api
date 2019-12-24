@@ -2,6 +2,9 @@
 
 namespace App\Tests;
 
+use LogicException;
+use Symfony\Component\HttpFoundation\Response;
+
 final class CollectionTest extends AbstractWebTestCase
 {
     // ToDo add tests for page -1, 0, and page size -1, 0, 1
@@ -53,7 +56,7 @@ final class CollectionTest extends AbstractWebTestCase
     public function testPaginationWorks(): void
     {
         foreach (self::TEST as $test) {
-            $response = $this->getCollection($test['page'], 2);
+            $response = $this->getCollectionContent($test['page'], 2);
 
             self::assertArrayHasKey('view', $response);
 
@@ -64,6 +67,41 @@ final class CollectionTest extends AbstractWebTestCase
         }
     }
 
+    public function testPaginationError(): void
+    {
+        $this->expectException(LogicException::class);
+        $response = $this->getCollection(-1, 2);
+        self::assertEquals(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            $response->getStatusCode(),
+            'Assert HTTP 500 is returned for page -1'
+        );
+
+        $this->expectException(LogicException::class);
+        $response = $this->getCollection(0, 2);
+        self::assertEquals(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            $response->getStatusCode(),
+            'Assert HTTP 500 is returned for page 0'
+        );
+
+        $this->expectException(LogicException::class);
+        $response = $this->getCollection(1, -1);
+        self::assertEquals(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            $response->getStatusCode(),
+            'Assert HTTP 500 is returned for page size -1'
+        );
+
+        $this->expectException(LogicException::class);
+        $response = $this->getCollection(1, 0);
+        self::assertEquals(
+            Response::HTTP_INTERNAL_SERVER_ERROR,
+            $response->getStatusCode(),
+            'Assert HTTP 500 is returned for page size 0'
+        );
+    }
+
     private function assertViewIsCorrect($expected, $actual): void
     {
         foreach ($actual as $key => $value) {
@@ -72,16 +110,21 @@ final class CollectionTest extends AbstractWebTestCase
         }
     }
 
-    private function getCollection(int $page, int $pageSize): array
+    private function getCollectionContent(int $page, int $pageSize): array
     {
         return $this->toArray(
-            $this->get(
-                '/api/tle',
-                [
-                    'page' => $page,
-                    'page-size' => $pageSize,
-                ]
-            )
+            $this->getCollection($page, $pageSize)
+        );
+    }
+
+    private function getCollection(int $page, int $pageSize): Response
+    {
+        return $this->get(
+            '/api/tle',
+            [
+                'page' => $page,
+                'page-size' => $pageSize,
+            ]
         );
     }
 }
