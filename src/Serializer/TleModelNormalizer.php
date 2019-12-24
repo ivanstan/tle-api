@@ -9,8 +9,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class TleModelNormalizer implements NormalizerInterface
 {
-    /** @var UrlGeneratorInterface */
-    private $router;
+    private UrlGeneratorInterface $router;
 
     public function __construct(UrlGeneratorInterface $router)
     {

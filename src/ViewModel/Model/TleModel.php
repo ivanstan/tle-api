@@ -39,11 +39,11 @@ class TleModel
         return $this->name;
     }
 
-    public function launchYear($fourDigits = true): int
+    public function launchYear(?bool $fourDigits = null): int
     {
         $year = (int)trim(substr($this->line1, 9, 2));
 
-        if ($fourDigits) {
+        if ($fourDigits ?? true) {
             $this->formatYear($year);
         }
 

@@ -25,14 +25,12 @@ class ApiController extends AbstractController
      */
     public function getJson(string $name): JsonResponse
     {
-        $file = json_decode(file_get_contents($this->getProjectDir().'/config/custom/'.$name.'.json'), true);
+        $path = $this->getProjectDir() . '/config/custom/' . $name . '.json';
 
-        switch ($name) {
-            case 'tle':
-                $file['info']['title'] = 'TLE API';
-                $file['info']['version'] = '1.3.0';
-                break;
-        }
+        $file = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+
+        $file['info']['title'] = 'TLE API';
+        $file['info']['version'] = '1.3.0';
 
         return new JsonResponse($file);
     }

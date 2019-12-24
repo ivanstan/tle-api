@@ -9,21 +9,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DoctrineReloadCommand extends Command
+final class DoctrineReloadCommand extends Command
 {
     protected static $defaultName = 'doctrine:reload';
 
-    private static $choices = [
+    private static array $choices = [
         'y' => 'Yes',
         'n' => 'No',
     ];
 
-    private static $envs = [
+    private static array $envs = [
         'dev',
         'test',
     ];
 
-    private $env;
+    private string $env;
 
     public function __construct($env)
     {
@@ -42,7 +42,7 @@ class DoctrineReloadCommand extends Command
         $helper = $this->getHelper('question');
         $question = new ChoiceQuestion('All data will be lost. Do you wish to continue?', self::$choices, false);
 
-        if (!in_array($this->env, self::$envs, true)) {
+        if (!\in_array($this->env, self::$envs, true)) {
             $io->warning('This is intended only for use in dev environment.');
 
             return 1;
