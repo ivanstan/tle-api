@@ -53,9 +53,10 @@ final class CollectionTest extends AbstractWebTestCase
     public function testPaginationWorks(): void
     {
         foreach (self::TEST as $test) {
+            $response = $this->getCollection($test['page'], 2);
             $this->assertViewIsCorrect(
                 $test['expected'],
-                $this->getCollection($test['page'], 2)
+                $response['view']
             );
         }
     }
@@ -70,16 +71,14 @@ final class CollectionTest extends AbstractWebTestCase
 
     private function getCollection(int $page, int $pageSize): array
     {
-        $response = $this->get(
-            '/api/tle',
-            [
-                'page' => $page,
-                'page-size' => $pageSize,
-            ]
+        return $this->toArray(
+            $this->get(
+                '/api/tle',
+                [
+                    'page' => $page,
+                    'page-size' => $pageSize,
+                ]
+            )
         );
-
-        $response = $this->toArray($response);
-
-        return $response['view'];
     }
 }
