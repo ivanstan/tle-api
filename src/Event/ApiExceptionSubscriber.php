@@ -14,7 +14,7 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
     /**
      * Exception handler will fire on exception occurred on a path bellow /.
      */
-    public const API_PATH = '/';
+    protected const API_PATH = '/';
 
     private string $env;
 

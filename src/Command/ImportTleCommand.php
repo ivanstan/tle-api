@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\Tle;
 use App\Repository\TleRepository;
-use App\Service\CsvReader;
 use App\Service\TleFile;
 use App\Service\Traits\FileSystemAwareTrait;
 use App\ViewModel\Model\TleModel;
@@ -14,13 +13,14 @@ use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Yaml\Yaml;
 
 final class ImportTleCommand extends Command
 {
     use FileSystemAwareTrait;
 
     private const BATCH_SIZE = 50;
-    private const SOURCE = '/config/custom/source.csv';
+    private const SOURCE = '/config/custom/source.yaml';
 
     private EntityManagerInterface $em;
     private TleRepository $repository;
@@ -35,11 +35,13 @@ final class ImportTleCommand extends Command
         $this->repository = $repository;
     }
 
+    /** @noinspection PhpMissingParentCallCommonInspection */
     protected function configure(): void
     {
         $this->setName('import:tle');
     }
 
+    /** @noinspection PhpMissingParentCallCommonInspection */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->output = $output;
@@ -48,13 +50,22 @@ final class ImportTleCommand extends Command
         $totalInsert = 0;
         $totalUpdate = 0;
 
-        $csv = new CsvReader($this->getProjectDir() . self::SOURCE);
+        $sources = Yaml::parseFile($this->getProjectDir() . self::SOURCE);
 
-        $progressBar = new ProgressBar($output, $csv->count());
+        $progressBar = new ProgressBar($output, \count($sources));
         $progressBar->start();
 
-        foreach ($csv->get() as $source) {
-            $file = new TleFile(file_get_contents($source[0]));
+        foreach ($sources as $uri) {
+            /** @noinspection DisconnectedForeachInstructionInspection */
+            $progressBar->advance();
+
+            $content = file_get_contents($uri);
+
+            if (!$content) {
+                continue;
+            }
+
+            $file = new TleFile($content);
 
             $insert = [];
             $update = [];
@@ -72,7 +83,7 @@ final class ImportTleCommand extends Command
 
             $this->flush($insert, true);
             $this->flush($update);
-            $progressBar->advance();
+
         }
 
         $progressBar->finish();

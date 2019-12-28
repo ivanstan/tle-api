@@ -13,15 +13,7 @@ class ApiController extends AbstractController
     use FileSystemAwareTrait;
 
     /**
-     * @Route("/api/{name}/docs", name="app_api_docs")
-     */
-    public function html(string $name): Response
-    {
-        return $this->render('pages/api/docs.html.twig', ['name' => $name]);
-    }
-
-    /**
-     * @Route("/api/{name}/json", name="app_api_docs_json")
+     * @Route("/api/{name}.json", name="app_api_docs_json")
      */
     public function getJson(string $name): JsonResponse
     {
@@ -29,9 +21,6 @@ class ApiController extends AbstractController
 
         $file = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
 
-        $file['info']['title'] = 'TLE API';
-        $file['info']['version'] = '1.3.0';
-
-        return new JsonResponse($file);
+        return new JsonResponse($file, Response::HTTP_OK, ['Access-Control-Allow-Origin' => '*',]);
     }
 }

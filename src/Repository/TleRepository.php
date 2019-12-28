@@ -25,7 +25,7 @@ class TleRepository extends ServiceEntityRepository
      */
     public function fetchAllIndexed()
     {
-        return $this->createQueryBuilder('tle', 'tle.satelliteId')
+        return $this->createQueryBuilder('tle', 'tle.id')
             ->getQuery()
             ->getResult();
     }
