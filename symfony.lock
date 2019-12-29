@@ -93,6 +93,9 @@
     "jdorn/sql-formatter": {
         "version": "v1.2.17"
     },
+    "myclabs/php-enum": {
+        "version": "1.7.2"
+    },
     "nikic/php-parser": {
         "version": "v4.3.0"
     },

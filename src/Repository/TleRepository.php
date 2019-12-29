@@ -10,11 +10,6 @@ use Doctrine\Persistence\ManagerRegistry;
 
 class TleRepository extends ServiceEntityRepository
 {
-    public const SORT_ID = 'id';
-    public const SORT_NAME = 'name';
-
-    public static array $sort = [self::SORT_ID, self::SORT_NAME];
-
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Tle::class);
