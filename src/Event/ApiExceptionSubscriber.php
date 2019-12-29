@@ -4,9 +4,9 @@ namespace App\Event;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class ApiExceptionSubscriber implements EventSubscriberInterface
@@ -32,37 +32,51 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
 
     public function onException(ExceptionEvent $event): void
     {
-        $exception = $event->getThrowable();
-
-        $path = $event->getRequest()->getPathInfo();
-
-        if (strpos($path, self::API_PATH) === false) {
+        if (strpos($event->getRequest()->getPathInfo(), self::API_PATH) === false) {
             return;
         }
 
-        if ($exception instanceof NotFoundHttpException) {
-            $this->setResponse($event, $exception->getMessage());
-        }
+        $exception = $event->getThrowable();
 
-        if ($exception instanceof AccessDeniedHttpException) {
-            $this->setResponse($event, 'Forbidden');
-        }
+        $response = ['message' => 'Unspecified error'];
 
         if ($this->env === 'dev') {
-            $this->setResponse($event, $exception->getMessage());
+            $response['message'] = $exception->getMessage();
+            $response['exception'] = $this->throwableToArray($exception);
         }
+
+        if ($exception instanceof HttpException) {
+            $response['message'] = $exception->getMessage();
+
+            $this->setJsonResponse($event, $response);
+            return;
+        }
+
+        $this->setJsonResponse($event, $response);
     }
 
-    private function setResponse(ExceptionEvent $event, string $message): void
+    private function setJsonResponse(ExceptionEvent $event, array $response): void
     {
-        $response = new JsonResponse(
-            [
-                'response' => [
-                    'message' => $message,
+        $event->setResponse(
+            new JsonResponse(
+                [
+                    'response' => $response
                 ],
-            ]
+                Response::HTTP_OK,
+                [
+                    'Access-Control-Allow-Origin' => '*',
+                ]
+            )
         );
+    }
 
-        $event->setResponse($response);
+    private function throwableToArray(\Throwable $throwable): array
+    {
+        return [
+            'code' => $throwable->getCode(),
+            'file' => $throwable->getFile() . ':' . $throwable->getLine(),
+            'message' => $throwable->getMessage(),
+            'trace' => $throwable->getTrace(),
+        ];
     }
 }
