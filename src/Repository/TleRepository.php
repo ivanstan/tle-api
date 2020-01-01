@@ -6,6 +6,7 @@ use App\Entity\Tle;
 use App\ViewModel\Model\PaginationCollection;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
 class TleRepository extends ServiceEntityRepository
@@ -31,8 +32,7 @@ class TleRepository extends ServiceEntityRepository
         string $sortDir,
         int $pageSize,
         int $offset
-    ): PaginationCollection
-    {
+    ): PaginationCollection {
         $builder = $this->createQueryBuilder('tle');
 
         // search
@@ -44,14 +44,13 @@ class TleRepository extends ServiceEntityRepository
                         $builder->expr()->like('tle.name', ':search')
                     )
                 )
-                ->setParameter('search', '%'.$search.'%');
+                ->setParameter('search', '%' . $search . '%');
         }
 
-        // get total
-        $total = \count($builder->getQuery()->getResult());
+        $total = $this->getCount($builder);
 
         // sort
-        $builder->orderBy('tle.'.$sort, $sortDir);
+        $builder->orderBy('tle.' . $sort, $sortDir);
 
         // limit
         $builder->setMaxResults($pageSize);
@@ -63,5 +62,13 @@ class TleRepository extends ServiceEntityRepository
         $collection->setTotal($total);
 
         return $collection;
+    }
+
+    private function getCount(QueryBuilder $builder): int
+    {
+        $builder = clone $builder;
+
+        $builder->select('count(tle.id)');
+        return $builder->getQuery()->getSingleScalarResult();
     }
 }

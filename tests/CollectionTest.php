@@ -2,13 +2,10 @@
 
 namespace App\Tests;
 
-use LogicException;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CollectionTest extends AbstractWebTestCase
 {
-    // ToDo add tests for page -1, 0, and page size -1, 0, 1
-
     private const TEST = [
         [
             'page' => 1,
@@ -69,36 +66,32 @@ final class CollectionTest extends AbstractWebTestCase
 
     public function testPaginationError(): void
     {
-        $this->expectException(LogicException::class);
         $response = $this->getCollection(-1, 2);
         self::assertEquals(
-            Response::HTTP_INTERNAL_SERVER_ERROR,
+            Response::HTTP_BAD_REQUEST,
             $response->getStatusCode(),
-            'Assert HTTP 500 is returned for page -1'
+            'Assert HTTP 400 is returned for page -1'
         );
 
-        $this->expectException(LogicException::class);
         $response = $this->getCollection(0, 2);
         self::assertEquals(
-            Response::HTTP_INTERNAL_SERVER_ERROR,
+            Response::HTTP_BAD_REQUEST,
             $response->getStatusCode(),
-            'Assert HTTP 500 is returned for page 0'
+            'Assert HTTP 400 is returned for page 0'
         );
 
-        $this->expectException(LogicException::class);
         $response = $this->getCollection(1, -1);
         self::assertEquals(
-            Response::HTTP_INTERNAL_SERVER_ERROR,
+            Response::HTTP_BAD_REQUEST,
             $response->getStatusCode(),
-            'Assert HTTP 500 is returned for page size -1'
+            'Assert HTTP 400 is returned for page size -1'
         );
 
-        $this->expectException(LogicException::class);
         $response = $this->getCollection(1, 0);
         self::assertEquals(
-            Response::HTTP_INTERNAL_SERVER_ERROR,
+            Response::HTTP_BAD_REQUEST,
             $response->getStatusCode(),
-            'Assert HTTP 500 is returned for page size 0'
+            'Assert HTTP 400 is returned for page size 0'
         );
     }
 

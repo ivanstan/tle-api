@@ -51,7 +51,7 @@ class TleController extends AbstractApiController
             ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray());
 
         $search = $request->get(self::SEARCH_PARAM);
-        $sort = $request->get(self::SORT_DIR_PARAM, TleCollectionSortableFieldsEnum::NAME);
+        $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::NAME);
         $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::ASCENDING);
         $pageSize = (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), self::MAX_PAGE_SIZE);
 

@@ -13,7 +13,7 @@ class ApiController extends AbstractController
     use FileSystemAwareTrait;
 
     /**
-     * @Route("/api/{name}.json", name="app_api_docs_json")
+     * @Route("/api/{name}/json", name="app_api_docs_json")
      */
     public function getJson(string $name): JsonResponse
     {
