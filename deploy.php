@@ -8,21 +8,29 @@ require 'recipe/symfony.php';
 set('repository', 'https://github.com/ivanstan/tle-api');
 
 // [Optional] Allocate tty for git clone. Default value is false.
-set('git_tty', true); 
+set('git_tty', true);
 
 // Shared files/dirs between deploys 
-add('shared_files', [
-    '.env'
-]);
-add('shared_dirs', [
-    'var'
-]);
+add(
+    'shared_files',
+    [
+        '.env'
+    ]
+);
+add(
+    'shared_dirs',
+    [
+        'var'
+    ]
+);
 
 // Writable dirs by web server 
-add('writable_dirs', [
-    'var'
-]);
-
+add(
+    'writable_dirs',
+    [
+        'var'
+    ]
+);
 
 // Hosts
 
@@ -31,12 +39,31 @@ host('data.ivanstanojevic.me')
     ->port(2233)
     ->stage('production')
     ->set('deploy_path', '~/projects/tle.ivanstanojevic.me');
-    
+
 // Tasks
 
-task('build', function () {
-    run('cd {{release_path}} && build');
-});
+task(
+    'deploy',
+    [
+        'deploy:info',
+        'deploy:prepare',
+        'deploy:lock',
+        'deploy:release',
+        'deploy:update_code',
+        'deploy:clear_paths',
+        'deploy:create_cache_dir',
+        'deploy:shared',
+        'deploy:assets',
+        'deploy:vendors',
+        'deploy:cache:clear',
+        'deploy:cache:warmup',
+        'deploy:writable',
+        'database:migrate',
+        'deploy:symlink',
+        'deploy:unlock',
+        'cleanup',
+    ]
+);
 
 // [Optional] if deploy fails automatically unlock.
 after('deploy:failed', 'deploy:unlock');
