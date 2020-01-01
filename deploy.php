@@ -11,11 +11,17 @@ set('repository', 'https://github.com/ivanstan/tle-api');
 set('git_tty', true); 
 
 // Shared files/dirs between deploys 
-add('shared_files', []);
-add('shared_dirs', []);
+add('shared_files', [
+    '.env'
+]);
+add('shared_dirs', [
+    'var'
+]);
 
 // Writable dirs by web server 
-add('writable_dirs', []);
+add('writable_dirs', [
+    'var'
+]);
 
 
 // Hosts
