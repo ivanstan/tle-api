@@ -197,6 +197,7 @@ class TleModel
         throw new \InvalidArgumentException(\sprintf('Invalid line number %d', $lineNumber));
     }
 
+    // refactor: TleValidator
     private function checksum(string $line): int
     {
         $line = substr($line, 0, -1); // remove checksum

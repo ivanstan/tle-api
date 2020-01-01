@@ -6,13 +6,6 @@ use App\DataFixtures\TleFixtures;
 
 final class DocumentationTest extends AbstractWebTestCase
 {
-    public function testDocumentationIsAvailable(): void
-    {
-        $response = $this->get('/api/tle/docs');
-
-        self::assertEquals(200, $response->getStatusCode(), 'Assert documentation is available');
-    }
-
     public function testDocumentationIsCorrect(): void
     {
         $response = $this->get('/api/tle/json');
