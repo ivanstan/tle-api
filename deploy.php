@@ -9,6 +9,9 @@ set('repository', 'https://github.com/ivanstan/tle-api');
 
 // [Optional] Allocate tty for git clone. Default value is false.
 set('git_tty', true);
+set('bin_dir', 'bin');
+set('http_user', 'glutenfr');
+set('writable_mode', 'chmod');
 
 // Shared files/dirs between deploys 
 add(
@@ -25,12 +28,7 @@ add(
 );
 
 // Writable dirs by web server 
-add(
-    'writable_dirs',
-    [
-        'var'
-    ]
-);
+add('writable_dirs', []);
 
 // Hosts
 
