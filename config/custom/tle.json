@@ -13,7 +13,7 @@
     "/api/tle/{id}": {
       "get": {
         "summary": "Record",
-        "operationId": "tle-record",
+        "operationId": "record",
         "parameters": [
           {
             "name": "id",
@@ -48,24 +48,15 @@
     "/api/tle": {
       "get": {
         "summary": "Collection",
-        "operationId": "tle-collection",
+        "operationId": "collection",
         "parameters": [
           {
             "$ref": "#/components/parameters/search"
           },
           {
-            "name": "prn",
-            "in": "query",
-            "description": "Filter by pseudo-random noise.",
-            "schema": {
-              "type": "number",
-              "default": "null"
-            }
-          },
-          {
             "name": "sort",
             "in": "query",
-            "description": "Sort field",
+            "description": "Sort by",
             "schema": {
               "type": "string",
               "default": "name",
@@ -182,9 +173,6 @@
         "properties": {
           "response": {
             "properties": {
-              "code": {
-                "type": "integer"
-              },
               "message": {
                 "type": "string"
               }
@@ -205,10 +193,6 @@
               "@type": {
                 "type": "string",
                 "example": "TleModel"
-              },
-              "satelliteId": {
-                "type": "integer",
-                "example": "43630"
               },
               "name": {
                 "type": "string",
@@ -242,7 +226,6 @@
             },
             "example": {
               "response": {
-                "code": 404,
                 "message": "Not found"
               }
             }
@@ -258,7 +241,6 @@
             },
             "example": {
               "response": {
-                "code": 500,
                 "message": "Server error"
               }
             }
@@ -296,7 +278,7 @@
         "schema": {
           "type": "integer",
           "default": 1,
-          "minimum": "1"
+          "minimum": 1
         }
       },
       "pageSize": {
@@ -305,7 +287,9 @@
         "description": "Number of items per page",
         "schema": {
           "type": "integer",
-          "default": "50"
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100
         }
       }
     }
