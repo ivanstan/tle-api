@@ -18,7 +18,6 @@ final class TleTest extends AbstractWebTestCase
 
         self::assertArrayHasKey('@id', $response);
         self::assertArrayHasKey('@type', $response);
-        self::assertArrayHasKey('satelliteId', $response);
         self::assertArrayHasKey('name', $response);
         self::assertArrayHasKey('date', $response);
         self::assertArrayHasKey('line1', $response);
@@ -26,7 +25,6 @@ final class TleTest extends AbstractWebTestCase
 
         self::assertEquals('http://localhost/api/tle/'.$tle->getId(), $response['@id']);
         self::assertEquals('TleModel', $response['@type']);
-        self::assertEquals($tle->getId(), $response['satelliteId']);
         self::assertEquals($tle->getName(), $response['name']);
         self::assertEquals(TleFixtures::$date, $response['date']);
         self::assertEquals($tle->getLine1(), $response['line1']);

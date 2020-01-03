@@ -15,16 +15,16 @@ if (is_array($env = @include dirname(__DIR__) . '/.env.local.php')
     && ($_SERVER['APP_ENV'] ?? $_ENV['APP_ENV'] ?? $env['APP_ENV']) === $env['APP_ENV']
 ) {
     foreach ($env as $k => $v) {
-        $_ENV[$k] = $_ENV[$k] ?? (isset($_SERVER[$k]) && 0 !== strpos($k, 'HTTP_') ? $_SERVER[$k] : $v);
+        $_ENV[$k] = $_ENV[$k] ?? (isset($_SERVER[$k]) && strncmp($k, 'HTTP_', 5) !== 0 ? $_SERVER[$k] : $v);
     }
-} elseif (!class_exists(Dotenv::class)) {
-    throw new RuntimeException('Please run "composer require symfony/dotenv" to load the ".env" files configuring the application.');
-} else {
+} elseif (class_exists(Dotenv::class)) {
     // load all the .env files
     (new Dotenv(false))->loadEnv(dirname(__DIR__) . '/.env');
+} else {
+    throw new RuntimeException('Please run "composer require symfony/dotenv" to load the ".env" files configuring the application.');
 }
 
-if ('test' === $_SERVER['APP_ENV']) {
+if ($_SERVER['APP_ENV'] === 'test') {
     $kernel = new Kernel($_SERVER['APP_ENV'], true); // create a "test" kernel
     $kernel->boot();
 
