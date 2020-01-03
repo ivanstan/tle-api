@@ -32,7 +32,6 @@ class TleModelNormalizer implements NormalizerInterface
         return [
             '@id' => $id,
             '@type' => 'TleModel',
-            'satelliteId' => $model->getId(),
             'name' => $model->getName(),
             'date' => $model->getDate(),
             'line1' => $model->getLine1(),
