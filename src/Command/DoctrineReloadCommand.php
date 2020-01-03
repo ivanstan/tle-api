@@ -11,8 +11,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class DoctrineReloadCommand extends Command
 {
-    protected static $defaultName = 'doctrine:reload';
-
     private static array $choices = [
         'y' => 'Yes',
         'n' => 'No',
@@ -31,11 +29,18 @@ final class DoctrineReloadCommand extends Command
         $this->env = $env;
     }
 
+    /** @noinspection PhpMissingParentCallCommonInspection */
     protected function configure(): void
     {
-        $this->setDescription('Purge database, execute migrations and load fixtures');
+        $this
+            ->setName('doctrine:reload')
+            ->setDescription('Purge database, execute migrations and load fixtures');
     }
 
+    /**
+     * @noinspection PhpMissingParentCallCommonInspection
+     * @throws \Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -51,7 +56,7 @@ final class DoctrineReloadCommand extends Command
         $application = $this->getApplication();
 
         if ($application === null) {
-            return 1;
+            throw new \RuntimeException('Application instance not found.');
         }
 
         if ($input->getOption('no-interaction') || $helper->ask($input, $output, $question) === 'y') {
