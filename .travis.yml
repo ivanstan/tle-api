@@ -13,7 +13,7 @@ matrix:
     - php: 7.4
 
 install:
-  - composer update $COMPOSER_FLAGS
+  - composer install
 
 script:
   - composer test
