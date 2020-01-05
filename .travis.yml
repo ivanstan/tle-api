@@ -15,8 +15,14 @@ matrix:
   include:
     - php: 7.4
 
+before_install:
+  - composer require satooshi/php-coveralls:dev-master
+
 install:
   - composer install
 
 script:
-  - composer test
+  - php bin/phpunit --coverage-clover ./tests/logs/clover.xml
+
+after_script:
+  - php vendor/bin/coveralls -v
