@@ -5,7 +5,9 @@
 ![status](https://badgen.net/uptime-robot/month/m781499721-d42767e28cc71aea507fb087)
 ![status](https://badgen.net/uptime-robot/response/m781499721-d42767e28cc71aea507fb087)
 
-![logo](https://github.com/ivanstan/tle-api/blob/master/docs/logo512.png?raw=true)
+<p align="center"> 
+<img src="https://github.com/ivanstan/tle-api/blob/master/docs/logo192.png?raw=true"/>
+</p>
 
 Code repository that powers TLE API backend, listed on NASA API catalog 
 https://api.nasa.gov/
