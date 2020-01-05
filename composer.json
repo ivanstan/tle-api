@@ -60,7 +60,7 @@
         "post-update-cmd": [
             "@auto-scripts"
         ],
-        "test": "@php bin/phpunit"
+        "test": "@php bin/phpunit --coverage-text"
     },
     "conflict": {
         "symfony/symfony": "*"
