@@ -25,4 +25,4 @@ script:
   - php bin/phpunit --coverage-clover ./tests/logs/clover.xml
 
 after_script:
-  - php vendor/satooshi/php-coveralls/bin/php-coveralls --coverage-clover ./tests/logs/clover.xml
+  - php vendor/satooshi/php-coveralls/bin/php-coveralls --coverage_clover ./tests/logs/clover.xml
