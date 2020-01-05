@@ -25,4 +25,7 @@ script:
   - php bin/phpunit --coverage-clover ./tests/logs/clover.xml
 
 after_script:
+  - export CI_BUILD_NUMBER="$TRAVIS_BUILD_NUMBER"
+  - export CI_PULL_REQUEST="$TRAVIS_PULL_REQUEST"
+  - export CI_BRANCH="$TRAVIS_BRANCH"
   - php vendor/satooshi/php-coveralls/bin/php-coveralls -vv --coverage_clover ./tests/logs/clover.xml
