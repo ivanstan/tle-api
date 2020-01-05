@@ -8,7 +8,7 @@ final class DocumentationTest extends AbstractWebTestCase
 {
     public function testDocumentationIsCorrect(): void
     {
-        $response = $this->get('/api/tle/json');
+        $response = $this->get('/api/tle.json');
 
         self::assertEquals(200, $response->getStatusCode(), 'Assert json documentation is available');
 
