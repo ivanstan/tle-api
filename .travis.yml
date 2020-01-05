@@ -16,7 +16,7 @@ matrix:
     - php: 7.4
 
 before_install:
-  - composer require satooshi/php-coveralls:dev-master
+  - composer require satooshi/php-coveralls
 
 install:
   - composer install
