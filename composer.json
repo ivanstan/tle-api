@@ -6,6 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
+        "ivanstan/tle-php": "^1.0",
         "myclabs/php-enum": "^1.7",
         "symfony/apache-pack": "^1.0",
         "symfony/asset": "5.0.*",

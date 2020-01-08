@@ -23,9 +23,8 @@ Two-line Element Set Coordinate System](https://spaceflight.nasa.gov/realdata/si
 Further documentation and response examples are available at: 
 http://data.ivanstanojevic.me/api/tle/docs
 
-
-Available endpoints
-The TLE API consists of two endpoints GET http://data.ivanstanojevic.me
+###Available endpoints
+The TLE API consists of two endpoints `GET http://data.ivanstanojevic.me`
 
 | Endpoint | Description |
 |----------|:------:|
