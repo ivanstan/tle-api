@@ -7,6 +7,9 @@ namespace DoctrineMigrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
+/**
+ * @codeCoverageIgnore
+ */
 final class Version20191217203053 extends AbstractMigration
 {
     /** @throws \Exception */

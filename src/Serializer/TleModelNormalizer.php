@@ -3,7 +3,7 @@
 namespace App\Serializer;
 
 use App\Entity\Tle;
-use App\ViewModel\Model\TleModel;
+use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 

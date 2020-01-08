@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\DataFixtures\TleFixtures;
+use Symfony\Component\HttpFoundation\Response;
 
 final class DocumentationTest extends AbstractWebTestCase
 {
@@ -10,7 +11,7 @@ final class DocumentationTest extends AbstractWebTestCase
     {
         $response = $this->get('/api/tle.json');
 
-        self::assertEquals(200, $response->getStatusCode(), 'Assert json documentation is available');
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode(), 'Assert json documentation is available');
 
         $response = $this->toArray($response);
 
