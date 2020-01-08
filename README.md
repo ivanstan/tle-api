@@ -33,3 +33,9 @@ The TLE API consists of two endpoints `GET http://data.ivanstanojevic.me`
 
 Example query
 http://data.ivanstanojevic.me/api/tle
+
+# Client libraries
+
+* JavaScript https://github.com/ivanstan/tle.js
+* PHP https://github.com/ivanstan/tle-php 
+* C# https://github.com/nichols-t/TLE.NET
