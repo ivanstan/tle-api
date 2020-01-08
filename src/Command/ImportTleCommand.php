@@ -4,10 +4,10 @@ namespace App\Command;
 
 use App\Entity\Tle;
 use App\Repository\TleRepository;
-use App\Service\TleFile;
 use App\Service\Traits\FileSystemAwareTrait;
-use App\ViewModel\Model\TleModel;
+use Ivanstan\Tle\Model\Tle as TleModel;
 use Doctrine\ORM\EntityManagerInterface;
+use Ivanstan\Tle\TleFile;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;

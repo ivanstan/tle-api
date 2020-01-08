@@ -2,13 +2,19 @@
 
 namespace App\Tests;
 
+use Symfony\Component\HttpFoundation\Response;
+
 class ErrorPageTest extends AbstractWebTestCase
 {
     public function test404(): void
     {
         $response = $this->get('/noop');
 
-        self::assertEquals($response->getStatusCode(), 404, 'Assert page not found returns HTTP 404');
+        self::assertEquals(
+            $response->getStatusCode(),
+            Response::HTTP_NOT_FOUND,
+            'Assert page not found returns HTTP 404'
+        );
 
         $response = $this->toArray($response);
 

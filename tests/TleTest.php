@@ -3,6 +3,7 @@
 namespace App\Tests;
 
 use App\DataFixtures\TleFixtures;
+use Symfony\Component\HttpFoundation\Response;
 
 final class TleTest extends AbstractWebTestCase
 {
@@ -10,9 +11,9 @@ final class TleTest extends AbstractWebTestCase
     {
         $tle = TleFixtures::create();
 
-        $response = $this->get('/api/tle/'.$tle->getId());
+        $response = $this->get('/api/tle/' . $tle->getId());
 
-        self::assertEquals(200, $response->getStatusCode());
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $response = $this->toArray($response);
 
@@ -23,12 +24,18 @@ final class TleTest extends AbstractWebTestCase
         self::assertArrayHasKey('line1', $response);
         self::assertArrayHasKey('line2', $response);
 
-        self::assertEquals('http://localhost/api/tle/'.$tle->getId(), $response['@id']);
+        self::assertEquals('http://localhost/api/tle/' . $tle->getId(), $response['@id']);
         self::assertEquals('TleModel', $response['@type']);
         self::assertEquals($tle->getName(), $response['name']);
         self::assertEquals(TleFixtures::$date, $response['date']);
         self::assertEquals($tle->getLine1(), $response['line1']);
         self::assertEquals($tle->getLine2(), $response['line2']);
+    }
+
+    public function testTleRecordNotFound(): void
+    {
+        $response = $this->get('/api/tle/0');
+        self::assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
     }
 
     public function testTleCollectionRecord(): void
@@ -42,7 +49,7 @@ final class TleTest extends AbstractWebTestCase
             ]
         );
 
-        self::assertEquals(200, $response->getStatusCode());
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
 
         $response = $this->toArray($response);
 
