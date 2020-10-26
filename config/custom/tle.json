@@ -89,7 +89,7 @@
                     },
                     "@id": {
                       "type": "string",
-                      "example": "https://ivanstanojevic.me/api/tle"
+                      "example": "https://tle.ivanstanojevic.me/api/tle"
                     },
                     "@type": {
                       "type": "string",
@@ -188,7 +188,7 @@
             "properties": {
               "@id": {
                 "type": "string",
-                "example": "https://ivanstanojevic.me/api/tle/43630"
+                "example": "https://tle.ivanstanojevic.me/api/tle/43630"
               },
               "@type": {
                 "type": "string",
