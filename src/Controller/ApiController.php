@@ -13,7 +13,7 @@ class ApiController extends AbstractController
     use FileSystemAwareTrait;
 
     /**
-     * @Route("/", name="app_api_docs")
+     * @Route("/api/tle/docs", name="app_api_docs")
      */
     public function docs(): Response
     {
