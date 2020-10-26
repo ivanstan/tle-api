@@ -19,7 +19,7 @@ if (is_array($env = @include dirname(__DIR__) . '/.env.local.php')
     }
 } elseif (class_exists(Dotenv::class)) {
     // load all the .env files
-    (new Dotenv(false))->loadEnv(dirname(__DIR__) . '/.env');
+    (new Dotenv())->loadEnv(dirname(__DIR__) . '/.env');
 } else {
     throw new RuntimeException('Please run "composer require symfony/dotenv" to load the ".env" files configuring the application.');
 }
