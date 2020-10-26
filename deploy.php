@@ -9,7 +9,7 @@ set('git_tty', true);
 set('bin_dir', 'bin');
 set('http_user', 'glutenfr');
 set('writable_mode', 'chmod');
-
+set('default_stage', 'production');
 add('shared_files', ['.env']);
 add('shared_dirs', ['var']);
 add('writable_dirs', []);
@@ -24,7 +24,6 @@ task('test', function () {
     set('symfony_env', 'dev');
     runLocally('bin/phpunit');
 });
-
 
 task('dump-autoload', function () {
    run('composer dump-env prod');
