@@ -10,6 +10,7 @@ set('bin_dir', 'bin');
 set('http_user', 'glutenfr');
 set('writable_mode', 'chmod');
 set('default_stage', 'production');
+set('bin/composer', '~/bin/composer.phar');
 add('shared_files', ['.env']);
 add('shared_dirs', ['var']);
 add('writable_dirs', []);
@@ -39,16 +40,16 @@ task('deploy', [
     'deploy:create_cache_dir',
     'deploy:shared',
     'deploy:assets',
-    'deploy:vendors',
-    'deploy:cache:clear',
-    'deploy:cache:warmup',
-    'dump-autoload',
+//    'deploy:vendors',
+//    'deploy:cache:clear',
+//    'deploy:cache:warmup',
+//    'dump-autoload',
     'deploy:writable',
-    'database:migrate',
+//    'database:migrate',
     'deploy:symlink',
     'deploy:unlock',
     'cleanup',
 ]);
 
-before('deploy', 'test');
+//before('deploy', 'test');
 after('deploy:failed', 'deploy:unlock');
