@@ -24,7 +24,6 @@ final class ImportTleCommand extends Command
 
     private EntityManagerInterface $em;
     private TleRepository $repository;
-    private OutputInterface $output;
 
     private array $satellites = [];
 
@@ -44,7 +43,6 @@ final class ImportTleCommand extends Command
     /** @noinspection PhpMissingParentCallCommonInspection */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->output = $output;
         $this->satellites = $this->repository->fetchAllIndexed();
 
         $totalInsert = 0;
@@ -72,7 +70,15 @@ final class ImportTleCommand extends Command
 
             foreach ($file->parse() as $tle) {
                 if (\array_key_exists($tle->getId(), $this->satellites)) {
-                    $update[$tle->getId()] = $tle;
+                    $existing = new \Ivanstan\Tle\Model\Tle(
+                        $this->satellites[$tle->getId()]->getLine1(),
+                        $this->satellites[$tle->getId()]->getLine2(),
+                        $this->satellites[$tle->getId()]->getName(),
+                    );
+
+                    if ($tle->getDate() > $existing->getDate()) {
+                        $update[$tle->getId()] = $tle;
+                    }
                 } else {
                     $insert[$tle->getId()] = $tle;
                 }
@@ -127,11 +133,18 @@ final class ImportTleCommand extends Command
     protected function flush(array $queue, $persistNew = null): void
     {
         $counter = 0;
+        /** @var TleModel $model */
         foreach ($queue as $model) {
-            $tle = $this->toPersistent($model);
-            $this->satellites[$model->getId()] = $tle;
+            /** @var Tle $existing */
+            $existing = $this->satellites[$model->getId()];
+            $existing->setName($model->getName());
+            $existing->setId($model->getId());
+            $existing->setLine1($model->getLine1());
+            $existing->setLine2($model->getLine2());
 
             if ($persistNew) {
+                $tle = $this->toPersistent($model);
+                $this->satellites[$model->getId()] = $tle;
                 $this->em->persist($tle);
             }
 

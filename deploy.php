@@ -13,7 +13,7 @@ set('default_stage', 'production');
 set('bin/composer', '~/bin/composer.phar');
 add('shared_files', ['.env']);
 add('shared_dirs', ['var']);
-add('writable_dirs', []);
+add('writable_dirs', ['var']);
 
 host('ivanstanojevic.me')
     ->user('glutenfr')
@@ -27,29 +27,32 @@ task('test', function () {
 });
 
 task('dump-autoload', function () {
-   run('composer dump-env prod');
+   run('{{bin/composer}} dump-env prod');
 });
 
-task('deploy', [
-    'deploy:info',
-    'deploy:prepare',
-    'deploy:lock',
-    'deploy:release',
-    'deploy:update_code',
-    'deploy:clear_paths',
-    'deploy:create_cache_dir',
-    'deploy:shared',
-    'deploy:assets',
-    'deploy:vendors',
-    'deploy:cache:clear',
-    'deploy:cache:warmup',
-    'dump-autoload',
-    'deploy:writable',
-    'database:migrate',
-    'deploy:symlink',
-    'deploy:unlock',
-    'cleanup',
-]);
+task(
+    'deploy',
+    [
+        'deploy:info',
+        'deploy:prepare',
+        'deploy:lock',
+        'deploy:release',
+        'deploy:update_code',
+        'deploy:clear_paths',
+        'deploy:create_cache_dir',
+        'deploy:shared',
+        'deploy:assets',
+        'deploy:vendors',
+        'deploy:cache:clear',
+        'deploy:cache:warmup',
+        'dump-autoload',
+        'deploy:writable',
+        'database:migrate',
+        'deploy:symlink',
+        'deploy:unlock',
+        'cleanup',
+    ]
+);
 
 //before('deploy', 'test');
 after('deploy:failed', 'deploy:unlock');
