@@ -7,7 +7,7 @@ use App\Repository\TleRepository;
 use App\Service\Traits\FileSystemAwareTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Doctrine\ORM\EntityManagerInterface;
-use Ivanstan\Tle\TleFile;
+use Ivanstan\Tle\Model\TleFile;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;

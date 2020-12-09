@@ -1697,22 +1697,23 @@
         },
         {
             "name": "ivanstan/tle-php",
-            "version": "1.0",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ivanstan/tle-php.git",
-                "reference": "5bd7487aa242248ad255b041f5fe99a8f5daca33"
+                "reference": "15c7e46644237df8c5997a6d7875b0f2b9a62cd1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ivanstan/tle-php/zipball/5bd7487aa242248ad255b041f5fe99a8f5daca33",
-                "reference": "5bd7487aa242248ad255b041f5fe99a8f5daca33",
+                "url": "https://api.github.com/repos/ivanstan/tle-php/zipball/15c7e46644237df8c5997a6d7875b0f2b9a62cd1",
+                "reference": "15c7e46644237df8c5997a6d7875b0f2b9a62cd1",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
                 "guzzlehttp/guzzle": "^6.5",
-                "myclabs/php-enum": "^1.7"
+                "myclabs/php-enum": "^1.7",
+                "php": "^7.4"
             },
             "require-dev": {
                 "phpunit/phpunit": "^8"
@@ -1736,9 +1737,9 @@
             "description": "TLE Framework written in PHP and client to NASA TLE API.",
             "support": {
                 "issues": "https://github.com/ivanstan/tle-php/issues",
-                "source": "https://github.com/ivanstan/tle-php/tree/1.0"
+                "source": "https://github.com/ivanstan/tle-php/tree/1.0.1"
             },
-            "time": "2020-01-08T10:08:36+00:00"
+            "time": "2020-12-09T09:04:57+00:00"
         },
         {
             "name": "laminas/laminas-code",
