@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "623796bd13aa29d141dca80c543db4c9",
+    "content-hash": "7c52093cda81bd58cb507fc311f386da",
     "packages": [
         {
             "name": "composer/package-versions-deprecated",
@@ -2387,16 +2387,16 @@
         },
         {
             "name": "symfony/browser-kit",
-            "version": "v5.0.11",
+            "version": "v5.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/browser-kit.git",
-                "reference": "c46b676a993cc437bafe6fe0f30f074857cde2a6"
+                "reference": "4fc769a12282a12bc47f883f04f01ff3777e369b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/browser-kit/zipball/c46b676a993cc437bafe6fe0f30f074857cde2a6",
-                "reference": "c46b676a993cc437bafe6fe0f30f074857cde2a6",
+                "url": "https://api.github.com/repos/symfony/browser-kit/zipball/4fc769a12282a12bc47f883f04f01ff3777e369b",
+                "reference": "4fc769a12282a12bc47f883f04f01ff3777e369b",
                 "shasum": ""
             },
             "require": {
@@ -2413,11 +2413,6 @@
                 "symfony/process": ""
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "5.0-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Symfony\\Component\\BrowserKit\\": ""
@@ -2443,7 +2438,7 @@
             "description": "Symfony BrowserKit Component",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/browser-kit/tree/v5.0.11"
+                "source": "https://github.com/symfony/browser-kit/tree/v5.2.0"
             },
             "funding": [
                 {
@@ -2459,7 +2454,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-06-12T09:22:24+00:00"
+            "time": "2020-11-14T11:04:29+00:00"
         },
         {
             "name": "symfony/cache",
