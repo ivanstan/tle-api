@@ -5,8 +5,9 @@ namespace App\Command;
 use App\Entity\Tle;
 use App\Repository\TleRepository;
 use App\Service\Traits\FileSystemAwareTrait;
-use Ivanstan\Tle\Model\Tle as TleModel;
 use Doctrine\ORM\EntityManagerInterface;
+use GuzzleHttp\Client;
+use Ivanstan\Tle\Model\Tle as TleModel;
 use Ivanstan\Tle\Model\TleFile;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -57,13 +58,24 @@ final class ImportTleCommand extends Command
             /** @noinspection DisconnectedForeachInstructionInspection */
             $progressBar->advance();
 
-            $content = file_get_contents($uri);
-
-            if (!$content) {
+            try {
+                $response = (new Client())->request('GET', $uri);
+            } catch (\Exception $exception) {
+                $output->writeln(
+                    \sprintf(
+                        'Unable to fetch resource "%s" with exception message "%s"',
+                        $uri,
+                        $exception->getMessage()
+                    )
+                );
                 continue;
             }
 
-            $file = new TleFile($content);
+            if (!$response->getBody()) {
+                continue;
+            }
+
+            $file = new TleFile($response->getBody());
 
             $insert = [];
             $update = [];
@@ -135,12 +147,14 @@ final class ImportTleCommand extends Command
         $counter = 0;
         /** @var TleModel $model */
         foreach ($queue as $model) {
-            /** @var Tle $existing */
-            $existing = $this->satellites[$model->getId()];
-            $existing->setName($model->getName());
-            $existing->setId($model->getId());
-            $existing->setLine1($model->getLine1());
-            $existing->setLine2($model->getLine2());
+            if (!$persistNew) {
+                /** @var Tle $existing */
+                $existing = $this->satellites[$model->getId()];
+                $existing->setName($model->getName());
+                $existing->setId($model->getId());
+                $existing->setLine1($model->getLine1());
+                $existing->setLine2($model->getLine2());
+            }
 
             if ($persistNew) {
                 $tle = $this->toPersistent($model);

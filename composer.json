@@ -73,7 +73,7 @@
         "public-dir": "./public",
         "symfony": {
             "allow-contrib": false,
-            "require": "5.0.*"
+            "require": "5.2.*"
         }
     }
 }
