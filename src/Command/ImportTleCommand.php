@@ -82,15 +82,7 @@ final class ImportTleCommand extends Command
 
             foreach ($file->parse() as $tle) {
                 if (\array_key_exists($tle->getId(), $this->satellites)) {
-                    $existing = new \Ivanstan\Tle\Model\Tle(
-                        $this->satellites[$tle->getId()]->getLine1(),
-                        $this->satellites[$tle->getId()]->getLine2(),
-                        $this->satellites[$tle->getId()]->getName(),
-                    );
-
-                    if ($tle->getDate() > $existing->getDate()) {
-                        $update[$tle->getId()] = $tle;
-                    }
+                    $update[$tle->getId()] = $tle;
                 } else {
                     $insert[$tle->getId()] = $tle;
                 }
