@@ -18,7 +18,7 @@ class DocsController extends AbstractController
      */
     public function docs(): Response
     {
-        return $this->render('docs.html.twig');
+        return new Response(file_get_contents($this->getProjectDir() . '/public/index.html'));
     }
 
     /**
