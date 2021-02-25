@@ -37,8 +37,8 @@ task('test', function () {
     runLocally('bin/phpunit');
 });
 
-task('dump-autoload', function () {
-   run('{{bin/composer}} dump-env prod');
+task('deploy:dump-env', function () {
+    run('cd {{release_path}} && {{bin/composer}} dump-env prod');
 });
 
 task(
@@ -56,7 +56,7 @@ task(
         'deploy:vendors',
         'deploy:cache:clear',
         'deploy:cache:warmup',
-        'dump-autoload',
+        'deploy:dump-env',
         'deploy:writable',
         'database:migrate',
         'deploy:symlink',

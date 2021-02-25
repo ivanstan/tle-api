@@ -17,12 +17,10 @@
         "symfony/framework-bundle": "5.2.*",
         "symfony/orm-pack": "^1.1",
         "symfony/serializer": "5.2.*",
-        "symfony/twig-bundle": "5.2.*",
-        "symfony/yaml": "5.2.*",
-        "twig/extra-bundle": "^2.12|^3.0",
-        "twig/twig": "^2.12|^3.0"
+        "symfony/yaml": "5.2.*"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-master",
         "doctrine/doctrine-fixtures-bundle": "^3.1",
         "symfony/phpunit-bridge": "^5.2"
     },
