@@ -11,8 +11,19 @@ set('http_user', 'glutenfr');
 set('writable_mode', 'chmod');
 set('default_stage', 'production');
 set('bin/composer', '~/bin/composer.phar');
-add('shared_files', ['.env']);
-add('shared_dirs', ['var']);
+add('shared_files', [
+    '.env',
+    'public/robots.txt',
+    'public/manifest.json',
+    'public/asset-manifest.json',
+    'public/favicon.ico',
+    'public/index.html',
+]);
+add('shared_dirs', [
+    'var',
+    'public/static',
+    'public/images',
+]);
 add('writable_dirs', ['var']);
 
 host('ivanstanojevic.me')
