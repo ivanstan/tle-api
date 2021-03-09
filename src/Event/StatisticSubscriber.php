@@ -16,7 +16,7 @@ class StatisticSubscriber implements EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            KernelEvents::RESPONSE => 'onKernelTerminate',
+            KernelEvents::TERMINATE => 'onKernelTerminate',
         ];
     }
 

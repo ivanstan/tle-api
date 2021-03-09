@@ -2,10 +2,13 @@
 
 namespace App\Repository;
 
+use App\Entity\Statistic;
 use App\Entity\Tle;
 use App\ViewModel\Model\PaginationCollection;
+use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -50,7 +53,12 @@ class TleRepository extends ServiceEntityRepository
         $total = $this->getCount($builder);
 
         // sort
-        $builder->orderBy('tle.' . $sort, $sortDir);
+        if ($sort === TleCollectionSortableFieldsEnum::POPULARITY) {
+            $builder->leftJoin(Statistic::class, 's', Expr\Join::WITH, 's.tle = tle.id');
+            $builder->addOrderBy('s.hits', $sortDir);
+        } else {
+            $builder->addOrderBy('tle.' . $sort, $sortDir);
+        }
 
         // limit
         $builder->setMaxResults($pageSize);
@@ -69,6 +77,7 @@ class TleRepository extends ServiceEntityRepository
         $builder = clone $builder;
 
         $builder->select('count(tle.id)');
+
         return $builder->getQuery()->getSingleScalarResult();
     }
 }
