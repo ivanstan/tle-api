@@ -46,7 +46,7 @@ class TleController extends AbstractApiController
 
         $search = $request->get(self::SEARCH_PARAM);
         $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::POPULARITY);
-        $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::ASCENDING);
+        $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::DESCENDING);
         $pageSize = (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), self::MAX_PAGE_SIZE);
 
         $collection = $repository->collection(
