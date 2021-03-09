@@ -12,18 +12,14 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
-/**
- * @Route("/api/tle")
- */
+#[Route("/api/tle")]
 class TleController extends AbstractApiController
 {
     protected const MAX_PAGE_SIZE = 100;
 
     protected const PAGE_SIZE = 20;
 
-    /**
-     * @Route("/{id}", name="tle_record", requirements={"id"="\d+"})
-     */
+    #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
     public function record(int $id, TleRepository $repository): Response
     {
         /** @var Tle $tle */
@@ -36,9 +32,7 @@ class TleController extends AbstractApiController
         return $this->response($tle);
     }
 
-    /**
-     * @Route(name="tle_collection")
-     */
+    #[Route("/", name: "tle_collection")]
     public function collection(Request $request, TleRepository $repository): Response
     {
         $this
@@ -51,7 +45,7 @@ class TleController extends AbstractApiController
             ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray());
 
         $search = $request->get(self::SEARCH_PARAM);
-        $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::NAME);
+        $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::POPULARITY);
         $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::ASCENDING);
         $pageSize = (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), self::MAX_PAGE_SIZE);
 

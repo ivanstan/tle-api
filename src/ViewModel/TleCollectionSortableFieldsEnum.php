@@ -8,4 +8,5 @@ class TleCollectionSortableFieldsEnum extends Enum
 {
     public const ID = 'id';
     public const NAME = 'name';
+    public const POPULARITY = 'popularity';
 }
