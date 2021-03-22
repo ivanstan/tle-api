@@ -54,16 +54,16 @@ final class TleTest extends AbstractWebTestCase
         $response = $this->toArray($response);
 
         self::assertArrayHasKey('@context', $response);
-        self::assertEquals($response['@context'], 'http://www.w3.org/ns/hydra/context.jsonld');
+        self::assertEquals('http://www.w3.org/ns/hydra/context.jsonld', $response['@context']);
 
         self::assertArrayHasKey('@id', $response);
-        self::assertEquals($response['@id'], 'http://localhost/api/tle');
+        self::assertEquals('http://localhost/api/tle', $response['@id']);
 
         self::assertArrayHasKey('@type', $response);
-        self::assertEquals($response['@type'], 'Collection');
+        self::assertEquals('Collection', $response['@type']);
 
         self::assertArrayHasKey('totalItems', $response);
-        self::assertEquals($response['totalItems'], 10);
+        self::assertEquals(10, $response['totalItems']);
 
         self::assertArrayHasKey('member', $response);
         self::assertEquals(\count($response['member']), $pageSize);
@@ -72,16 +72,16 @@ final class TleTest extends AbstractWebTestCase
         $parameters = $response['parameters'];
 
         self::assertArrayHasKey('search', $parameters);
-        self::assertEquals($parameters['search'], '*');
+        self::assertEquals('*', $parameters['search']);
 
         self::assertArrayHasKey('sort', $parameters);
-        self::assertEquals($parameters['sort'], 'name');
+        self::assertEquals('name', $parameters['sort']);
 
         self::assertArrayHasKey('sort-dir', $parameters);
-        self::assertEquals($parameters['sort-dir'], 'asc');
+        self::assertEquals('asc', $parameters['sort-dir']);
 
         self::assertArrayHasKey('page', $parameters);
-        self::assertEquals($parameters['page'], 1);
+        self::assertEquals(1, $parameters['page']);
 
         self::assertArrayHasKey('page-size', $parameters);
         self::assertEquals($parameters['page-size'], $pageSize);

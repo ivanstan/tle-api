@@ -14,6 +14,15 @@ abstract class AbstractApiController extends AbstractController
 {
     use RequestValidator;
 
+    protected const CORS_HEADERS = [
+        'Content-type' => 'application/json',
+        'Access-Control-Allow-Origin' => '*',
+        'Access-Control-Allow-Credentials' => 'true',
+        'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers' => 'DNT, X-User-Token, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type',
+        'Access-Control-Max-Age' => 1728000,
+    ];
+
     protected const SORT_PARAM = 'sort';
     protected const SORT_DIR_PARAM = 'sort-dir';
     protected const PAGE_SIZE_PARAM = 'page-size';
@@ -121,14 +130,7 @@ abstract class AbstractApiController extends AbstractController
         return new Response(
             $this->serializer->serialize($response, 'json'),
             Response::HTTP_OK,
-            [
-                'Content-type' => 'application/json',
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Credentials' => 'true',
-                'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers' => 'DNT, X-User-Token, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type',
-                'Access-Control-Max-Age' => 1728000,
-            ]
+            self::CORS_HEADERS
         );
     }
 }

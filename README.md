@@ -19,10 +19,10 @@ Two-line Element Set Coordinate System](https://spaceflight.nasa.gov/realdata/si
 
 ## Usage
 Further documentation and response examples are available at: 
-http://data.ivanstanojevic.me/api/tle/docs
+http://tle.ivanstanojevic.me/api/tle/docs
 
 ###Available endpoints
-The TLE API consists of two endpoints `GET http://data.ivanstanojevic.me`
+The TLE API consists of two endpoints `GET http://tle.ivanstanojevic.me`
 
 | Endpoint | Description |
 |----------|:------:|
@@ -30,7 +30,7 @@ The TLE API consists of two endpoints `GET http://data.ivanstanojevic.me`
 | `GET /api/tle/{q}` | Retrieve a single TLE record where query is satellite number |
 
 Example query
-http://data.ivanstanojevic.me/api/tle
+http://tle.ivanstanojevic.me/api/tle
 
 # Client libraries
 
