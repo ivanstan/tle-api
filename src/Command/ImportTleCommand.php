@@ -21,7 +21,7 @@ final class ImportTleCommand extends Command
     use FileSystemAwareTrait;
 
     private const BATCH_SIZE = 50;
-    private const SOURCE = '/config/custom/source.yaml';
+    public const SOURCE = '/config/custom/source.yaml';
 
     private EntityManagerInterface $em;
     private TleRepository $repository;
@@ -120,7 +120,7 @@ final class ImportTleCommand extends Command
             );
         $table->render();
 
-        return 0;
+        return Command::SUCCESS;
     }
 
     protected function toPersistent(TleModel $model): Tle
