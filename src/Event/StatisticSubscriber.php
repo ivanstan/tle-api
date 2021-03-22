@@ -36,6 +36,14 @@ class StatisticSubscriber implements EventSubscriberInterface
             return;
         }
 
+        $request = new Request();
+        $request->setTle($tle);
+        $request->setIp($event->getRequest()->getClientIp());
+
+        $this->em->persist($request);
+
+        $this->em->flush();
+
         $statistics = $this->statisticRepository->find((int)$event->getRequest()->get('id'));
 
         if ($statistics === null) {
@@ -43,12 +51,6 @@ class StatisticSubscriber implements EventSubscriberInterface
         }
 
         $statistics->incrementHits();
-
-        $request = new Request();
-        $request->setTle($tle);
-        $request->setIp($event->getRequest()->getClientIp());
-
-        $this->em->persist($request);
 
         $this->em->flush();
     }

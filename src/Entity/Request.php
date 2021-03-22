@@ -22,7 +22,7 @@ class Request
     private int $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="Tle")
+     * @ORM\ManyToOne(targetEntity="Tle")
      * @ORM\JoinColumn(name="tle_id", referencedColumnName="id", nullable=false)
      */
     private Tle $tle;
