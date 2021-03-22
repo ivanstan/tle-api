@@ -50,7 +50,7 @@ final class DoctrineReloadCommand extends Command
         if (!\in_array($this->env, self::$envs, true)) {
             $io->warning('This is intended only for use in dev or test environment.');
 
-            return 1;
+            return Command::FAILURE;
         }
 
         $application = $this->getApplication();
@@ -79,6 +79,6 @@ final class DoctrineReloadCommand extends Command
             $application->run(new ArrayInput($options));
         }
 
-        return 0;
+        return Command::SUCCESS;
     }
 }

@@ -187,6 +187,9 @@
             "config/bootstrap.php"
         ]
     },
+    "symfony/css-selector": {
+        "version": "v5.2.4"
+    },
     "symfony/dependency-injection": {
         "version": "v5.0.1"
     },
