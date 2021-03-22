@@ -6,11 +6,13 @@ use App\Entity\Tle;
 use App\Repository\TleRepository;
 use App\ViewModel\SortDirectionEnum;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[Route("/api/tle")]
 class TleController extends AbstractApiController
@@ -20,8 +22,11 @@ class TleController extends AbstractApiController
     protected const PAGE_SIZE = 20;
 
     #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
-    public function record(int $id, TleRepository $repository): Response
-    {
+    public function record(
+        int $id,
+        TleRepository $repository,
+        NormalizerInterface $normalizer
+    ): Response {
         /** @var Tle $tle */
         $tle = $repository->findOneBy(['id' => $id]);
 
@@ -29,7 +34,15 @@ class TleController extends AbstractApiController
             throw new NotFoundHttpException(\sprintf('Unable to find record with id %s', $id));
         }
 
-        return $this->response($tle);
+        $data = [
+            '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
+        ];
+
+        return new JsonResponse(
+            array_merge($data, $normalizer->normalize($tle)),
+            Response::HTTP_OK,
+            self::CORS_HEADERS,
+        );
     }
 
     #[Route("/", name: "tle_collection")]

@@ -9,19 +9,16 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class TleModelNormalizer implements NormalizerInterface
 {
-    private UrlGeneratorInterface $router;
-
-    public function __construct(UrlGeneratorInterface $router)
+    public function __construct(private UrlGeneratorInterface $router)
     {
-        $this->router = $router;
     }
 
     /**
-     * @param TleModel $model
-     * @param null     $format
-     * @param array    $context
+     * @param $entity
+     * @param string|null $format
+     * @param array $context
      *
-     * @return array|bool|float|int|string
+     * @return array
      */
     public function normalize($entity, string $format = null, array $context = [])
     {

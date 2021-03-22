@@ -4,6 +4,7 @@
     "require": {
         "php": "^8.0",
         "ext-ctype": "*",
+        "ext-dom": "*",
         "ext-iconv": "*",
         "ext-json": "*",
         "ivanstan/tle-php": "^1.0.2",
@@ -18,8 +19,7 @@
         "symfony/framework-bundle": "5.2.*",
         "symfony/orm-pack": "^1.1",
         "symfony/serializer": "5.2.*",
-        "symfony/yaml": "5.2.*",
-        "ext-dom": "*"
+        "symfony/yaml": "5.2.*"
     },
     "require-dev": {
         "roave/security-advisories": "dev-master",
