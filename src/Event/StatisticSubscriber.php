@@ -2,14 +2,17 @@
 
 namespace App\Event;
 
+use App\Entity\Request;
+use App\Entity\Tle;
 use App\Repository\StatisticRepository;
+use App\Repository\TleRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
 
 class StatisticSubscriber implements EventSubscriberInterface
 {
-    public function __construct(private StatisticRepository $statisticRepository, private EntityManagerInterface $em)
+    public function __construct(private StatisticRepository $statisticRepository, private EntityManagerInterface $em, private TleRepository $tleRepository)
     {
     }
 
@@ -26,6 +29,13 @@ class StatisticSubscriber implements EventSubscriberInterface
             return;
         }
 
+        /** @var Tle|null $tle */
+        $tle = $this->tleRepository->find($event->getRequest()->get('id'));
+
+        if ($tle === null) {
+            return;
+        }
+
         $statistics = $this->statisticRepository->find((int)$event->getRequest()->get('id'));
 
         if ($statistics === null) {
@@ -33,6 +43,12 @@ class StatisticSubscriber implements EventSubscriberInterface
         }
 
         $statistics->incrementHits();
+
+        $request = new Request();
+        $request->setTle($tle);
+        $request->setIp($event->getRequest()->getClientIp());
+
+        $this->em->persist($request);
 
         $this->em->flush();
     }
