@@ -9,6 +9,7 @@
         "ext-json": "*",
         "ivanstan/tle-php": "^1.0.2",
         "myclabs/php-enum": "^1.7",
+        "sentry/sentry-symfony": "^4.0",
         "symfony/apache-pack": "^1.0",
         "symfony/asset": "5.2.*",
         "symfony/browser-kit": "5.2.*",
