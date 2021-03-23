@@ -159,6 +159,18 @@
     "roave/security-advisories": {
         "version": "dev-master"
     },
+    "sentry/sentry-symfony": {
+        "version": "3.0",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "master",
+            "version": "3.0",
+            "ref": "9746f0823302d7980e5273ef7a69ef3f5ac80914"
+        },
+        "files": [
+            "config/packages/sentry.yaml"
+        ]
+    },
     "symfony/apache-pack": {
         "version": "1.0",
         "recipe": {
