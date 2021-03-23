@@ -8,7 +8,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-class DocsController extends AbstractController
+final class DocsController extends AbstractController
 {
     use FileSystemAwareTrait;
 
