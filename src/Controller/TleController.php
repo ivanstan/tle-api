@@ -15,20 +15,23 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[Route("/api/tle")]
-class TleController extends AbstractApiController
+final class TleController extends AbstractApiController
 {
     protected const MAX_PAGE_SIZE = 100;
 
     protected const PAGE_SIZE = 20;
 
+    public function __construct(protected TleRepository $repository,)
+    {
+    }
+
     #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
     public function record(
         int $id,
-        TleRepository $repository,
         NormalizerInterface $normalizer
     ): Response {
         /** @var Tle $tle */
-        $tle = $repository->findOneBy(['id' => $id]);
+        $tle = $this->repository->findOneBy(['id' => $id]);
 
         if ($tle === null) {
             throw new NotFoundHttpException(\sprintf('Unable to find record with id %s', $id));
@@ -46,8 +49,9 @@ class TleController extends AbstractApiController
     }
 
     #[Route("/", name: "tle_collection")]
-    public function collection(Request $request, TleRepository $repository): Response
-    {
+    public function collection(
+        Request $request
+    ): Response {
         $this
             ->assertParamIsInteger($request, self::PAGE_PARAM)
             ->assertParamIsGreaterThan($request, self::PAGE_PARAM, 0)
@@ -62,7 +66,7 @@ class TleController extends AbstractApiController
         $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::DESCENDING);
         $pageSize = (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), self::MAX_PAGE_SIZE);
 
-        $collection = $repository->collection(
+        $collection = $this->repository->collection(
             $search,
             $sort,
             $sortDir,
@@ -86,6 +90,38 @@ class TleController extends AbstractApiController
                 ],
                 'view' => $this->getPagination($request, $collection->getTotal(), $pageSize),
             ]
+        );
+    }
+
+    #[Route("/popular", name: "tle_popular")]
+    public function popular(
+        Request $request,
+        TleRepository $repository
+    ): Response {
+        $newerThan = new \DateTime('now');
+        $newerThan->setTime(0, 0, 0);
+        $newerThan->modify('-3 days');
+
+        $limit = 10;
+
+        $members = $repository->popular($newerThan, $limit);
+
+        $data = [
+            '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
+            '@id' => $this->router->generate('tle_popular', [], UrlGeneratorInterface::ABSOLUTE_URL),
+            '@type' => 'Collection',
+            'totalItems' => \count($members),
+            'member' => $members,
+            'parameters' => [
+                '*limit' => $limit,
+                '*newerThan' => $newerThan->format('c'),
+            ],
+        ];
+
+        return new JsonResponse(
+            $data,
+            Response::HTTP_OK,
+            self::CORS_HEADERS,
         );
     }
 }
