@@ -16,3 +16,11 @@ doctrine:
                 dir: '%kernel.project_dir%/src/Entity'
                 prefix: 'App\Entity'
                 alias: App
+
+        dql:
+          string_functions:
+            DATE_FORMAT: DoctrineExtensions\Query\Mysql\DateFormat
+            CAST: DoctrineExtensions\Query\Mysql\Cast
+            IF: DoctrineExtensions\Query\Mysql\IfElse
+          numeric_functions:
+            ROUND: DoctrineExtensions\Query\Mysql\Round
