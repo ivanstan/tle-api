@@ -17,6 +17,10 @@ class StatisticsController extends AbstractApiController
     public function hits(
         EntityManagerInterface $em
     ): Response {
+        $newerThan = new \DateTime('now');
+        $newerThan->setTime(0, 0, 0);
+        $newerThan->modify('-3 days');
+
         $qb = $em->createQueryBuilder();
 
         $qb->select(
@@ -29,6 +33,8 @@ class StatisticsController extends AbstractApiController
 
         $qb
             ->from(Request::class, 'r')
+            ->where('r.createdAt > :newerThan')
+            ->setParameter('newerThan', $newerThan)
             ->groupBy('date, hour')
             ->setParameter('interval', self::INTERVAL);
 
