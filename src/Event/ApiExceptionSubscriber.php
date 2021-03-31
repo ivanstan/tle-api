@@ -2,6 +2,7 @@
 
 namespace App\Event;
 
+use App\Controller\AbstractApiController;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -32,7 +33,7 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
 
     public function onException(ExceptionEvent $event): void
     {
-        if (strpos($event->getRequest()->getPathInfo(), self::API_PATH) === false) {
+        if (!str_contains($event->getRequest()->getPathInfo(), self::API_PATH)) {
             return;
         }
 
@@ -63,9 +64,7 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
                     'response' => $response
                 ],
                 Response::HTTP_OK,
-                [
-                    'Access-Control-Allow-Origin' => '*',
-                ]
+                AbstractApiController::CORS_HEADERS
             )
         );
     }
