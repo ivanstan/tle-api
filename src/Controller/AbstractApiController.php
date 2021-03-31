@@ -14,7 +14,7 @@ abstract class AbstractApiController extends AbstractController
 {
     use RequestValidator;
 
-    protected const CORS_HEADERS = [
+    public const CORS_HEADERS = [
         'Content-type' => 'application/json',
         'Access-Control-Allow-Origin' => '*',
         'Access-Control-Allow-Credentials' => 'true',
