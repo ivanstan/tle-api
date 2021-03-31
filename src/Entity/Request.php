@@ -28,7 +28,7 @@ class Request
     private Tle $tle;
 
     /**
-     * @ORM\Column(name="updated_at", type="datetime")
+     * @ORM\Column(name="created_at", type="datetime")
      */
     private \DateTime $createdAt;
 
