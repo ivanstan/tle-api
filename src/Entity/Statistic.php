@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Entity\Attributes\TleOneToOneReference;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -9,12 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Statistic
 {
-    /**
-     * @ORM\Id
-     * @ORM\OneToOne(targetEntity="Tle")
-     * @ORM\JoinColumn(name="tle_id", referencedColumnName="id", nullable=false)
-     */
-    private Tle $tle;
+    use TleOneToOneReference;
 
     /**
      * @ORM\Column(name="hits", type="bigint")
@@ -39,10 +35,5 @@ class Statistic
     public function incrementHits(): void
     {
         $this->hits++;
-    }
-
-    public function getTle(): Tle
-    {
-        return $this->tle;
     }
 }
