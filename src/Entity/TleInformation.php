@@ -13,14 +13,14 @@ class TleInformation
     use TleOneToOneReference;
 
     /**
-     * @ORM\Column(type="float", precision=10, nullable=true)
+     * @ORM\Column(type="float", precision=14, scale=12, nullable=true)
      */
-    public int $eccentricity;
+    public float $eccentricity;
 
     /**
-     * @ORM\Column(type="float", precision=10, nullable=true)
+     * @ORM\Column(type="float", precision=16, scale=10, nullable=true)
      */
-    public int $inclination;
+    public float $inclination;
 
     public function __construct(Tle $tle)
     {
