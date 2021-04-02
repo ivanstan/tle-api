@@ -2,7 +2,7 @@
   "openapi": "3.0.0",
   "info": {
     "title": "TLE API",
-    "version": "1.3.0"
+    "version": "1.3.1"
   },
   "servers": [
     {
@@ -74,6 +74,34 @@
           },
           {
             "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "name": "eccentricity[gte]",
+            "in": "query",
+            "description": "Filter records with orbital eccentricity greater then or equal to the provided value",
+            "required": false,
+            "example": 1
+          },
+          {
+            "name": "eccentricity[lte]",
+            "in": "query",
+            "description": "Filter records with orbital eccentricity less then or equal to the provided value",
+            "required": false,
+            "example": 1
+          },
+          {
+            "name": "inclination[lt]",
+            "in": "query",
+            "description": "Filter records with orbital posigrade orbital inclination",
+            "required": false,
+            "example": 90
+          },
+          {
+            "name": "inclination[gt]",
+            "in": "query",
+            "description": "Filter records with orbital retrograde orbital inclination",
+            "required": false,
+            "example": 90
           }
         ],
         "responses": {
