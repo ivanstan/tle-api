@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Request;
 use App\Entity\Statistic;
 use App\Entity\Tle;
+use App\Entity\TleInformation;
 use App\ViewModel\Model\PaginationCollection;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -35,9 +36,11 @@ class TleRepository extends ServiceEntityRepository
         string $sort,
         string $sortDir,
         int $pageSize,
-        int $offset
+        int $offset,
+        array $filters,
     ): PaginationCollection {
         $builder = $this->createQueryBuilder('tle');
+        $builder->leftJoin(TleInformation::class, 'info', Expr\Join::WITH, 'info.tle = tle.id');
 
         // search
         if ($search) {
@@ -52,6 +55,18 @@ class TleRepository extends ServiceEntityRepository
         }
 
         $total = $this->getCount($builder);
+
+        if (!empty($filters)) {
+            foreach ($filters as $filter => $operators) {
+                $key = 0;
+                foreach ($operators as $operator => $value) {
+                    $paramName = 'filter_' . $filter . '_' . $key;
+                    $builder->andWhere(\sprintf('info.%s %s :%s', $filter, $operator, $paramName));
+                    $builder->setParameter($paramName, $value);
+                    $key++;
+                }
+            }
+        }
 
         // sort
         if ($sort === TleCollectionSortableFieldsEnum::POPULARITY) {

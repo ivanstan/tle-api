@@ -84,7 +84,7 @@ trait RequestValidator
         $result = [];
 
         foreach ($filters as $filter => $type) {
-            $values = $request->get($filter);
+            $values = $request->get($filter, []);
 
             foreach ($values as $operator => $value) {
                 $operator = $this->assertOperator($operator, $type, $filter);

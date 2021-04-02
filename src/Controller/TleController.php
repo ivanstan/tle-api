@@ -69,8 +69,6 @@ final class TleController extends AbstractApiController
             ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray());
         $filters = $this->assertFilter($request, self::COLLECTION_FILTERS);
 
-        dd($filters);
-
         $search = $request->get(self::SEARCH_PARAM);
         $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::POPULARITY);
         $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::DESCENDING);
@@ -81,7 +79,8 @@ final class TleController extends AbstractApiController
             $sort,
             $sortDir,
             $pageSize,
-            $this->getPageOffset($this->getPage($request), $pageSize)
+            $this->getPageOffset($this->getPage($request), $pageSize),
+            $filters,
         );
 
         return $this->response(
