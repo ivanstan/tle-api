@@ -14,6 +14,17 @@ abstract class AbstractApiController extends AbstractController
 {
     use RequestValidator;
 
+    protected const FILTER_TYPE_FLOAT = 'float';
+
+    protected const FILTER_FLOAT_OPERATORS = [
+        self::FILTER_TYPE_FLOAT => [
+            'gt' => '>',
+            'gte' => '>=',
+            'lt' => '<',
+            'lte' => '<=',
+        ],
+    ];
+
     public const CORS_HEADERS = [
         'Content-type' => 'application/json',
         'Access-Control-Allow-Origin' => '*',

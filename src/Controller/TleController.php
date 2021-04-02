@@ -21,7 +21,14 @@ final class TleController extends AbstractApiController
 
     protected const PAGE_SIZE = 20;
 
-    public function __construct(protected TleRepository $repository,)
+    protected const FILTER_ECCENTRICITY = 'eccentricity';
+    protected const FILTER_INCLINATION = 'inclination';
+
+    protected const COLLECTION_FILTERS = [
+        self::FILTER_ECCENTRICITY => self::FILTER_TYPE_FLOAT,
+    ];
+
+    public function __construct(protected TleRepository $repository)
     {
     }
 
@@ -60,6 +67,9 @@ final class TleController extends AbstractApiController
             ->assertParamIsLessThan($request, self::PAGE_SIZE_PARAM, self::MAX_PAGE_SIZE)
             ->assertParamInEnum($request, self::SORT_DIR_PARAM, SortDirectionEnum::toArray())
             ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray());
+        $filters = $this->assertFilter($request, self::COLLECTION_FILTERS);
+
+        dd($filters);
 
         $search = $request->get(self::SEARCH_PARAM);
         $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::POPULARITY);
