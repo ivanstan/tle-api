@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Tle;
 use App\Repository\TleRepository;
+use App\ViewModel\Filter;
 use App\ViewModel\SortDirectionEnum;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -25,7 +26,8 @@ final class TleController extends AbstractApiController
     protected const FILTER_INCLINATION = 'inclination';
 
     protected const COLLECTION_FILTERS = [
-        self::FILTER_ECCENTRICITY => self::FILTER_TYPE_FLOAT,
+        self::FILTER_ECCENTRICITY => Filter::FILTER_TYPE_FLOAT,
+        self::FILTER_INCLINATION => Filter::FILTER_TYPE_FLOAT,
     ];
 
     public function __construct(protected TleRepository $repository)
@@ -67,6 +69,7 @@ final class TleController extends AbstractApiController
             ->assertParamIsLessThan($request, self::PAGE_SIZE_PARAM, self::MAX_PAGE_SIZE)
             ->assertParamInEnum($request, self::SORT_DIR_PARAM, SortDirectionEnum::toArray())
             ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray());
+        /** @var Filter[] $filters */
         $filters = $this->assertFilter($request, self::COLLECTION_FILTERS);
 
         $search = $request->get(self::SEARCH_PARAM);
@@ -83,6 +86,18 @@ final class TleController extends AbstractApiController
             $filters,
         );
 
+        $parameters = [
+            self::SEARCH_PARAM => $search ?? '*',
+            self::SORT_PARAM => $sort,
+            self::SORT_DIR_PARAM => $sortDir,
+            self::PAGE_PARAM => $this->getPage($request),
+            self::PAGE_SIZE_PARAM => $pageSize,
+        ];
+
+        foreach ($filters as $filter) {
+            $parameters[\sprintf('%s[%s]', $filter->filter, $filter->operator)] = $filter->value;
+        }
+
         return $this->response(
             [
                 '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
@@ -90,13 +105,7 @@ final class TleController extends AbstractApiController
                 '@type' => 'Collection',
                 'totalItems' => $collection->getTotal(),
                 'member' => $collection->getCollection(),
-                'parameters' => [
-                    self::SEARCH_PARAM => $search ?? '*',
-                    self::SORT_PARAM => $sort,
-                    self::SORT_DIR_PARAM => $sortDir,
-                    self::PAGE_PARAM => $this->getPage($request),
-                    self::PAGE_SIZE_PARAM => $pageSize,
-                ],
+                'parameters' => $parameters,
                 'view' => $this->getPagination($request, $collection->getTotal(), $pageSize),
             ]
         );

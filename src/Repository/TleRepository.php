@@ -56,16 +56,12 @@ class TleRepository extends ServiceEntityRepository
 
         $total = $this->getCount($builder);
 
-        if (!empty($filters)) {
-            foreach ($filters as $filter => $operators) {
-                $key = 0;
-                foreach ($operators as $operator => $value) {
-                    $paramName = 'filter_' . $filter . '_' . $key;
-                    $builder->andWhere(\sprintf('info.%s %s :%s', $filter, $operator, $paramName));
-                    $builder->setParameter($paramName, $value);
-                    $key++;
-                }
-            }
+        $key = 0;
+        foreach ($filters as $filter) {
+            $paramName = 'filter_' . $filter->filter . '_' . $key;
+            $builder->andWhere(\sprintf('info.%s %s :%s', $filter->filter, $filter->sqlOperator, $paramName));
+            $builder->setParameter($paramName, $filter->value);
+            $key++;
         }
 
         // sort
