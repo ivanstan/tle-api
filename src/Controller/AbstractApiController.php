@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Service\Validator\RequestValidator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -125,12 +126,12 @@ abstract class AbstractApiController extends AbstractController
         return $result;
     }
 
-    public function response($response): Response
+    public function response(array $data): Response
     {
-        return new Response(
-            $this->serializer->serialize($response, 'json'),
+        return new JsonResponse(
+            $data,
             Response::HTTP_OK,
-            self::CORS_HEADERS
+            self::CORS_HEADERS,
         );
     }
 }
