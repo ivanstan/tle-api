@@ -17,6 +17,11 @@ class Filter
     public const REST_OPERATOR_LESS_THEN = 'lt';
     public const REST_OPERATOR_LESS_THEN_EQUAL = 'lte';
 
+    public const BOOLEAN_VALUES = [
+        '1',
+        '0',
+    ];
+
     public const FILTER_FLOAT_OPERATORS = [
         self::FILTER_TYPE_FLOAT => [
             self::REST_OPERATOR_GREATER_THEN => self::OPERATOR_GREATER_THEN,

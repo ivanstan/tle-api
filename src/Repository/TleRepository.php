@@ -24,7 +24,7 @@ class TleRepository extends ServiceEntityRepository
     /**
      * @return Tle[]|Collection
      */
-    public function fetchAllIndexed()
+    public function fetchAllIndexed(): array|Collection
     {
         return $this->createQueryBuilder('tle', 'tle.id')
             ->getQuery()
@@ -40,6 +40,8 @@ class TleRepository extends ServiceEntityRepository
         array $filters,
     ): PaginationCollection {
         $builder = $this->createQueryBuilder('tle');
+
+        $builder->select('tle');
         $builder->leftJoin(TleInformation::class, 'info', Expr\Join::WITH, 'info.tle = tle.id');
 
         // search
@@ -54,15 +56,14 @@ class TleRepository extends ServiceEntityRepository
                 ->setParameter('search', '%' . $search . '%');
         }
 
-        $total = $this->getCount($builder);
-
-        $key = 0;
-        foreach ($filters as $filter) {
-            $paramName = 'filter_' . $filter->filter . '_' . $key;
-            $builder->andWhere(\sprintf('info.%s %s :%s', $filter->filter, $filter->sqlOperator, $paramName));
-            $builder->setParameter($paramName, $filter->value);
-            $key++;
+        // filters
+        foreach ($filters as $index => $filter) {
+            $placeholder = \sprintf('filter_%s_%d', $filter->filter, $index);
+            $builder->andWhere(\sprintf('info.%s %s :%s', $filter->filter, $filter->sqlOperator, $placeholder));
+            $builder->setParameter($placeholder, $filter->value);
         }
+
+        $total = $this->getCount($builder);
 
         // sort
         if ($sort === TleCollectionSortableFieldsEnum::POPULARITY) {

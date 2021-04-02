@@ -2,6 +2,7 @@
 
 namespace App\Serializer;
 
+use App\Controller\TleController;
 use App\Entity\Tle;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -26,7 +27,9 @@ class TleModelNormalizer implements NormalizerInterface
 
         $model = new TleModel($entity->getLine1(), $entity->getLine2(), $entity->getName());
 
-        return [
+        $isExtra = ($context[TleController::PARAM_EXTRA] ?? null) === true;
+
+        $normalized = [
             '@id' => $id,
             '@type' => 'TleModel',
             'satelliteId' => $model->getId(),
@@ -35,6 +38,19 @@ class TleModelNormalizer implements NormalizerInterface
             'line1' => $model->getLine1(),
             'line2' => $model->getLine2(),
         ];
+
+        if ($isExtra) {
+            $extra = [
+                'extra' => [
+                    TleController::FILTER_ECCENTRICITY => $entity->getInfo()->eccentricity,
+                    TleController::FILTER_INCLINATION => $entity->getInfo()->inclination,
+                ],
+            ];
+
+            $normalized = array_merge($normalized, $extra);
+        }
+
+        return $normalized;
     }
 
     public function supportsNormalization($data, string $format = null): bool

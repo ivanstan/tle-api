@@ -7,7 +7,6 @@ use App\Repository\TleRepository;
 use App\ViewModel\Filter;
 use App\ViewModel\SortDirectionEnum;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -22,8 +21,10 @@ final class TleController extends AbstractApiController
 
     protected const PAGE_SIZE = 20;
 
-    protected const FILTER_ECCENTRICITY = 'eccentricity';
-    protected const FILTER_INCLINATION = 'inclination';
+    public const FILTER_ECCENTRICITY = 'eccentricity';
+    public const FILTER_INCLINATION = 'inclination';
+
+    public const PARAM_EXTRA = 'extra';
 
     protected const COLLECTION_FILTERS = [
         self::FILTER_ECCENTRICITY => Filter::FILTER_TYPE_FLOAT,
@@ -37,8 +38,13 @@ final class TleController extends AbstractApiController
     #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
     public function record(
         int $id,
-        NormalizerInterface $normalizer
+        NormalizerInterface $normalizer,
+        Request $request,
     ): Response {
+        $this->assertParamIsBoolean($request, self::PARAM_EXTRA);
+
+        $extra = (bool)$request->get(self::PARAM_EXTRA, false);
+
         /** @var Tle $tle */
         $tle = $this->repository->findOneBy(['id' => $id]);
 
@@ -51,7 +57,7 @@ final class TleController extends AbstractApiController
         ];
 
         return $this->response(
-            array_merge($data, $normalizer->normalize($tle)),
+            array_merge($data, $normalizer->normalize($tle, null, [self::PARAM_EXTRA => $extra])),
         );
     }
 
@@ -67,7 +73,11 @@ final class TleController extends AbstractApiController
             ->assertParamIsGreaterThan($request, self::PAGE_SIZE_PARAM, 0)
             ->assertParamIsLessThan($request, self::PAGE_SIZE_PARAM, self::MAX_PAGE_SIZE)
             ->assertParamInEnum($request, self::SORT_DIR_PARAM, SortDirectionEnum::toArray())
-            ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray());
+            ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray())
+            ->assertParamIsBoolean($request, self::PARAM_EXTRA);
+
+        $extra = (bool)$request->get(self::PARAM_EXTRA, false);
+
         /** @var Filter[] $filters */
         $filters = $this->assertFilter($request, self::COLLECTION_FILTERS);
 
@@ -108,7 +118,7 @@ final class TleController extends AbstractApiController
         ];
 
         return $this->response(
-            $normalizer->normalize($response)
+            $normalizer->normalize($response, null, [self::PARAM_EXTRA => $extra])
         );
     }
 
