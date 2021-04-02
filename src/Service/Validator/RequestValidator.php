@@ -2,6 +2,7 @@
 
 namespace App\Service\Validator;
 
+use App\ViewModel\Filter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -87,54 +88,10 @@ trait RequestValidator
             $values = $request->get($filter, []);
 
             foreach ($values as $operator => $value) {
-                $operator = $this->assertOperator($operator, $type, $filter);
-                $value = $this->assertValue($value, $type, $filter);
-
-                $result[$filter][$operator] = $value;
+                $result[] = new Filter($filter, $type, $operator, $value);
             }
         }
 
         return $result;
-    }
-
-    protected function assertOperator(string $operator, string $type, string $filter): ?string
-    {
-        if ($type === self::FILTER_TYPE_FLOAT) {
-            $operators = self::FILTER_FLOAT_OPERATORS[self::FILTER_TYPE_FLOAT];
-            if (!array_key_exists($operator, $operators)) {
-                throw new BadRequestHttpException(
-                    \sprintf(
-                        'Operator for filter \'%s\' should be one of the following %s, \'%s\' provided',
-                        $filter,
-                        implode(', ', array_keys($operators)),
-                        $operator
-                    )
-                );
-            }
-
-            return $operators[$operator];
-        }
-
-        return null;
-    }
-
-    /**
-     * @noinspection CallableParameterUseCaseInTypeContextInspection
-     */
-    protected function assertValue(string $value, string $type, string $filter): mixed
-    {
-        if ($type === self::FILTER_TYPE_FLOAT) {
-            $value = (float)$value;
-
-            if (!is_float($value)) {
-                throw new BadRequestHttpException(
-                    \sprintf('Filter %s value should be %s', $filter, $type)
-                );
-            }
-
-            return $value;
-        }
-
-        return null;
     }
 }
