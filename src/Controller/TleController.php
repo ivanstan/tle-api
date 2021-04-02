@@ -50,16 +50,15 @@ final class TleController extends AbstractApiController
             '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
         ];
 
-        return new JsonResponse(
+        return $this->response(
             array_merge($data, $normalizer->normalize($tle)),
-            Response::HTTP_OK,
-            self::CORS_HEADERS,
         );
     }
 
     #[Route("/", name: "tle_collection")]
     public function collection(
-        Request $request
+        Request $request,
+        NormalizerInterface $normalizer
     ): Response {
         $this
             ->assertParamIsInteger($request, self::PAGE_PARAM)
@@ -98,16 +97,18 @@ final class TleController extends AbstractApiController
             $parameters[\sprintf('%s[%s]', $filter->filter, $filter->operator)] = $filter->value;
         }
 
+        $response = [
+            '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
+            '@id' => $this->router->generate('tle_collection', [], UrlGeneratorInterface::ABSOLUTE_URL),
+            '@type' => 'Collection',
+            'totalItems' => $collection->getTotal(),
+            'member' => $collection->getCollection(),
+            'parameters' => $parameters,
+            'view' => $this->getPagination($request, $collection->getTotal(), $pageSize),
+        ];
+
         return $this->response(
-            [
-                '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
-                '@id' => $this->router->generate('tle_collection', [], UrlGeneratorInterface::ABSOLUTE_URL),
-                '@type' => 'Collection',
-                'totalItems' => $collection->getTotal(),
-                'member' => $collection->getCollection(),
-                'parameters' => $parameters,
-                'view' => $this->getPagination($request, $collection->getTotal(), $pageSize),
-            ]
+            $normalizer->normalize($response)
         );
     }
 
@@ -136,10 +137,6 @@ final class TleController extends AbstractApiController
             ],
         ];
 
-        return new JsonResponse(
-            $data,
-            Response::HTTP_OK,
-            self::CORS_HEADERS,
-        );
+        return $this->response($data);
     }
 }
