@@ -14,13 +14,13 @@ class TleModelNormalizer implements NormalizerInterface
     }
 
     /**
-     * @param $entity
+     * @param Tle $entity
      * @param string|null $format
      * @param array $context
      *
      * @return array
      */
-    public function normalize($entity, string $format = null, array $context = [])
+    public function normalize($entity, ?string $format = null, array $context = []): array
     {
         $id = $this->router->generate('tle_record', ['id' => $entity->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
