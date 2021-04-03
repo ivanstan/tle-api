@@ -18,6 +18,8 @@ add('shared_files', [
     'public/asset-manifest.json',
     'public/favicon.ico',
     'public/index.html',
+    'public/logo192.png',
+    'public/logo512.png',
 ]);
 add('shared_dirs', [
     'var',
