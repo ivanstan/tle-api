@@ -111,7 +111,7 @@ class TleRepository extends ServiceEntityRepository
         return $builder->getQuery()->getSingleScalarResult();
     }
 
-    private function getSortTableColumnMapping(string $sort)
+    private function getSortTableColumnMapping(string $sort): ?string
     {
         return match ($sort) {
             TleCollectionSortableFieldsEnum::ID => 'tle.id',
