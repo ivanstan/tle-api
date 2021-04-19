@@ -70,7 +70,7 @@ class TleRepository extends ServiceEntityRepository
             $builder->leftJoin(Statistic::class, 's', Expr\Join::WITH, 's.tle = tle.id');
             $builder->addOrderBy('s.hits', $sortDir);
         } else {
-            $builder->addOrderBy('tle.' . $sort, $sortDir);
+            $builder->addOrderBy($this->getSortTableColumnMapping($sort), $sortDir);
         }
 
         // limit
@@ -109,5 +109,16 @@ class TleRepository extends ServiceEntityRepository
         $builder->select('count(tle.id)');
 
         return $builder->getQuery()->getSingleScalarResult();
+    }
+
+    private function getSortTableColumnMapping(string $sort)
+    {
+        return match ($sort) {
+            TleCollectionSortableFieldsEnum::ID => 'tle.id',
+            TleCollectionSortableFieldsEnum::NAME => 'tle.name',
+            TleCollectionSortableFieldsEnum::POPULARITY => null,
+            TleCollectionSortableFieldsEnum::INCLINATION => 'info.inclination',
+            TleCollectionSortableFieldsEnum::ECCENTRICITY => 'info.eccentricity',
+        };
     }
 }
