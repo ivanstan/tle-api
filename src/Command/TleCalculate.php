@@ -50,6 +50,7 @@ class TleCalculate extends Command
             $tleInformation->inclination = $tleModel->getInclination();
             $tleInformation->eccentricity = $tleModel->eccentricity();
             $tleInformation->period = $tleModel->period();
+            $tleInformation->geostationary = $tleModel->isGeostationary();
 
             if (!$exists) {
                 $this->entityManager->persist($tleInformation);

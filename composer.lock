@@ -1851,12 +1851,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ivanstan/tle-php.git",
-                "reference": "78133b47a05e336e3088d46ac0ffa9abdb084743"
+                "reference": "50ea45311c3bc50450a799d5cff56f3a904d5835"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ivanstan/tle-php/zipball/78133b47a05e336e3088d46ac0ffa9abdb084743",
-                "reference": "78133b47a05e336e3088d46ac0ffa9abdb084743",
+                "url": "https://api.github.com/repos/ivanstan/tle-php/zipball/50ea45311c3bc50450a799d5cff56f3a904d5835",
+                "reference": "50ea45311c3bc50450a799d5cff56f3a904d5835",
                 "shasum": ""
             },
             "require": {
@@ -1890,7 +1890,7 @@
                 "issues": "https://github.com/ivanstan/tle-php/issues",
                 "source": "https://github.com/ivanstan/tle-php/tree/master"
             },
-            "time": "2021-04-20T12:58:40+00:00"
+            "time": "2021-04-20T16:57:25+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",

@@ -29,6 +29,13 @@ class TleInformation
      */
     public ?float $period;
 
+    /**
+     * Period for complete orbit in seconds
+     *
+     * @ORM\Column(type="boolean", options={"default":"0"})
+     */
+    public bool $geostationary = false;
+
     public function __construct(Tle $tle)
     {
         $this->tle = $tle;
