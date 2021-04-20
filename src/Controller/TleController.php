@@ -53,7 +53,7 @@ final class TleController extends AbstractApiController
         }
 
         $data = [
-            '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
+            '@context' => self::HYDRA_CONTEXT,
         ];
 
         return $this->response(
@@ -108,7 +108,7 @@ final class TleController extends AbstractApiController
         }
 
         $response = [
-            '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
+            '@context' => self::HYDRA_CONTEXT,
             '@id' => $this->router->generate('tle_collection', [], UrlGeneratorInterface::ABSOLUTE_URL),
             '@type' => 'Collection',
             'totalItems' => $collection->getTotal(),
@@ -136,14 +136,14 @@ final class TleController extends AbstractApiController
         $members = $repository->popular($newerThan, $limit);
 
         $data = [
-            '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
+            '@context' => self::HYDRA_CONTEXT,
             '@id' => $this->router->generate('tle_popular', [], UrlGeneratorInterface::ABSOLUTE_URL),
             '@type' => 'Collection',
             'totalItems' => \count($members),
             'member' => $members,
             'parameters' => [
                 '*limit' => $limit,
-                '*newerThan' => $newerThan->format('c'),
+                '*newerThan' => $newerThan->format(self::DATETIME_FORMAT),
             ],
         ];
 

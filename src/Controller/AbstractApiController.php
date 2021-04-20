@@ -17,6 +17,8 @@ abstract class AbstractApiController extends AbstractController
 
     public const DATETIME_FORMAT = 'c';
 
+    protected const HYDRA_CONTEXT = 'https://www.w3.org/ns/hydra/context.jsonld';
+
     public const CORS_HEADERS = [
         'Content-type' => 'application/json',
         'Access-Control-Allow-Origin' => '*',
