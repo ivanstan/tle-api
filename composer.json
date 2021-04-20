@@ -10,7 +10,7 @@
         "ext-iconv": "*",
         "ext-json": "*",
         "beberlei/doctrineextensions": "^1.3",
-        "ivanstan/tle-php": "^1.0.2",
+        "ivanstan/tle-php": "dev-master",
         "myclabs/php-enum": "^1.7",
         "sentry/sentry-symfony": "^4.0",
         "symfony/apache-pack": "^1.0",

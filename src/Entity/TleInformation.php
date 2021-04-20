@@ -15,12 +15,19 @@ class TleInformation
     /**
      * @ORM\Column(type="float", precision=14, scale=12, nullable=true)
      */
-    public float $eccentricity;
+    public ?float $eccentricity;
 
     /**
      * @ORM\Column(type="float", precision=16, scale=10, nullable=true)
      */
-    public float $inclination;
+    public ?float $inclination;
+
+    /**
+     * Period for complete orbit in seconds
+     *
+     * @ORM\Column(type="float", precision=24, scale=10, nullable=true)
+     */
+    public ?float $period;
 
     public function __construct(Tle $tle)
     {

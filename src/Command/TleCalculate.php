@@ -49,6 +49,7 @@ class TleCalculate extends Command
 
             $tleInformation->inclination = $tleModel->getInclination();
             $tleInformation->eccentricity = $tleModel->eccentricity();
+            $tleInformation->period = $tleModel->period();
 
             if (!$exists) {
                 $this->entityManager->persist($tleInformation);
