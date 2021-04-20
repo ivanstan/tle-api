@@ -4,23 +4,33 @@ namespace App\Controller;
 
 use App\Entity\Tle;
 use App\Repository\TleRepository;
+use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Observer;
+use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class PropagateController extends AbstractApiController
 {
+    use TleHttpTrait;
+
+    protected const DEEP_SATELLITE_PERIOD = 225; // minutes
+
     public function __construct(protected TleRepository $repository)
     {
     }
 
-    #[Route("/api/tle/{id}/next-pass", name: "tle_pass", requirements: ["id" => "\d+"])]
-    public function nextPass(int $id, Request $request, NormalizerInterface $normalizer): JsonResponse {
-
+    #[Route("/api/tle/{id}/pass", name: "tle_pass", requirements: ["id" => "\d+"])]
+    public function pass(
+        int $id,
+        Request $request,
+        NormalizerInterface $normalizer
+    ): JsonResponse {
         try {
             $observer = new Observer((float)$request->get('latitude', 0), (float)$request->get('longitude', 0));
         } catch (\InvalidArgumentException $exception) {
@@ -34,10 +44,9 @@ class PropagateController extends AbstractApiController
         $qth->lon = $observer->longitude;
         $qth->alt = $observer->altitude;
 
-        /** @var Tle $tle */
-        $tle = $this->repository->findOneBy(['id' => $id]);
+        $tle = $this->getTle($id);
 
-        $tle = new \Predict_TLE($tle->getName(), $tle->getLine1(), $tle->getLine2()); // Instantiate it
+        $tle = new \Predict_TLE($tle->getName(), $tle->getLine1(), $tle->getLine2());
         $sat = new \Predict_Sat($tle); // Load up the satellite data
         $now = \Predict_Time::get_current_daynum(); // get the current time as Julian Date (daynum)
 
@@ -72,6 +81,79 @@ class PropagateController extends AbstractApiController
             'parameters' => $parameters,
         ];
 
-        return new JsonResponse($data);
+        return $this->response($data);
+    }
+
+    #[Route("/api/tle/{id}/vector", name: "tle_propagate", requirements: ["id" => "\d+"])]
+    public function vector(
+        int $id,
+        Request $request,
+        NormalizerInterface $normalizer
+    ): JsonResponse {
+        /** @var Tle $tle */
+        $tle = $this->repository->findOneBy(['id' => $id]);
+        if ($tle === null) {
+            throw new NotFoundHttpException(\sprintf('Unable to find record with id %s', $id));
+        }
+
+        $tleModel = new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName());
+        $sat = new \Predict_Sat(new \Predict_TLE($tle->getName(), $tle->getLine1(), $tle->getLine2()));
+
+        $date = $request->get('date', (new \DateTime('now', new \DateTimeZone('UTC')))->format(self::DATETIME_FORMAT));
+        $datetime = \DateTime::createFromFormat(\DateTimeInterface::ATOM, str_replace(' ', '+', $date));
+
+        $dateTimeUTC = clone $datetime;
+        $dateTimeUTC->setTimezone(new \DateTimeZone('UTC'));
+        $epoch = \DateTime::createFromFormat(\DateTimeInterface::ATOM, $tleModel->getDate());
+
+        $deltaT = ($datetime->getTimestamp() - $epoch->getTimestamp()) / 60; // minutes
+
+        $propagator = new \Predict_SGPSDP();
+        if (($tleModel->period() / 60) > self::DEEP_SATELLITE_PERIOD) {
+            $propagator->SDP4($sat, $deltaT);
+            $algorithm = 'SDP4';
+        } else {
+            $propagator->SGP4($sat, $deltaT);
+            $algorithm = 'SGP4';
+        }
+
+        \Predict_Math::Convert_Sat_State($sat->pos, $sat->vel);
+
+        $parameters = [
+            'date' => $datetime->format(self::DATETIME_FORMAT),
+        ];
+
+        $url = $this->router->generate(
+            'tle_propagate',
+            array_merge($request->request->all(), $parameters, ['id' => $id]),
+            UrlGeneratorInterface::ABSOLUTE_URL
+        );
+
+        $parameters['satelliteId'] = $id;
+
+        $data = [
+            '@context' => self::HYDRA_CONTEXT,
+            '@id' => $url,
+            '@type' => 'SatelliteStateVector',
+            'propagator' => $algorithm,
+            'reference_frame' => 'ECI',
+            'position' => [
+                'x' => $sat->pos->x,
+                'y' => $sat->pos->y,
+                'z' => $sat->pos->z,
+                'r' => $sat->pos->w,
+                'unit' => 'km',
+            ],
+            'velocity' => [
+                'x' => $sat->vel->x,
+                'y' => $sat->vel->y,
+                'z' => $sat->vel->z,
+                'r' => $sat->vel->w,
+                'unit' => 'km/s',
+            ],
+            'parameters' => $parameters,
+        ];
+
+        return $this->response($data);
     }
 }

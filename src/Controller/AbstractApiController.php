@@ -15,6 +15,7 @@ abstract class AbstractApiController extends AbstractController
 {
     use RequestValidator;
 
+    /** @var string ISO-8601 date format */
     public const DATETIME_FORMAT = 'c';
 
     protected const HYDRA_CONTEXT = 'https://www.w3.org/ns/hydra/context.jsonld';
@@ -130,7 +131,7 @@ abstract class AbstractApiController extends AbstractController
         return $result;
     }
 
-    public function response(array $data): Response
+    public function response(array $data): JsonResponse
     {
         return new JsonResponse(
             $data,

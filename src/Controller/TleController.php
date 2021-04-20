@@ -4,9 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Tle;
 use App\Repository\TleRepository;
+use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
 use App\ViewModel\SortDirectionEnum;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -17,6 +19,8 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 #[Route("/api/tle")]
 final class TleController extends AbstractApiController
 {
+    use TleHttpTrait;
+
     protected const MAX_PAGE_SIZE = 100;
 
     protected const PAGE_SIZE = 20;
@@ -40,17 +44,12 @@ final class TleController extends AbstractApiController
         int $id,
         NormalizerInterface $normalizer,
         Request $request,
-    ): Response {
+    ): JsonResponse {
         $this->assertParamIsBoolean($request, self::PARAM_EXTRA);
 
         $extra = (bool)$request->get(self::PARAM_EXTRA, false);
 
-        /** @var Tle $tle */
-        $tle = $this->repository->findOneBy(['id' => $id]);
-
-        if ($tle === null) {
-            throw new NotFoundHttpException(\sprintf('Unable to find record with id %s', $id));
-        }
+        $tle = $this->getTle($id);
 
         $data = [
             '@context' => self::HYDRA_CONTEXT,
@@ -65,7 +64,7 @@ final class TleController extends AbstractApiController
     public function collection(
         Request $request,
         NormalizerInterface $normalizer
-    ): Response {
+    ): JsonResponse {
         $this
             ->assertParamIsInteger($request, self::PAGE_PARAM)
             ->assertParamIsGreaterThan($request, self::PAGE_PARAM, 0)
@@ -126,7 +125,7 @@ final class TleController extends AbstractApiController
     public function popular(
         Request $request,
         TleRepository $repository
-    ): Response {
+    ): JsonResponse {
         $newerThan = new \DateTime('now');
         $newerThan->setTime(0, 0, 0);
         $newerThan->modify('-3 days');
