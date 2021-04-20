@@ -22,7 +22,7 @@ final class Version20210420125645 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE tle_information ADD period DOUBLE PRECISION DEFAULT NULL');
+        $this->addSql('ALTER TABLE tle_information ADD `period` DOUBLE PRECISION DEFAULT NULL');
     }
 
     public function down(Schema $schema) : void
@@ -30,6 +30,6 @@ final class Version20210420125645 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('ALTER TABLE tle_information DROP period');
+        $this->addSql('ALTER TABLE tle_information DROP `period`');
     }
 }
