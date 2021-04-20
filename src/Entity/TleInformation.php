@@ -25,7 +25,7 @@ class TleInformation
     /**
      * Period for complete orbit in seconds
      *
-     * @ORM\Column(type="float", name="`period`" precision=24, scale=10, nullable=true)
+     * @ORM\Column(type="float", name="`period`", precision=24, scale=10, nullable=true)
      */
     public ?float $period;
 
