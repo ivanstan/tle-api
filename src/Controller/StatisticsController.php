@@ -54,7 +54,7 @@ class StatisticsController extends AbstractApiController
             $date = new \DateTime($item['date']);
             $date->setTime((int)$item['hour'] * self::INTERVAL, 0);
 
-            $response[$date->format('c')] = $item['hits'];
+            $response[$date->format(self::DATETIME_FORMAT)] = $item['hits'];
         }
 
         return new JsonResponse(

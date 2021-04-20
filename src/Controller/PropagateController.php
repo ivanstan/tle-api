@@ -64,7 +64,7 @@ class PropagateController extends AbstractApiController
         $parameters['satelliteId'] = $id;
 
         $data = [
-            '@context' => 'http://www.w3.org/ns/hydra/context.jsonld',
+            '@context' => self::HYDRA_CONTEXT,
             '@id' => $url,
             '@type' => 'VisibleSatellitePassCollection',
             'observer' => $normalizer->normalize($observer),
