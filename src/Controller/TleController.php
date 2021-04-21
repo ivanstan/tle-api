@@ -25,14 +25,11 @@ final class TleController extends AbstractApiController
 
     protected const PAGE_SIZE = 20;
 
-    public const FILTER_ECCENTRICITY = 'eccentricity';
-    public const FILTER_INCLINATION = 'inclination';
-
     public const PARAM_EXTRA = 'extra';
 
     protected const COLLECTION_FILTERS = [
-        self::FILTER_ECCENTRICITY => Filter::FILTER_TYPE_FLOAT,
-        self::FILTER_INCLINATION => Filter::FILTER_TYPE_FLOAT,
+        TleCollectionSortableFieldsEnum::ECCENTRICITY => Filter::FILTER_TYPE_FLOAT,
+        TleCollectionSortableFieldsEnum::INCLINATION => Filter::FILTER_TYPE_FLOAT,
     ];
 
     public function __construct(protected TleRepository $repository)

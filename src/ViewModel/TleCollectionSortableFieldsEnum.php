@@ -11,4 +11,5 @@ class TleCollectionSortableFieldsEnum extends Enum
     public const POPULARITY = 'popularity';
     public const INCLINATION = 'inclination';
     public const ECCENTRICITY = 'eccentricity';
+    public const PERIOD = 'period';
 }
