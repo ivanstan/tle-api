@@ -117,7 +117,16 @@ class PropagateController extends AbstractApiController
             $algorithm = 'SGP4';
         }
 
+        $daynum = \Predict_Time::unix2daynum($datetime->getTimestamp());
+
         \Predict_Math::Convert_Sat_State($sat->pos, $sat->vel);
+
+
+        $sat_geodetic = new \Predict_Geodetic();
+        \Predict_SGPObs::Calculate_LatLonAlt($daynum, $sat->pos, $sat_geodetic);
+
+        $sat_geodetic->lat = rad2deg($sat_geodetic->lat);
+        $sat_geodetic->lon = rad2deg($sat_geodetic->lon);
 
         $parameters = [
             'date' => $datetime->format(self::DATETIME_FORMAT),
@@ -150,6 +159,11 @@ class PropagateController extends AbstractApiController
                 'z' => $sat->vel->z,
                 'r' => $sat->vel->w,
                 'unit' => 'km/s',
+            ],
+            'geodetic' => [
+                'latitude' => $sat_geodetic->lat,
+                'longitude' => $sat_geodetic->lon,
+                'altitude' => $sat_geodetic->alt,
             ],
             'parameters' => $parameters,
         ];
