@@ -4,6 +4,7 @@ namespace App\Serializer;
 
 use App\Controller\TleController;
 use App\Entity\Tle;
+use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -42,8 +43,9 @@ class TleModelNormalizer implements NormalizerInterface
         if ($isExtra) {
             $extra = [
                 'extra' => [
-                    TleController::FILTER_ECCENTRICITY => $entity->getInfo()->eccentricity,
-                    TleController::FILTER_INCLINATION => $entity->getInfo()->inclination,
+                    TleCollectionSortableFieldsEnum::ECCENTRICITY => $entity->getInfo()->eccentricity,
+                    TleCollectionSortableFieldsEnum::INCLINATION => $entity->getInfo()->inclination,
+                    TleCollectionSortableFieldsEnum::PERIOD => $entity->getInfo()->period,
                 ],
             ];
 
