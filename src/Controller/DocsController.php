@@ -23,13 +23,16 @@ final class DocsController extends AbstractController
 
     /**
      * @Route("/api/{name}.json", name="app_api_docs_json")
+     * @throws \JsonException
      */
     public function getJson(string $name): JsonResponse
     {
         $path = $this->getProjectDir() . '/config/custom/' . $name . '.json';
 
-        $file = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+        $docs = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
 
-        return new JsonResponse($file, Response::HTTP_OK, ['Access-Control-Allow-Origin' => '*',]);
+        unset($docs['paths']['/api/tle/{id}/propagate']);
+
+        return new JsonResponse($docs, Response::HTTP_OK, ['Access-Control-Allow-Origin' => '*',]);
     }
 }
