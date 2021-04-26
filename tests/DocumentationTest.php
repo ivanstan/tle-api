@@ -17,7 +17,7 @@ final class DocumentationTest extends AbstractWebTestCase
 
         $collectionSchema = $response['paths']['/api/tle']['get']['responses'][200]['content']['application/json']['schema']['properties'];
         $paginationSchema = $response['components']['schemas']['Pagination']['properties'];
-        $tleSchema = $response['components']['schemas']['TLE']['allOf'][0]['properties'];
+        $tleSchema = $response['components']['schemas']['TleModel']['allOf'][0]['properties'];
 
         $tle = TleFixtures::create();
 
@@ -26,7 +26,7 @@ final class DocumentationTest extends AbstractWebTestCase
         self::assertCount(\count($tleSchema), $response);
         self::assertEquals(array_keys($tleSchema), array_keys($response));
 
-        $response = $this->toArray($this->get('/api/tle', ['page-size' => 2, 'page' => 2]));
+        $response = $this->toArray($this->get('/api/tle/', ['page-size' => 2, 'page' => 2]));
 
         self::assertCount(\count($paginationSchema), $response['view']);
         self::assertEquals(array_keys($paginationSchema), array_keys($response['view']));

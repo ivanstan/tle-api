@@ -43,7 +43,7 @@ final class TleTest extends AbstractWebTestCase
         $pageSize = 2;
 
         $response = $this->get(
-            '/api/tle',
+            '/api/tle/',
             [
                 'page-size' => $pageSize,
             ]
@@ -57,7 +57,7 @@ final class TleTest extends AbstractWebTestCase
         self::assertEquals('https://www.w3.org/ns/hydra/context.jsonld', $response['@context']);
 
         self::assertArrayHasKey('@id', $response);
-        self::assertEquals('http://localhost/api/tle', $response['@id']);
+        self::assertEquals('http://localhost/api/tle/', $response['@id']);
 
         self::assertArrayHasKey('@type', $response);
         self::assertEquals('Collection', $response['@type']);
@@ -75,10 +75,10 @@ final class TleTest extends AbstractWebTestCase
         self::assertEquals('*', $parameters['search']);
 
         self::assertArrayHasKey('sort', $parameters);
-        self::assertEquals('name', $parameters['sort']);
+        self::assertEquals('popularity', $parameters['sort']);
 
         self::assertArrayHasKey('sort-dir', $parameters);
-        self::assertEquals('asc', $parameters['sort-dir']);
+        self::assertEquals('desc', $parameters['sort-dir']);
 
         self::assertArrayHasKey('page', $parameters);
         self::assertEquals(1, $parameters['page']);

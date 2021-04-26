@@ -67,5 +67,5 @@ task(
     ]
 );
 
-//before('deploy', 'test');
+before('deploy', 'test');
 after('deploy:failed', 'deploy:unlock');
