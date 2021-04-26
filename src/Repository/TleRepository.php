@@ -87,23 +87,6 @@ class TleRepository extends ServiceEntityRepository
         return $collection;
     }
 
-    public function popular(\DateTime $newerThen, int $limit): array
-    {
-        $builder = $this->_em->createQueryBuilder();
-
-        $builder->select(['t.name', 't.id', 'COUNT(q.ip) as hits'])
-            ->from(Request::class, 'q')
-            ->distinct('t.id')
-            ->leftJoin('q.tle', 't')
-            ->groupBy('t.id')
-            ->where('q.createdAt > :newerThan')
-            ->setParameter('newerThan', $newerThen)
-            ->setMaxResults($limit)
-            ->orderBy('hits', 'DESC');
-
-        return $builder->getQuery()->getResult();
-    }
-
     private function getCount(QueryBuilder $builder): int
     {
         $builder = clone $builder;
