@@ -10,42 +10,42 @@ final class CollectionTest extends AbstractWebTestCase
         [
             'page' => 1,
             'expected' => [
-                '@id' => 'http://localhost/api/tle?page=1&page-size=2',
+                '@id' => 'http://localhost/api/tle/?page=1&page-size=2',
                 '@type' => 'PartialCollectionView',
-                'first' => 'http://localhost/api/tle?page=1&page-size=2',
-                'next' => 'http://localhost/api/tle?page=2&page-size=2',
-                'last' => 'http://localhost/api/tle?page=5&page-size=2'
+                'first' => 'http://localhost/api/tle/?page=1&page-size=2',
+                'next' => 'http://localhost/api/tle/?page=2&page-size=2',
+                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
             ]
         ],
         [
             'page' => 3,
             'expected' => [
-                '@id' => 'http://localhost/api/tle?page=3&page-size=2',
+                '@id' => 'http://localhost/api/tle/?page=3&page-size=2',
                 '@type' => 'PartialCollectionView',
-                'first' => 'http://localhost/api/tle?page=1&page-size=2',
-                'previous' => 'http://localhost/api/tle?page=2&page-size=2',
-                'next' => 'http://localhost/api/tle?page=4&page-size=2',
-                'last' => 'http://localhost/api/tle?page=5&page-size=2'
+                'first' => 'http://localhost/api/tle/?page=1&page-size=2',
+                'previous' => 'http://localhost/api/tle/?page=2&page-size=2',
+                'next' => 'http://localhost/api/tle/?page=4&page-size=2',
+                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
             ]
         ],
         [
             'page' => 5,
             'expected' => [
-                '@id' => 'http://localhost/api/tle?page=5&page-size=2',
+                '@id' => 'http://localhost/api/tle/?page=5&page-size=2',
                 '@type' => 'PartialCollectionView',
-                'first' => 'http://localhost/api/tle?page=1&page-size=2',
-                'previous' => 'http://localhost/api/tle?page=4&page-size=2',
-                'last' => 'http://localhost/api/tle?page=5&page-size=2'
+                'first' => 'http://localhost/api/tle/?page=1&page-size=2',
+                'previous' => 'http://localhost/api/tle/?page=4&page-size=2',
+                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
             ]
         ],
         [
             'page' => 7,
             'expected' => [
-                '@id' => 'http://localhost/api/tle?page=7&page-size=2',
+                '@id' => 'http://localhost/api/tle/?page=7&page-size=2',
                 '@type' => 'PartialCollectionView',
-                'first' => 'http://localhost/api/tle?page=1&page-size=2',
-                'previous' => 'http://localhost/api/tle?page=6&page-size=2',
-                'last' => 'http://localhost/api/tle?page=5&page-size=2'
+                'first' => 'http://localhost/api/tle/?page=1&page-size=2',
+                'previous' => 'http://localhost/api/tle/?page=6&page-size=2',
+                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
             ]
         ]
     ];
@@ -113,7 +113,7 @@ final class CollectionTest extends AbstractWebTestCase
     private function getCollection(int $page, int $pageSize): Response
     {
         return $this->get(
-            '/api/tle',
+            '/api/tle/',
             [
                 'page' => $page,
                 'page-size' => $pageSize,

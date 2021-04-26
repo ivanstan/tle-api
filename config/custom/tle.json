@@ -282,6 +282,10 @@
         "allOf": [
           {
             "properties": {
+              "@context": {
+                "type": "string",
+                "example": "https://www.w3.org/ns/hydra/context.jsonld"
+              },
               "@id": {
                 "type": "string",
                 "example": "https://tle.ivanstanojevic.me/api/tle/43638"
