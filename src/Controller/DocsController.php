@@ -22,12 +22,12 @@ final class DocsController extends AbstractController
     }
 
     /**
-     * @Route("/api/{name}.json", name="app_api_docs_json")
+     * @Route("/api/tle.json", name="app_api_docs_json")
      * @throws \JsonException
      */
-    public function getJson(string $name): JsonResponse
+    public function getJson(): JsonResponse
     {
-        $path = $this->getProjectDir() . '/config/custom/' . $name . '.json';
+        $path = $this->getProjectDir() . '/config/custom/tle.json';
 
         $docs = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
 
