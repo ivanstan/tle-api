@@ -84,8 +84,8 @@ class PropagateController extends AbstractApiController
         return $this->response($data);
     }
 
-    #[Route("/api/tle/{id}/vector", name: "tle_propagate", requirements: ["id" => "\d+"])]
-    public function vector(
+    #[Route("/api/tle/{id}/propagate", name: "tle_propagate", requirements: ["id" => "\d+"])]
+    public function propagate(
         int $id,
         Request $request,
         NormalizerInterface $normalizer
@@ -121,7 +121,6 @@ class PropagateController extends AbstractApiController
 
         \Predict_Math::Convert_Sat_State($sat->pos, $sat->vel);
 
-
         $sat_geodetic = new \Predict_Geodetic();
         \Predict_SGPObs::Calculate_LatLonAlt($daynum, $sat->pos, $sat_geodetic);
 
@@ -143,22 +142,25 @@ class PropagateController extends AbstractApiController
         $data = [
             '@context' => self::HYDRA_CONTEXT,
             '@id' => $url,
-            '@type' => 'SatelliteStateVector',
+            '@type' => 'SatellitePropagationResult',
+            'tle' => $tle,
             'propagator' => $algorithm,
-            'reference_frame' => 'ECI',
-            'position' => [
-                'x' => $sat->pos->x,
-                'y' => $sat->pos->y,
-                'z' => $sat->pos->z,
-                'r' => $sat->pos->w,
-                'unit' => 'km',
-            ],
-            'velocity' => [
-                'x' => $sat->vel->x,
-                'y' => $sat->vel->y,
-                'z' => $sat->vel->z,
-                'r' => $sat->vel->w,
-                'unit' => 'km/s',
+            'vector' => [
+                'reference_frame' => 'ECI',
+                'position' => [
+                    'x' => $sat->pos->x,
+                    'y' => $sat->pos->y,
+                    'z' => $sat->pos->z,
+                    'r' => $sat->pos->w,
+                    'unit' => 'km',
+                ],
+                'velocity' => [
+                    'x' => $sat->vel->x,
+                    'y' => $sat->vel->y,
+                    'z' => $sat->vel->z,
+                    'r' => $sat->vel->w,
+                    'unit' => 'km/s',
+                ],
             ],
             'geodetic' => [
                 'latitude' => $sat_geodetic->lat,
@@ -168,6 +170,8 @@ class PropagateController extends AbstractApiController
             'parameters' => $parameters,
         ];
 
-        return $this->response($data);
+        return $this->response(
+            $normalizer->normalize($data)
+        );
     }
 }

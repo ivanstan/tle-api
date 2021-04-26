@@ -12,6 +12,12 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class StatisticSubscriber implements EventSubscriberInterface
 {
+    protected const TLE_ROUTES = [
+      'tle_propagate',
+      'tle_pass',
+      'tle_record'
+    ];
+
     public function __construct(private StatisticRepository $statisticRepository, private EntityManagerInterface $em, private TleRepository $tleRepository)
     {
     }
@@ -25,7 +31,7 @@ class StatisticSubscriber implements EventSubscriberInterface
 
     public function onKernelTerminate($event): void
     {
-        if ($event->getRequest()->get('_route') !== 'tle_record') {
+        if (!in_array($event->getRequest()->get('_route'), self::TLE_ROUTES, false)) {
             return;
         }
 
