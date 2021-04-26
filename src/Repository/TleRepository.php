@@ -3,7 +3,6 @@
 namespace App\Repository;
 
 use App\Entity\Request;
-use App\Entity\Statistic;
 use App\Entity\Tle;
 use App\Entity\TleInformation;
 use App\ViewModel\Model\PaginationCollection;
@@ -67,8 +66,11 @@ class TleRepository extends ServiceEntityRepository
 
         // sort
         if ($sort === TleCollectionSortableFieldsEnum::POPULARITY) {
-            $builder->leftJoin(Statistic::class, 's', Expr\Join::WITH, 's.tle = tle.id');
-            $builder->addOrderBy('s.hits', $sortDir);
+            $before = (new \DateTime())->sub(new \DateInterval('P7D'));
+            $builder->leftJoin(Request::class, 's', Expr\Join::WITH, 's.tle = tle.id AND s.createdAt < :date');
+            $builder->setParameter('date', $before);
+            $builder->groupBy('tle.id');
+            $builder->addOrderBy('COUNT(s.id)', $sortDir);
         } else {
             $builder->addOrderBy($this->getSortTableColumnMapping($sort), $sortDir);
         }

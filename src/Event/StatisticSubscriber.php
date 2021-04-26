@@ -18,7 +18,7 @@ class StatisticSubscriber implements EventSubscriberInterface
       'tle_record'
     ];
 
-    public function __construct(private StatisticRepository $statisticRepository, private EntityManagerInterface $em, private TleRepository $tleRepository)
+    public function __construct(private EntityManagerInterface $em, private TleRepository $tleRepository)
     {
     }
 
@@ -47,17 +47,6 @@ class StatisticSubscriber implements EventSubscriberInterface
         $request->setIp($event->getRequest()->getClientIp());
 
         $this->em->persist($request);
-
-        $this->em->flush();
-
-        $statistics = $this->statisticRepository->find((int)$event->getRequest()->get('id'));
-
-        if ($statistics === null) {
-            return;
-        }
-
-        $statistics->incrementHits();
-
         $this->em->flush();
     }
 }
