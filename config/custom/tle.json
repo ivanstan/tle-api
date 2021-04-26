@@ -31,7 +31,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TLE"
+                  "$ref": "#/components/schemas/TleModel"
                 }
               }
             }
@@ -148,11 +148,11 @@
                     "member": {
                       "type": "array",
                       "items": {
-                        "$ref": "#/components/schemas/TLE"
+                        "$ref": "#/components/schemas/TleModel"
                       }
                     },
                     "parameters": {
-                      "type": "array"
+                      "type": "object"
                     },
                     "view": {
                       "type": "object",
@@ -264,7 +264,7 @@
         },
         "type": "object"
       },
-      "TLE": {
+      "TleModel": {
         "allOf": [
           {
             "properties": {
@@ -275,6 +275,10 @@
               "@type": {
                 "type": "string",
                 "example": "TleModel"
+              },
+              "satelliteId": {
+                "type": "integer",
+                "example": 43638
               },
               "name": {
                 "type": "string",
@@ -312,7 +316,7 @@
             "example": "SatellitePropagationResult"
           },
           "tle": {
-            "$ref": "#/components/schemas/TLE"
+            "$ref": "#/components/schemas/TleModel"
           },
           "propagator": {
             "type": "string",
@@ -480,7 +484,7 @@
       "pageSize": {
         "name": "page-size",
         "in": "query",
-        "description": "Number of items per page",
+        "description": "Number of records per page",
         "schema": {
           "type": "integer",
           "default": 20,
