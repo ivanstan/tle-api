@@ -40,7 +40,7 @@ class TleModelNormalizer implements NormalizerInterface
             'line2' => $model->getLine2(),
         ];
 
-        if ($isExtra) {
+        if ($isExtra && $entity->getInfo()) {
             $extra = [
                 'extra' => [
                     TleCollectionSortableFieldsEnum::ECCENTRICITY => $entity->getInfo()->eccentricity,

@@ -7,11 +7,13 @@ use App\Entity\TleInformation;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class TleCalculate extends Command
 {
     protected const BATCH_SIZE = 20;
+    protected const OPTION_TLE = 'tle';
 
     protected static $defaultName = 'tle:calculate';
 
@@ -23,6 +25,7 @@ class TleCalculate extends Command
     protected function configure()
     {
         $this->setDescription('Calculate and persist data in TleInformation entity');
+        $this->addOption(self::OPTION_TLE, 't', InputOption::VALUE_REQUIRED, 'Calculate only for specified record');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -31,6 +34,13 @@ class TleCalculate extends Command
             ->createQueryBuilder()
             ->select('tle')
             ->from(Tle::class, 'tle');
+
+        $tle = $input->getOption(self::OPTION_TLE);
+
+        if ($tle !== null) {
+            $builder->andWhere('tle.id = :tle');
+            $builder->setParameter('tle', $tle);
+        }
 
         $repository = $this->entityManager->getRepository(TleInformation::class);
 

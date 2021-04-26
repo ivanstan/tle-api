@@ -38,7 +38,7 @@ class Tle
         $this->updatedAt = DateTimeService::getCurrentUTC();
     }
 
-    public function getInfo(): TleInformation {
+    public function getInfo(): ?TleInformation {
         return $this->info;
     }
 }
