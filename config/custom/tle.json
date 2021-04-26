@@ -14,20 +14,22 @@
       "get": {
         "summary": "Record",
         "operationId": "record",
+        "description": "Return single TleModel for requested satellite id",
         "parameters": [
           {
             "name": "id",
             "in": "path",
-            "description": "id",
+            "description": "Satellite id",
             "required": true,
             "schema": {
+              "example": 43638,
               "type": "integer"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "Record found",
+            "description": "Resource found",
             "content": {
               "application/json": {
                 "schema": {
@@ -49,6 +51,7 @@
       "get": {
         "summary": "Collection",
         "operationId": "collection",
+        "description": "Return collection of TleModels depending on requested parameters",
         "parameters": [
           {
             "$ref": "#/components/parameters/search"
@@ -124,7 +127,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Tle collection",
+            "description": "Resource found",
             "content": {
               "application/json": {
                 "schema": {
@@ -143,7 +146,7 @@
                     },
                     "totalItems": {
                       "type": "integer",
-                      "example": "50"
+                      "example": 10414
                     },
                     "member": {
                       "type": "array",
@@ -192,13 +195,24 @@
     "/api/tle/{id}/propagate": {
       "get": {
         "summary": "Propagate (experimental)",
+        "description": "Return propagation result with satellite position and velocity using SGP4 or SDP4 algorithms",
         "operationId": "propagate",
         "parameters": [
           {
-            "name": "date",
+            "name": "id",
             "in": "path",
-            "description": "date",
+            "description": "Target satellite id for which propagation is calculated",
             "required": true,
+            "schema": {
+              "example": 43638,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Target date and time",
+            "required": false,
             "schema": {
               "type": "string",
               "example": "2021-04-20T16:28:40+00:00"
@@ -207,7 +221,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Record found",
+            "description": "Resource found",
             "content": {
               "application/json": {
                 "schema": {
@@ -318,8 +332,10 @@
           "tle": {
             "$ref": "#/components/schemas/TleModel"
           },
-          "propagator": {
+          "algorithm": {
             "type": "string",
+            "enum": ["SGP4", "SDP4"],
+            "description": "Algorithm used for propagation. Determined based on mean motion.",
             "example": "SGP4"
           },
           "vector": {
@@ -332,19 +348,19 @@
                 "properties": {
                   "x": {
                     "type": "number",
-                    "example": "-2450.396984017652"
+                    "example": -2450.396984017652
                   },
                   "y": {
                     "type": "number",
-                    "example": "6101.198295995954"
+                    "example": 6101.198295995954
                   },
                   "z": {
                     "type": "number",
-                    "example": "-6032.216318229235"
+                    "example": -6032.216318229235
                   },
                   "r": {
                     "type": "number",
-                    "example": "8922.819046481767"
+                    "example": 8922.819046481767
                   },
                   "unit": {
                     "type": "string",
@@ -358,19 +374,19 @@
                 "properties": {
                   "x": {
                     "type": "number",
-                    "example": "-0.1644949004552056"
+                    "example": -0.1644949004552056
                   },
                   "y": {
                     "type": "number",
-                    "example": "4.639904402973215"
+                    "example": 4.639904402973215
                   },
                   "z": {
                     "type": "number",
-                    "example": "4.406398357056158"
+                    "example": 4.406398357056158
                   },
                   "r": {
                     "type": "number",
-                    "example": "6.400946642651633"
+                    "example": 6.400946642651633
                   },
                   "unit": {
                     "type": "string",
@@ -386,15 +402,15 @@
             "properties": {
               "latitude": {
                 "type": "number",
-                "example": "-42.67210184042445"
+                "example": -42.67210184042445
               },
               "longitude": {
                 "type": "number",
-                "example": "124.524923099869"
+                "example": 124.524923099869
               },
               "altitude": {
                 "type": "number",
-                "example": "2554.4740343929398"
+                "example": 2554.4740343929398
               }
             },
             "type": "object"
@@ -426,7 +442,7 @@
             },
             "example": {
               "response": {
-                "message": "Not found"
+                "message": "Resource not found"
               }
             }
           }
@@ -441,7 +457,7 @@
             },
             "example": {
               "response": {
-                "message": "Server error"
+                "message": "Server has encountered an internal error"
               }
             }
           }
@@ -484,7 +500,7 @@
       "pageSize": {
         "name": "page-size",
         "in": "query",
-        "description": "Number of records per page",
+        "description": "Number of collection member per page",
         "schema": {
           "type": "integer",
           "default": 20,
