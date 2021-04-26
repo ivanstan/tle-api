@@ -25,10 +25,22 @@ final class TleFixtures extends Fixture
         return $tle;
     }
 
+    public static function createDeep(): Tle
+    {
+        $tle = new Tle();
+        $tle->setId(22049);
+        $tle->setName('GEOTAIL');
+        $tle->setLine1('1 22049U 92044A   21119.24930644 -.00001485  00000-0  00000+0 0  9990');
+        $tle->setLine2('2 22049  38.4941  42.7845 5317694 181.2241 357.6003  0.19228928 12156');
+
+        return $tle;
+    }
+
     public function load(ObjectManager $manager): void
     {
         // create single record
         $manager->persist(self::create());
+        $manager->persist(self::createDeep());
 
         // create additional nine records with dummy satelliteIds
         for ($satelliteId = 1; $satelliteId < 10; $satelliteId++) {
