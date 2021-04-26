@@ -41,7 +41,7 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
 
         $response = ['message' => 'Unspecified error'];
 
-        if ($this->env === 'dev') {
+        if ($this->env === 'dev' || $this->env === 'test') {
             $response['message'] = $exception->getMessage();
             $response['exception'] = $this->throwableToArray($exception);
         }
