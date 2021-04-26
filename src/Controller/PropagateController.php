@@ -144,7 +144,7 @@ class PropagateController extends AbstractApiController
             '@id' => $url,
             '@type' => 'SatellitePropagationResult',
             'tle' => $tle,
-            'propagator' => $algorithm,
+            'algorithm' => $algorithm,
             'vector' => [
                 'reference_frame' => 'ECI',
                 'position' => [
