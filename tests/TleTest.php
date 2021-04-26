@@ -54,7 +54,7 @@ final class TleTest extends AbstractWebTestCase
         $response = $this->toArray($response);
 
         self::assertArrayHasKey('@context', $response);
-        self::assertEquals('http://www.w3.org/ns/hydra/context.jsonld', $response['@context']);
+        self::assertEquals('https://www.w3.org/ns/hydra/context.jsonld', $response['@context']);
 
         self::assertArrayHasKey('@id', $response);
         self::assertEquals('http://localhost/api/tle', $response['@id']);
