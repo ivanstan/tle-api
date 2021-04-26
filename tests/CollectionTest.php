@@ -14,7 +14,7 @@ final class CollectionTest extends AbstractWebTestCase
                 '@type' => 'PartialCollectionView',
                 'first' => 'http://localhost/api/tle/?page=1&page-size=2',
                 'next' => 'http://localhost/api/tle/?page=2&page-size=2',
-                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
+                'last' => 'http://localhost/api/tle/?page=6&page-size=2'
             ]
         ],
         [
@@ -25,7 +25,7 @@ final class CollectionTest extends AbstractWebTestCase
                 'first' => 'http://localhost/api/tle/?page=1&page-size=2',
                 'previous' => 'http://localhost/api/tle/?page=2&page-size=2',
                 'next' => 'http://localhost/api/tle/?page=4&page-size=2',
-                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
+                'last' => 'http://localhost/api/tle/?page=6&page-size=2'
             ]
         ],
         [
@@ -35,7 +35,8 @@ final class CollectionTest extends AbstractWebTestCase
                 '@type' => 'PartialCollectionView',
                 'first' => 'http://localhost/api/tle/?page=1&page-size=2',
                 'previous' => 'http://localhost/api/tle/?page=4&page-size=2',
-                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
+                'next' => 'http://localhost/api/tle/?page=6&page-size=2',
+                'last' => 'http://localhost/api/tle/?page=6&page-size=2'
             ]
         ],
         [
@@ -45,7 +46,7 @@ final class CollectionTest extends AbstractWebTestCase
                 '@type' => 'PartialCollectionView',
                 'first' => 'http://localhost/api/tle/?page=1&page-size=2',
                 'previous' => 'http://localhost/api/tle/?page=6&page-size=2',
-                'last' => 'http://localhost/api/tle/?page=5&page-size=2'
+                'last' => 'http://localhost/api/tle/?page=6&page-size=2'
             ]
         ]
     ];
@@ -99,7 +100,7 @@ final class CollectionTest extends AbstractWebTestCase
     {
         foreach ($actual as $key => $value) {
             self::assertArrayHasKey($key, $expected, \sprintf('Assert view has key %s', $key));
-            self::assertEquals($value, $expected[$key], \sprintf('Assert value of key %s is correct', $key));
+            self::assertEquals($expected[$key], $value , \sprintf('Assert value of key %s is correct', $key));
         }
     }
 

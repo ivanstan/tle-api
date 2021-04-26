@@ -63,7 +63,7 @@ final class TleTest extends AbstractWebTestCase
         self::assertEquals('Collection', $response['@type']);
 
         self::assertArrayHasKey('totalItems', $response);
-        self::assertEquals(10, $response['totalItems']);
+        self::assertEquals(11, $response['totalItems']);
 
         self::assertArrayHasKey('member', $response);
         self::assertEquals(\count($response['member']), $pageSize);

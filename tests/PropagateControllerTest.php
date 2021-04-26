@@ -9,6 +9,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PropagateControllerTest extends AbstractWebTestCase
 {
+    public function testResourceNotFound(): void
+    {
+        $response = $this->get('/api/tle/0/propagate');
+
+        self::assertEquals(Response::HTTP_NOT_FOUND, $response->getStatusCode());
+
+        $response = $this->toArray($response);
+
+        self::assertEquals($response['response']['message'], 'Unable to find record with id 0');
+    }
+
     public function testPropagateSGP4(): void
     {
         $tle = TleFixtures::create();
