@@ -10,8 +10,6 @@ use App\ViewModel\SortDirectionEnum;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -30,6 +28,7 @@ final class TleController extends AbstractApiController
     protected const COLLECTION_FILTERS = [
         TleCollectionSortableFieldsEnum::ECCENTRICITY => Filter::FILTER_TYPE_FLOAT,
         TleCollectionSortableFieldsEnum::INCLINATION => Filter::FILTER_TYPE_FLOAT,
+        TleCollectionSortableFieldsEnum::PERIOD => Filter::FILTER_TYPE_FLOAT,
     ];
 
     public function __construct(protected TleRepository $repository)
@@ -46,14 +45,12 @@ final class TleController extends AbstractApiController
 
         $extra = (bool)$request->get(self::PARAM_EXTRA, false);
 
-        $tle = $this->getTle($id);
-
         $data = [
             '@context' => self::HYDRA_CONTEXT,
         ];
 
         return $this->response(
-            array_merge($data, $normalizer->normalize($tle, null, [self::PARAM_EXTRA => $extra])),
+            array_merge($data, $normalizer->normalize($this->getTle($id), null, [self::PARAM_EXTRA => $extra])),
         );
     }
 
@@ -116,33 +113,5 @@ final class TleController extends AbstractApiController
         return $this->response(
             $normalizer->normalize($response, null, [self::PARAM_EXTRA => $extra])
         );
-    }
-
-    #[Route("/popular", name: "tle_popular")]
-    public function popular(
-        Request $request,
-        TleRepository $repository
-    ): JsonResponse {
-        $newerThan = new \DateTime('now');
-        $newerThan->setTime(0, 0, 0);
-        $newerThan->modify('-3 days');
-
-        $limit = 10;
-
-        $members = $repository->popular($newerThan, $limit);
-
-        $data = [
-            '@context' => self::HYDRA_CONTEXT,
-            '@id' => $this->router->generate('tle_popular', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            '@type' => 'Collection',
-            'totalItems' => \count($members),
-            'member' => $members,
-            'parameters' => [
-                '*limit' => $limit,
-                '*newerThan' => $newerThan->format(self::DATETIME_FORMAT),
-            ],
-        ];
-
-        return $this->response($data);
     }
 }
