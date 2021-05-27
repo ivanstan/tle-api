@@ -46,6 +46,8 @@ class TleModelNormalizer implements NormalizerInterface
                     TleCollectionSortableFieldsEnum::ECCENTRICITY => $entity->getInfo()->eccentricity,
                     TleCollectionSortableFieldsEnum::INCLINATION => $entity->getInfo()->inclination,
                     TleCollectionSortableFieldsEnum::PERIOD => $entity->getInfo()->period,
+                    TleCollectionSortableFieldsEnum::RAAN => $entity->getInfo()->raan,
+                    TleCollectionSortableFieldsEnum::SEMI_MAJOR_AXIS => $entity->getInfo()->semiMajorAxis,
                 ],
             ];
 
