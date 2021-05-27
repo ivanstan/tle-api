@@ -61,6 +61,8 @@ class TleCalculate extends Command
             $tleInformation->eccentricity = $tleModel->eccentricity();
             $tleInformation->period = $tleModel->period();
             $tleInformation->geostationary = $tleModel->isGeostationary();
+            $tleInformation->raan = $tleModel->raan();
+            $tleInformation->semiMajorAxis = $tleModel->semiMajorAxis();
 
             if (!$exists) {
                 $this->entityManager->persist($tleInformation);

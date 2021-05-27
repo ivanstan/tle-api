@@ -23,6 +23,16 @@ class TleInformation
     public ?float $inclination;
 
     /**
+     * @ORM\Column(type="float", precision=16, scale=10, nullable=true)
+     */
+    public ?float $raan;
+
+    /**
+     * @ORM\Column(type="float", precision=16, scale=10, nullable=true)
+     */
+    public ?float $semiMajorAxis;
+
+    /**
      * Period for complete orbit in seconds
      *
      * @ORM\Column(type="float", name="`period`", precision=24, scale=10, nullable=true)
