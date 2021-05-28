@@ -9,7 +9,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 
 abstract class AbstractApiController extends AbstractController
 {
@@ -36,18 +35,7 @@ abstract class AbstractApiController extends AbstractController
     protected const PAGE_SIZE = 50;
     protected const SEARCH_PARAM = 'search';
 
-    protected SerializerInterface $serializer;
     protected RouterInterface $router;
-
-    /**
-     * @required
-     *
-     * @param SerializerInterface $serializer
-     */
-    public function setSerializer(SerializerInterface $serializer): void
-    {
-        $this->serializer = $serializer;
-    }
 
     /**
      * @required
