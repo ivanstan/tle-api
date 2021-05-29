@@ -105,6 +105,8 @@ class TleRepository extends ServiceEntityRepository
             TleCollectionSortableFieldsEnum::INCLINATION => 'info.inclination',
             TleCollectionSortableFieldsEnum::ECCENTRICITY => 'info.eccentricity',
             TleCollectionSortableFieldsEnum::PERIOD => 'info.period',
+            TleCollectionSortableFieldsEnum::SEMI_MAJOR_AXIS => 'info.semi_major_axis',
+            TleCollectionSortableFieldsEnum::RAAN => 'info.raan',
         };
     }
 }
