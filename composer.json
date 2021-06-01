@@ -24,7 +24,7 @@
         "symfony/monolog-bundle": "^3.7",
         "symfony/orm-pack": "^1.1",
         "symfony/property-access": "5.2.*",
-        "symfony/serializer": "5.2.*",
+        "symfony/serializer": "5.3.*",
         "symfony/yaml": "5.2.*"
     },
     "require-dev": {
