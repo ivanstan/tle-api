@@ -5,6 +5,7 @@ namespace App\Event;
 use App\Entity\Request;
 use App\Entity\Tle;
 use App\Repository\TleRepository;
+use App\Service\Route;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\TerminateEvent;
@@ -12,11 +13,11 @@ use Symfony\Component\HttpKernel\KernelEvents;
 
 class StatisticSubscriber implements EventSubscriberInterface
 {
-    protected const TLE_ROUTES = [
-      'tle_record',
-      'tle_propagate',
-      'tle_flyover',
-      'tle_flyover_details'
+    public const ROUTES = [
+        'tle_record',
+        'tle_propagate',
+        'tle_flyover',
+        'tle_flyover_details',
     ];
 
     public function __construct(private EntityManagerInterface $em, private TleRepository $tleRepository)
@@ -32,7 +33,7 @@ class StatisticSubscriber implements EventSubscriberInterface
 
     public function onKernelTerminate(TerminateEvent $event): void
     {
-        if (!in_array($event->getRequest()->get('_route'), self::TLE_ROUTES, false)) {
+        if (!Route::inArray($event->getRequest(), self::ROUTES)) {
             return;
         }
 

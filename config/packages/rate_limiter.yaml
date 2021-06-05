@@ -1,0 +1,7 @@
+framework:
+  rate_limiter:
+    anonymous_api:
+      policy: 'sliding_window'
+      limit: 500
+      interval: '60 minutes'
+      lock_factory: null
