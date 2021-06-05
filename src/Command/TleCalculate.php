@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Entity\Tle;
 use App\Entity\TleInformation;
 use Doctrine\ORM\EntityManagerInterface;
+use Ivanstan\Tle\Specification\GeostationaryOrbitTleSpecification;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -60,7 +61,7 @@ final class TleCalculate extends Command
             $tleInformation->inclination = $tleModel->getInclination();
             $tleInformation->eccentricity = $tleModel->eccentricity();
             $tleInformation->period = $tleModel->period();
-            $tleInformation->geostationary = $tleModel->isGeostationary();
+            $tleInformation->geostationary = (new GeostationaryOrbitTleSpecification())->isSatisfiedBy($tleModel);
             $tleInformation->raan = $tleModel->raan();
             $tleInformation->semiMajorAxis = $tleModel->semiMajorAxis();
 
