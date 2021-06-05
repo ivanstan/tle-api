@@ -20,12 +20,7 @@ abstract class AbstractApiController extends AbstractController
     protected const HYDRA_CONTEXT = 'https://www.w3.org/ns/hydra/context.jsonld';
 
     public const CORS_HEADERS = [
-        'Content-type' => 'application/json',
         'Access-Control-Allow-Origin' => '*',
-        'Access-Control-Allow-Credentials' => 'true',
-        'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers' => 'DNT, X-User-Token, Keep-Alive, User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Type',
-        'Access-Control-Max-Age' => 1728000,
     ];
 
     protected const SORT_PARAM = 'sort';
