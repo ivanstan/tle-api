@@ -13,7 +13,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class PropagateController extends AbstractApiController
+final class PropagateController extends AbstractApiController
 {
     use TleHttpTrait;
 

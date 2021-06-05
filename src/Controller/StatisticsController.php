@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route("/api/tle")]
-class StatisticsController extends AbstractApiController
+final class StatisticsController extends AbstractApiController
 {
     protected const INTERVAL = 6;
 
