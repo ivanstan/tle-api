@@ -60,7 +60,6 @@ class StatisticsController extends AbstractApiController
         return new JsonResponse(
             $response,
             Response::HTTP_OK,
-            self::CORS_HEADERS,
         );
     }
 }

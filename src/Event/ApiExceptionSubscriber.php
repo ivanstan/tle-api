@@ -64,7 +64,6 @@ class ApiExceptionSubscriber implements EventSubscriberInterface
                     'response' => $response
                 ],
                 Response::HTTP_OK,
-                AbstractApiController::CORS_HEADERS
             )
         );
     }
