@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TleCalculate extends Command
+final class TleCalculate extends Command
 {
     protected const BATCH_SIZE = 20;
     protected const OPTION_TLE = 'tle';

@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class FlyOverController extends AbstractApiController
+final class FlyOverController extends AbstractApiController
 {
     use TleHttpTrait;
 

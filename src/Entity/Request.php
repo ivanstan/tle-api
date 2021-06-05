@@ -7,7 +7,7 @@ use App\Service\DateTimeService;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity()
+ * @ORM\Entity(repositoryClass="App\Repository\RequestRepository")
  * @ORM\HasLifecycleCallbacks()
  */
 class Request
