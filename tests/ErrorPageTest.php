@@ -19,7 +19,7 @@ class ErrorPageTest extends AbstractWebTestCase
         $response = $this->toArray($response);
 
         self::assertEquals(
-            'No route found for "GET /noop"',
+            'No route found for "GET http://localhost/noop"',
             $response['response']['message'],
             'Assert correct response message'
         );
