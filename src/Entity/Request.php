@@ -38,6 +38,11 @@ class Request
     private string $ip;
 
     /**
+     * @ORM\Column(name="referer", type="string", nullable=true)
+     */
+    private ?string $referer;
+
+    /**
      * @ORM\PrePersist()
      * @ORM\PreUpdate()
      */
@@ -64,5 +69,15 @@ class Request
     public function setIp(string $ip): void
     {
         $this->ip = $ip;
+    }
+
+    public function getReferer(): ?string
+    {
+        return $this->referer;
+    }
+
+    public function setReferer(?string $referer): void
+    {
+        $this->referer = $referer;
     }
 }
