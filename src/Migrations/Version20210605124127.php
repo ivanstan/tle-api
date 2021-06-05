@@ -12,9 +12,9 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20210605124127 extends AbstractMigration
 {
-    public function getDescription() : string
+    public function isTransactional(): bool
     {
-        return '';
+        return false;
     }
 
     public function up(Schema $schema) : void
