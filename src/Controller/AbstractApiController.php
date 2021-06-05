@@ -19,10 +19,6 @@ abstract class AbstractApiController extends AbstractController
 
     protected const HYDRA_CONTEXT = 'https://www.w3.org/ns/hydra/context.jsonld';
 
-    public const CORS_HEADERS = [
-        'Access-Control-Allow-Origin' => '*',
-    ];
-
     protected const SORT_PARAM = 'sort';
     protected const SORT_DIR_PARAM = 'sort-dir';
     protected const PAGE_SIZE_PARAM = 'page-size';
@@ -119,7 +115,6 @@ abstract class AbstractApiController extends AbstractController
         return new JsonResponse(
             $data,
             Response::HTTP_OK,
-            self::CORS_HEADERS,
         );
     }
 }
