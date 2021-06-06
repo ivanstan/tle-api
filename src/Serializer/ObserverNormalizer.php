@@ -22,14 +22,12 @@ class ObserverNormalizer implements NormalizerInterface
      */
     public function normalize($object, string $format = null, array $context = []): array
     {
-        $result = $this->normalizer->normalize($object);
-
-        unset($result['timeZone']);
-
-        $result['@type'] = 'Observer';
-        $result['datetime'] = $object->datetime;
-
-        return $result;
+        return array_merge(
+            [
+                '@type' => 'Observer',
+            ],
+            $this->normalizer->normalize($object)
+        );
     }
 
     public function supportsNormalization($data, string $format = null): bool

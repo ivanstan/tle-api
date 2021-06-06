@@ -55,7 +55,7 @@ final class FlyOverController extends AbstractApiController
 
         $parameters['satelliteId'] = $id;
 
-        $members = $this->normalizer->normalize($results, null, ['timezone' => $observer->getTimeZone()]);
+        $members = $this->normalizer->normalize($results, null, ['timezone' => $observer->getTimezone()]);
 
         foreach ($members as $index => &$member) {
             $member = array_merge(
@@ -122,7 +122,7 @@ final class FlyOverController extends AbstractApiController
         return $this->response(
             array_merge(
                 $data,
-                $this->normalizer->normalize($pass, null, ['timezone' => $observer->getTimeZone(), 'details' => true])
+                $this->normalizer->normalize($pass, null, ['timezone' => $observer->getTimezone(), 'details' => true])
             )
         );
     }

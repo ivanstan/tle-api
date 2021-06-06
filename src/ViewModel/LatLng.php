@@ -20,7 +20,7 @@ class LatLng
         }
     }
 
-    public function getTimeZone(): ?string
+    public function getTimezone(): ?string
     {
         $diffs = [];
         foreach (DateTimeZone::listIdentifiers() as $timezoneID) {
