@@ -2,13 +2,12 @@
 
 namespace App\Controller;
 
-use App\Entity\Tle;
+use App\Enum\PropagatorAlgorithm;
 use App\Repository\TleRepository;
 use App\Service\Traits\TleHttpTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -19,8 +18,11 @@ final class PropagateController extends AbstractApiController
 
     protected const DEEP_SATELLITE_PERIOD = 225; // minutes
 
+    protected \Predict_SGPSDP $propagator;
+
     public function __construct(protected TleRepository $repository)
     {
+        $this->propagator = new \Predict_SGPSDP();
     }
 
     #[Route("/api/tle/{id}/propagate", name: "tle_propagate", requirements: ["id" => "\d+"])]
@@ -29,32 +31,17 @@ final class PropagateController extends AbstractApiController
         Request $request,
         NormalizerInterface $normalizer
     ): JsonResponse {
-        /** @var Tle $tle */
-        $tle = $this->repository->findOneBy(['id' => $id]);
-        if ($tle === null) {
-            throw new NotFoundHttpException(\sprintf('Unable to find record with id %s', $id));
-        }
+        $tle = $this->getTle($id);
 
         $tleModel = new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName());
         $sat = new \Predict_Sat(new \Predict_TLE($tle->getName(), $tle->getLine1(), $tle->getLine2()));
 
-        $date = $request->get('date', (new \DateTime('now', new \DateTimeZone('UTC')))->format(self::DATETIME_FORMAT));
-        $datetime = \DateTime::createFromFormat(\DateTimeInterface::ATOM, str_replace(' ', '+', $date));
+        $datetime = $this->getDate($request, 'date');
+        $deltaT = ($datetime->getTimestamp() - $tleModel->epochDateTime()->getTimestamp()) / 60; // minutes
 
-        $dateTimeUTC = clone $datetime;
-        $dateTimeUTC->setTimezone(new \DateTimeZone('UTC'));
-        $epoch = \DateTime::createFromFormat(\DateTimeInterface::ATOM, $tleModel->getDate());
+        $algorithm = ($tleModel->period() / 60) > self::DEEP_SATELLITE_PERIOD ? PropagatorAlgorithm::SDP4 : PropagatorAlgorithm::SGP4;
 
-        $deltaT = ($datetime->getTimestamp() - $epoch->getTimestamp()) / 60; // minutes
-
-        $propagator = new \Predict_SGPSDP();
-        if (($tleModel->period() / 60) > self::DEEP_SATELLITE_PERIOD) {
-            $propagator->SDP4($sat, $deltaT);
-            $algorithm = 'SDP4';
-        } else {
-            $propagator->SGP4($sat, $deltaT);
-            $algorithm = 'SGP4';
-        }
+        $this->propagator->$algorithm($sat, $deltaT);
 
         \Predict_Math::Convert_Sat_State($sat->pos, $sat->vel);
 

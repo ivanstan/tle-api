@@ -117,4 +117,11 @@ abstract class AbstractApiController extends AbstractController
             Response::HTTP_OK,
         );
     }
+
+    protected function getDate(Request $request, string $name): \DateTime
+    {
+        $date = $request->get($name, (new \DateTime('now', new \DateTimeZone('UTC')))->format(self::DATETIME_FORMAT));
+
+        return \DateTime::createFromFormat(\DateTimeInterface::ATOM, str_replace(' ', '+', $date));
+    }
 }
