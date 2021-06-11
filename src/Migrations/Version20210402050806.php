@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DoctrineMigrations;
+namespace App\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
@@ -15,11 +15,6 @@ final class Version20210402050806 extends AbstractMigration
     public function isTransactional(): bool
     {
         return false;
-    }
-
-    public function getDescription() : string
-    {
-        return '';
     }
 
     public function up(Schema $schema) : void

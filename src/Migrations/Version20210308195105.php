@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace DoctrineMigrations;
+namespace App\Migrations;
 
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
@@ -21,11 +21,6 @@ final class Version20210308195105 extends AbstractMigration
         );
 
         $this->addSql('DROP TABLE statistic');
-    }
-
-    public function getDescription(): string
-    {
-        return '';
     }
 
     public function isTransactional(): bool

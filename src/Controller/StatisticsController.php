@@ -18,7 +18,7 @@ final class StatisticsController extends AbstractApiController
         EntityManagerInterface $em
     ): Response {
         $newerThan = new \DateTime('now');
-        $newerThan->setTime(0, 0, 0);
+        $newerThan->setTime(0, 0);
         $newerThan->modify('-3 days');
 
         $qb = $em->createQueryBuilder();
@@ -38,6 +38,7 @@ final class StatisticsController extends AbstractApiController
             ->groupBy('date, hour')
             ->setParameter('interval', self::INTERVAL);
 
+        /** @var Request[] $result */
         $result = $qb->getQuery()->getResult();
 
         $response = [];
@@ -54,7 +55,7 @@ final class StatisticsController extends AbstractApiController
             $date = new \DateTime($item['date']);
             $date->setTime((int)$item['hour'] * self::INTERVAL, 0);
 
-            $response[$date->format(self::DATETIME_FORMAT)] = $item['hits'];
+            $response[$date->format(\DateTimeInterface::ATOM)] = $item['hits'];
         }
 
         return new JsonResponse(

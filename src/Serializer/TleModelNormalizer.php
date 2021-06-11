@@ -16,17 +16,17 @@ class TleModelNormalizer implements NormalizerInterface
     }
 
     /**
-     * @param Tle $entity
+     * @param Tle $object
      * @param string|null $format
      * @param array $context
      *
      * @return array
      */
-    public function normalize($entity, ?string $format = null, array $context = []): array
+    public function normalize($object, ?string $format = null, array $context = []): array
     {
-        $id = $this->router->generate('tle_record', ['id' => $entity->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
+        $id = $this->router->generate('tle_record', ['id' => $object->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $model = new TleModel($entity->getLine1(), $entity->getLine2(), $entity->getName());
+        $model = new TleModel($object->getLine1(), $object->getLine2(), $object->getName());
 
         $isExtra = ($context[TleController::PARAM_EXTRA] ?? null) === true;
 
@@ -35,19 +35,19 @@ class TleModelNormalizer implements NormalizerInterface
             '@type' => 'TleModel',
             'satelliteId' => $model->getId(),
             'name' => $model->getName(),
-            'date' => $model->getDate(),
+            'date' => $model->epochDateTime()->format(\DateTimeInterface::ATOM),
             'line1' => $model->getLine1(),
             'line2' => $model->getLine2(),
         ];
 
-        if ($isExtra && $entity->getInfo()) {
+        if ($isExtra && $object->getInfo()) {
             $extra = [
                 'extra' => [
-                    TleCollectionSortableFieldsEnum::ECCENTRICITY => $entity->getInfo()->eccentricity,
-                    TleCollectionSortableFieldsEnum::INCLINATION => $entity->getInfo()->inclination,
-                    TleCollectionSortableFieldsEnum::PERIOD => $entity->getInfo()->period,
-                    TleCollectionSortableFieldsEnum::RAAN => $entity->getInfo()->raan,
-                    TleCollectionSortableFieldsEnum::SEMI_MAJOR_AXIS => $entity->getInfo()->semiMajorAxis,
+                    TleCollectionSortableFieldsEnum::ECCENTRICITY => $object->getInfo()->eccentricity,
+                    TleCollectionSortableFieldsEnum::INCLINATION => $object->getInfo()->inclination,
+                    TleCollectionSortableFieldsEnum::PERIOD => $object->getInfo()->period,
+                    TleCollectionSortableFieldsEnum::RAAN => $object->getInfo()->raan,
+                    TleCollectionSortableFieldsEnum::SEMI_MAJOR_AXIS => $object->getInfo()->semiMajorAxis,
                 ],
             ];
 

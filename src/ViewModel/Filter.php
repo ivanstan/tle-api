@@ -64,7 +64,7 @@ class Filter
     /**
      * @noinspection CallableParameterUseCaseInTypeContextInspection
      */
-    protected function validateValue(string $value): mixed
+    protected function validateValue(string $value): ?float
     {
         if ($this->type === self::FILTER_TYPE_FLOAT) {
             $value = (float)$value;

@@ -14,9 +14,6 @@ abstract class AbstractApiController extends AbstractController
 {
     use RequestValidator;
 
-    /** @var string ISO-8601 date format */
-    public const DATETIME_FORMAT = 'c';
-
     protected const HYDRA_CONTEXT = 'https://www.w3.org/ns/hydra/context.jsonld';
 
     protected const SORT_PARAM = 'sort';
@@ -120,7 +117,7 @@ abstract class AbstractApiController extends AbstractController
 
     protected function getDate(Request $request, string $name): \DateTime
     {
-        $date = $request->get($name, (new \DateTime('now', new \DateTimeZone('UTC')))->format(self::DATETIME_FORMAT));
+        $date = $request->get($name, (new \DateTime('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM));
 
         return \DateTime::createFromFormat(\DateTimeInterface::ATOM, str_replace(' ', '+', $date));
     }
