@@ -11,8 +11,8 @@ class ErrorPageTest extends AbstractWebTestCase
         $response = $this->get('/noop');
 
         self::assertEquals(
-            $response->getStatusCode(),
             Response::HTTP_NOT_FOUND,
+            $response->getStatusCode(),
             'Assert page not found returns HTTP 404'
         );
 
