@@ -2,7 +2,6 @@
 
 namespace App\Serializer;
 
-use App\Controller\AbstractApiController;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
@@ -28,21 +27,21 @@ class SatellitePassNormalizer implements NormalizerInterface
             '@type' => $details ? 'SatelliteFlyOverDetails' : 'SatelliteFlyOver',
             'aos' => [
                 'date' => \Predict_Time::daynum2datetime($object->visible_aos ?? $object->aos, $timezone)->format(
-                    AbstractApiController::DATETIME_FORMAT
+                    \DateTimeInterface::ATOM
                 ),
                 'azimuth' => round($object->visible_aos_az ?? null, 2),
                 'elevation' => round($object->visible_aos_el ?? null, 2),
             ],
             'max' => [
                 'date' => \Predict_Time::daynum2datetime($object->visible_tca ?? $object->tca, $timezone)->format(
-                    AbstractApiController::DATETIME_FORMAT
+                    \DateTimeInterface::ATOM
                 ),
                 'azimuth' => round($object->visible_max_el_az ?? null, 2),
                 'elevation' => round($object->visible_max_el ?? null, 2),
             ],
             'los' => [
                 'date' => \Predict_Time::daynum2datetime($object->visible_los ?? $object->los, $timezone)->format(
-                    AbstractApiController::DATETIME_FORMAT
+                    \DateTimeInterface::ATOM
                 ),
                 'azimuth' => round($object->visible_los_az ?? $object->los_az, 2),
                 'elevation' => round($object->visible_los_el ?? null, 2),

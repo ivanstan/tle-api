@@ -52,7 +52,7 @@ final class PropagateController extends AbstractApiController
         $sat_geodetic->lon = rad2deg($sat_geodetic->lon);
 
         $parameters = [
-            'date' => $datetime->format(self::DATETIME_FORMAT),
+            'date' => $datetime->format(\DateTimeInterface::ATOM),
         ];
 
         $url = $this->router->generate(

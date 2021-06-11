@@ -22,7 +22,7 @@ class Tle
     /**
      * @OneToOne(targetEntity="TleInformation", mappedBy="tle")
      */
-    private $info;
+    private ?TleInformation $info = null;
 
     /**
      * @ORM\Column(name="updated_at", type="datetime")

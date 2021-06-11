@@ -48,7 +48,7 @@ class ApiLimiterSubscriber implements EventSubscriberInterface
         if (false === $limit->isAccepted()) {
             $headers = [
                 'X-RateLimit-Remaining' => $limit->getRemainingTokens(),
-                'X-RateLimit-Retry-After' => $limit->getRetryAfter()->format('c'),
+                'X-RateLimit-Retry-After' => $limit->getRetryAfter()->format(\DateTimeInterface::ATOM),
                 'X-RateLimit-Limit' => $limit->getLimit(),
             ];
 
@@ -56,7 +56,7 @@ class ApiLimiterSubscriber implements EventSubscriberInterface
                 new JsonResponse(
                     [
                         'response' => [
-                            'message' => \sprintf('Too many requests. Retry after %s.', $limit->getRetryAfter()->format('c')),
+                            'message' => \sprintf('Too many requests. Retry after %s.', $limit->getRetryAfter()->format(\DateTimeInterface::ATOM)),
                             'limit' => $limit->getLimit(),
                             'remaining' => $limit->getRemainingTokens(),
                         ],
