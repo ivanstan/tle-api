@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\Tle;
 use App\Repository\TleRepository;
 use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
