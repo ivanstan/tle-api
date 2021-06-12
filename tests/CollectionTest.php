@@ -104,6 +104,7 @@ final class CollectionTest extends AbstractWebTestCase
         }
     }
 
+    /** @noinspection PhpSameParameterValueInspection */
     private function getCollectionContent(int $page, int $pageSize): array
     {
         return $this->toArray(

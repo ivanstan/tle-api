@@ -23,6 +23,9 @@ class AbstractWebTestCase extends WebTestCase
         return self::$client->getResponse();
     }
 
+    /**
+     * @throws \JsonException
+     */
     protected function toArray(Response $response): array
     {
         return json_decode($response->getContent(), true, 512, JSON_THROW_ON_ERROR);
