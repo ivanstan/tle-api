@@ -30,10 +30,11 @@ final class FlyOverController extends AbstractApiController
     ): JsonResponse {
         $observer = $this->getObserver($request);
         $onlyVisible = $request->get('only_visible', true);
+        $tle = $this->getTle($id);
 
         $this->service
             ->setObserver($observer)
-            ->setTle($this->getTle($id));
+            ->setTle($tle);
 
         if ($onlyVisible) {
             $results = $this->service->getVisiblePasses(\Predict_Time::get_current_daynum());
@@ -71,6 +72,7 @@ final class FlyOverController extends AbstractApiController
                 '@id' => $url,
                 '@type' => 'SatelliteFlyOverCollection',
                 'observer' => $this->normalizer->normalize($observer),
+                'tle' => $this->normalizer->normalize($tle),
                 'member' => $members,
                 'parameters' => $parameters,
             ]
@@ -85,10 +87,11 @@ final class FlyOverController extends AbstractApiController
     ): JsonResponse {
         $observer = $this->getObserver($request);
         $onlyVisible = $request->get('only_visible', true);
+        $tle = $this->getTle($id);
 
         $this->service
             ->setObserver($observer)
-            ->setTle($this->getTle($id));
+            ->setTle($tle);
 
         if ($onlyVisible) {
             $results = $this->service->getVisiblePasses(\Predict_Time::get_current_daynum());
@@ -112,6 +115,7 @@ final class FlyOverController extends AbstractApiController
             '@context' => self::HYDRA_CONTEXT,
             '@id' => $url,
             'observer' => $this->normalizer->normalize($observer),
+            'tle' => $this->normalizer->normalize($tle),
         ];
 
         return $this->response(
