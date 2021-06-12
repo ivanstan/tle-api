@@ -11,6 +11,7 @@ set('http_user', 'glutenfr');
 set('writable_mode', 'chmod');
 set('default_stage', 'production');
 set('bin/composer', '~/bin/composer.phar');
+set('composer_options', '{{composer_action}} --verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader');
 add('shared_files', [
     '.env',
     'public/robots.txt',
@@ -55,12 +56,12 @@ task(
         'deploy:create_cache_dir',
         'deploy:shared',
         'deploy:assets',
-//        'deploy:vendors',
         'deploy:writable',
-//        'deploy:cache:clear',
-//        'deploy:cache:warmup',
-//        'deploy:dump-env',
-//        'database:migrate',
+        'deploy:vendors',
+        'deploy:cache:clear',
+        'deploy:cache:warmup',
+        'deploy:dump-env',
+        'database:migrate',
         'deploy:symlink',
         'deploy:unlock',
         'cleanup',
