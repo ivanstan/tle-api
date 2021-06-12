@@ -87,6 +87,10 @@ class TleRepository extends ServiceEntityRepository
         return $collection;
     }
 
+    /**
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
     private function getCount(QueryBuilder $builder): int
     {
         $builder = clone $builder;

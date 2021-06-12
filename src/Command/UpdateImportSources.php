@@ -103,6 +103,7 @@ final class UpdateImportSources extends Command
 
                 if ($extension === 'txt') {
                     if (parse_url($href, PHP_URL_HOST) === null) {
+                        /** @noinspection PhpArrayKeyDoesNotMatchArrayShapeInspection */
                         if ($path[0] === '/') {
                             $scheme = parse_url($catalog, PHP_URL_SCHEME);
                             $host = parse_url($catalog, PHP_URL_HOST);

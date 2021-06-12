@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Service\DateTimeService;
 use App\Service\Validator\RequestValidator;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -117,7 +118,7 @@ abstract class AbstractApiController extends AbstractController
 
     protected function getDate(Request $request, string $name): \DateTime
     {
-        $date = $request->get($name, (new \DateTime('now', new \DateTimeZone('UTC')))->format(\DateTimeInterface::ATOM));
+        $date = $request->get($name, DateTimeService::getCurrentUTC()->format(\DateTimeInterface::ATOM));
 
         return \DateTime::createFromFormat(\DateTimeInterface::ATOM, str_replace(' ', '+', $date));
     }

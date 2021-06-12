@@ -19,6 +19,9 @@ final class DocsController extends AbstractController
         return new Response(file_get_contents($this->getProjectDir() . '/public/index.html'));
     }
 
+    /**
+     * @throws \JsonException
+     */
     #[Route("/api/tle.json", name: "app_api_docs_json")]
     public function getJson(): JsonResponse
     {
