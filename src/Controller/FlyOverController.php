@@ -55,24 +55,15 @@ final class FlyOverController extends AbstractApiController
 
         $parameters['satelliteId'] = $id;
 
-        $normalized = $this->normalizer->normalize($results, null, ['timezone' => $observer->getTimezone()]);
+        $members = $this->normalizer->normalize($results, null, ['timezone' => $observer->getTimezone()]);
 
-        $members = [];
-
-        foreach ($normalized as $index => $member) {
-            $members[] = [
-                [
-                    '@id' => $this->generateUrl(
-                        'tle_flyover_details',
-                        ['id' => $id, 'passId' => $index],
-                        UrlGeneratorInterface::ABSOLUTE_URL
-                    ),
-                ],
-                $member,
+        foreach ($members as $index => &$member) {
+            $item = [
+                '@id' => $this->generateUrl('tle_flyover_details', ['id' => $id, 'passId' => $index], UrlGeneratorInterface::ABSOLUTE_URL),
             ];
-        }
 
-        $members = array_merge([], ...$members);
+            $member = $item + $member;
+        }
 
         return $this->response(
             [
