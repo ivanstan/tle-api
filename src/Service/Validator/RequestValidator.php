@@ -104,7 +104,7 @@ trait RequestValidator
         foreach ($filters as $filter => $type) {
             $values = $request->get($filter, []);
 
-            if ($type === Filter::FILTER_TYPE_ARRAY) {
+            if ($type === Filter::FILTER_TYPE_ARRAY && !empty($values)) {
                 $result[] = new Filter($filter, $type, Filter::OPERATOR_EQUAL, $values);
 
                 continue;
