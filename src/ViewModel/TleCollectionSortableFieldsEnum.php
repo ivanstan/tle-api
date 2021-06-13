@@ -13,5 +13,6 @@ class TleCollectionSortableFieldsEnum extends Enum
     public const ECCENTRICITY = 'eccentricity';
     public const PERIOD = 'period';
     public const RAAN = 'raan';
+    public const SATELLITE_ID = 'satellite_id';
     public const SEMI_MAJOR_AXIS = 'semi_major_axis';
 }

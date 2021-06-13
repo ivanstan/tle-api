@@ -3,6 +3,7 @@
 namespace App\Service\Validator;
 
 use App\ViewModel\Filter;
+use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -102,6 +103,12 @@ trait RequestValidator
 
         foreach ($filters as $filter => $type) {
             $values = $request->get($filter, []);
+
+            if ($type === Filter::FILTER_TYPE_ARRAY) {
+                $result[] = new Filter($filter, $type, Filter::OPERATOR_EQUAL, $values);
+
+                continue;
+            }
 
             foreach ($values as $operator => $value) {
                 $result[] = new Filter($filter, $type, $operator, $value);

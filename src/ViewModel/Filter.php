@@ -7,7 +7,9 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 class Filter
 {
     public const FILTER_TYPE_FLOAT = 'float';
+    public const FILTER_TYPE_ARRAY = 'array';
 
+    public const OPERATOR_EQUAL = '=';
     public const OPERATOR_GREATER_THEN = '>';
     public const OPERATOR_GREATER_THEN_EQUAL = '>=';
     public const OPERATOR_LESS_THEN = '<';
@@ -58,18 +60,29 @@ class Filter
             return $operators[$this->operator];
         }
 
+        if ($this->type === self::FILTER_TYPE_ARRAY) {
+            return self::OPERATOR_EQUAL;
+        }
+
         return '';
     }
 
-    /**
-     * @noinspection CallableParameterUseCaseInTypeContextInspection
-     */
-    protected function validateValue(string $value): ?float
+    protected function validateValue(mixed $value): mixed
     {
         if ($this->type === self::FILTER_TYPE_FLOAT) {
             $value = (float)$value;
 
             if (!is_float($value)) {
+                throw new \InvalidArgumentException(
+                    \sprintf('Filter %s value should be %s', $this->filter, $this->type)
+                );
+            }
+
+            return $value;
+        }
+
+        if ($this->type === self::FILTER_TYPE_ARRAY) {
+            if (!is_array($value)) {
                 throw new \InvalidArgumentException(
                     \sprintf('Filter %s value should be %s', $this->filter, $this->type)
                 );

@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Request;
 use App\Entity\Tle;
 use App\Entity\TleInformation;
+use App\ViewModel\Filter;
 use App\ViewModel\Model\PaginationCollection;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -57,6 +58,16 @@ class TleRepository extends ServiceEntityRepository
 
         // filters
         foreach ($filters as $index => $filter) {
+            if ($filter->type === Filter::FILTER_TYPE_ARRAY) {
+                $paramName = \sprintf('param_%d', $index);
+
+                $builder
+                    ->andWhere(\sprintf("%s IN (:%s)", $this->getSortTableColumnMapping($filter->filter), $paramName))
+                    ->setParameter($paramName, $filter->value);
+
+                continue;
+            }
+
             $placeholder = \sprintf('filter_%s_%d', $filter->filter, $index);
             $builder->andWhere(\sprintf('info.%s %s :%s', $filter->filter, $filter->sqlOperator, $placeholder));
             $builder->setParameter($placeholder, $filter->value);
@@ -104,6 +115,7 @@ class TleRepository extends ServiceEntityRepository
     {
         return match ($sort) {
             TleCollectionSortableFieldsEnum::ID => 'tle.id',
+            TleCollectionSortableFieldsEnum::SATELLITE_ID => 'tle.id',
             TleCollectionSortableFieldsEnum::NAME => 'tle.name',
             TleCollectionSortableFieldsEnum::POPULARITY => null,
             TleCollectionSortableFieldsEnum::INCLINATION => 'info.inclination',
