@@ -29,6 +29,8 @@ final class DocsController extends AbstractController
 
         $docs = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
 
+        $docs['info']['version'] = $this->getParameter('version');
+
         return new JsonResponse($docs, Response::HTTP_OK, ['Access-Control-Allow-Origin' => '*',]);
     }
 }

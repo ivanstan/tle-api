@@ -1,1 +1,3 @@
 parameters:
+  env(COMPOSER_JSON): "%kernel.project_dir%/composer.json"
+  version: '%env(string:key:version:json:file:COMPOSER_JSON)%'
