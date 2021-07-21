@@ -24,7 +24,7 @@ class Kernel extends BaseKernel
      */
     public function registerBundles(): iterable
     {
-        $contents = require $this->getProjectDir().'/config/bundles.php';
+        $contents = require $this->getProjectDir().'/etc/bundles.php';
         foreach ($contents as $class => $envs) {
             if ($envs[$this->environment] ?? $envs['all'] ?? false) {
                 yield new $class();
@@ -41,10 +41,10 @@ class Kernel extends BaseKernel
     /** @throws \Exception */
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
     {
-        $container->addResource(new FileResource($this->getProjectDir().'/config/bundles.php'));
+        $container->addResource(new FileResource($this->getProjectDir().'/etc/bundles.php'));
         $container->setParameter('container.dumper.inline_class_loader', \PHP_VERSION_ID < 70400);
         $container->setParameter('container.dumper.inline_factories', true);
-        $confDir = $this->getProjectDir().'/config';
+        $confDir = $this->getProjectDir().'/etc';
 
         $loader->load($confDir.'/{packages}/*'.self::CONFIG_EXTS, 'glob');
         $loader->load($confDir.'/{packages}/'.$this->environment.'/*'.self::CONFIG_EXTS, 'glob');
@@ -56,7 +56,7 @@ class Kernel extends BaseKernel
     /** @throws \Exception */
     protected function configureRoutes(RoutingConfigurator  $routes): void
     {
-        $confDir = $this->getProjectDir().'/config';
+        $confDir = $this->getProjectDir().'/etc';
 
         $routes->import($confDir.'/{routes}/'.$this->environment.'/*'.self::CONFIG_EXTS);
         $routes->import($confDir.'/{routes}/*'.self::CONFIG_EXTS);

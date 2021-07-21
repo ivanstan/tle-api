@@ -25,7 +25,7 @@ final class DocsController extends AbstractController
     #[Route("/api/tle.json", name: "app_api_docs_json")]
     public function getJson(): JsonResponse
     {
-        $path = $this->getProjectDir() . '/config/custom/tle.json';
+        $path = $this->getProjectDir() . '/etc/custom/tle.json';
 
         $docs = json_decode(file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
 

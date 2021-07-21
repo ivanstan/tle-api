@@ -1,0 +1,517 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "TLE API",
+    "version": ""
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/api/tle/{id}": {
+      "get": {
+        "summary": "Record",
+        "operationId": "record",
+        "description": "Return single TleModel for requested satellite id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Satellite id",
+            "required": true,
+            "schema": {
+              "example": 43638,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TleModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/api/tle": {
+      "get": {
+        "summary": "Collection",
+        "operationId": "collection",
+        "description": "Return collection of TleModels depending on requested parameters",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/search"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "description": "Sort by",
+            "schema": {
+              "type": "string",
+              "default": "name",
+              "enum": [
+                "id",
+                "name",
+                "popularity",
+                "inclination",
+                "eccentricity",
+                "period"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/sortDirection"
+          },
+          {
+            "$ref": "#/components/parameters/pageNumber"
+          },
+          {
+            "$ref": "#/components/parameters/pageSize"
+          },
+          {
+            "name": "eccentricity[gte]",
+            "in": "query",
+            "description": "Filter records with orbital eccentricity greater then or equal to the provided value",
+            "required": false,
+            "example": 1
+          },
+          {
+            "name": "eccentricity[lte]",
+            "in": "query",
+            "description": "Filter records with orbital eccentricity less then or equal to the provided value",
+            "required": false,
+            "example": 1
+          },
+          {
+            "name": "inclination[lt]",
+            "in": "query",
+            "description": "Filter records with posigrade orbital inclination",
+            "required": false,
+            "example": 90
+          },
+          {
+            "name": "inclination[gt]",
+            "in": "query",
+            "description": "Filter records with retrograde orbital inclination",
+            "required": false,
+            "example": 90
+          },
+          {
+            "name": "period[lt]",
+            "in": "query",
+            "description": "Filter records with orbital period less than specified",
+            "required": false,
+            "example": 255
+          },
+          {
+            "name": "period[gt]",
+            "in": "query",
+            "description": "Filter records with orbital period greater than specified",
+            "required": false,
+            "example": 255
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "@context": {
+                      "type": "string",
+                      "example": "http://www.w3.org/ns/hydra/context.jsonld"
+                    },
+                    "@id": {
+                      "type": "string",
+                      "example": "https://tle.ivanstanojevic.me/api/tle"
+                    },
+                    "@type": {
+                      "type": "string",
+                      "example": "Collection"
+                    },
+                    "totalItems": {
+                      "type": "integer",
+                      "example": 10414
+                    },
+                    "member": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/TleModel"
+                      }
+                    },
+                    "parameters": {
+                      "type": "object"
+                    },
+                    "view": {
+                      "type": "object",
+                      "properties": {
+                        "@id": {
+                          "type": "string"
+                        },
+                        "@type": {
+                          "type": "string"
+                        },
+                        "first": {
+                          "type": "string"
+                        },
+                        "previous": {
+                          "type": "string"
+                        },
+                        "next": {
+                          "type": "string"
+                        },
+                        "last": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/api/tle/{id}/propagate": {
+      "get": {
+        "summary": "Propagate (experimental)",
+        "description": "Return propagation result with satellite position and velocity using SGP4 or SDP4 algorithms",
+        "operationId": "propagate",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Target satellite id for which propagation is calculated",
+            "required": true,
+            "schema": {
+              "example": 43638,
+              "type": "integer"
+            }
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Target date and time",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "example": "2021-04-20T16:28:40+00:00"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Propagation"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Pagination": {
+        "properties": {
+          "@id": {
+            "type": "string"
+          },
+          "@type": {
+            "type": "string"
+          },
+          "first": {
+            "type": "string"
+          },
+          "previous": {
+            "type": "string"
+          },
+          "next": {
+            "type": "string"
+          },
+          "last": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Exception": {
+        "properties": {
+          "response": {
+            "properties": {
+              "message": {
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "TleModel": {
+        "allOf": [
+          {
+            "properties": {
+              "@context": {
+                "type": "string",
+                "example": "https://www.w3.org/ns/hydra/context.jsonld"
+              },
+              "@id": {
+                "type": "string",
+                "example": "https://tle.ivanstanojevic.me/api/tle/43638"
+              },
+              "@type": {
+                "type": "string",
+                "example": "TleModel"
+              },
+              "satelliteId": {
+                "type": "integer",
+                "example": 43638
+              },
+              "name": {
+                "type": "string",
+                "example": "1998-067PN"
+              },
+              "date": {
+                "type": "string",
+                "example": "2021-02-16T06:41:41+00:00"
+              },
+              "line1": {
+                "type": "string",
+                "example": "1 43638U 98067PN  21047.27895714  .00025925  00000-0  18734-3 0  9990"
+              },
+              "line2": {
+                "type": "string",
+                "example": "2 43638  51.6322 151.1192 0001883 262.5831  97.4954 15.73313437134937"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "Propagation": {
+        "properties": {
+          "@context": {
+            "type": "string",
+            "example": "https://www.w3.org/ns/hydra/context.jsonld"
+          },
+          "@id": {
+            "type": "string",
+            "example": "https://tle.ivanstanojevic.me/api/tle/44859/propagate?date=2021-04-26T08:39:45+00:00"
+          },
+          "@type": {
+            "type": "string",
+            "example": "SatellitePropagationResult"
+          },
+          "tle": {
+            "$ref": "#/components/schemas/TleModel"
+          },
+          "algorithm": {
+            "type": "string",
+            "enum": ["SGP4", "SDP4"],
+            "description": "Algorithm used for propagation. Determined based on mean motion.",
+            "example": "SGP4"
+          },
+          "vector": {
+            "properties": {
+              "reference_frame": {
+                "type": "string",
+                "example": "ECI"
+              },
+              "position": {
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "example": -2450.396984017652
+                  },
+                  "y": {
+                    "type": "number",
+                    "example": 6101.198295995954
+                  },
+                  "z": {
+                    "type": "number",
+                    "example": -6032.216318229235
+                  },
+                  "r": {
+                    "type": "number",
+                    "example": 8922.819046481767
+                  },
+                  "unit": {
+                    "type": "string",
+                    "example": "km"
+                  }
+                },
+                "type": "object"
+              },
+
+              "velocity": {
+                "properties": {
+                  "x": {
+                    "type": "number",
+                    "example": -0.1644949004552056
+                  },
+                  "y": {
+                    "type": "number",
+                    "example": 4.639904402973215
+                  },
+                  "z": {
+                    "type": "number",
+                    "example": 4.406398357056158
+                  },
+                  "r": {
+                    "type": "number",
+                    "example": 6.400946642651633
+                  },
+                  "unit": {
+                    "type": "string",
+                    "example": "km/s"
+                  }
+                },
+                "type": "object"
+              }
+            },
+            "type": "object"
+          },
+          "geodetic": {
+            "properties": {
+              "latitude": {
+                "type": "number",
+                "example": -42.67210184042445
+              },
+              "longitude": {
+                "type": "number",
+                "example": 124.524923099869
+              },
+              "altitude": {
+                "type": "number",
+                "example": 2554.4740343929398
+              }
+            },
+            "type": "object"
+          },
+          "parameters": {
+            "properties": {
+              "date": {
+                "type": "string",
+                "example": "2021-04-26T08:39:45+00:00"
+              },
+              "satelliteId": {
+                "type": "string",
+                "example": "44859"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "responses": {
+      "404": {
+        "description": "Resource not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Exception"
+            },
+            "example": {
+              "response": {
+                "message": "Resource not found"
+              }
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Server error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Exception"
+            },
+            "example": {
+              "response": {
+                "message": "Server has encountered an internal error"
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "search": {
+        "name": "search",
+        "in": "query",
+        "description": "Search string",
+        "schema": {
+          "type": "string",
+          "default": "*"
+        }
+      },
+      "sortDirection": {
+        "name": "sort-dir",
+        "in": "query",
+        "description": "Sort direction",
+        "schema": {
+          "type": "string",
+          "default": "asc",
+          "enum": [
+            "asc",
+            "desc"
+          ]
+        }
+      },
+      "pageNumber": {
+        "name": "page",
+        "in": "query",
+        "description": "Page number",
+        "schema": {
+          "type": "integer",
+          "default": 1,
+          "minimum": 1
+        }
+      },
+      "pageSize": {
+        "name": "page-size",
+        "in": "query",
+        "description": "Number of collection member per page",
+        "schema": {
+          "type": "integer",
+          "default": 20,
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    }
+  }
+}
