@@ -13,6 +13,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -21,7 +22,9 @@ final class ImportTleCommand extends Command
     use FileSystemAwareTrait;
 
     private const BATCH_SIZE = 50;
-    public const SOURCE = '/config/custom/source.yaml';
+    private const OPTION_NO_PROGRESS = 'no-progress';
+
+    public const SOURCE = '/etc/custom/source.yaml';
 
     private EntityManagerInterface $em;
     private TleRepository $repository;
@@ -38,12 +41,15 @@ final class ImportTleCommand extends Command
     /** @noinspection PhpMissingParentCallCommonInspection */
     protected function configure(): void
     {
-        $this->setName('import:tle');
+        $this->setName('import:tle')
+            ->addOption(self::OPTION_NO_PROGRESS, null, InputOption::VALUE_OPTIONAL, 'Hide progress bar', false);
     }
 
     /** @noinspection PhpMissingParentCallCommonInspection */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $showProgress = $input->getOption(self::OPTION_NO_PROGRESS) === false;
+
         $this->satellites = $this->repository->fetchAllIndexed();
 
         $totalInsert = 0;
@@ -51,12 +57,16 @@ final class ImportTleCommand extends Command
 
         $sources = Yaml::parseFile($this->getProjectDir() . self::SOURCE);
 
-        $progressBar = new ProgressBar($output, \count($sources));
-        $progressBar->start();
+        if ($showProgress) {
+            $progressBar = new ProgressBar($output, \count($sources));
+            $progressBar->start();
+        }
 
         foreach ($sources as $uri) {
             /** @noinspection DisconnectedForeachInstructionInspection */
-            $progressBar->advance();
+            if (isset($progressBar)) {
+                $progressBar->advance();
+            }
 
             try {
                 $response = (new Client())->request('GET', $uri);
@@ -96,7 +106,9 @@ final class ImportTleCommand extends Command
 
         }
 
-        $progressBar->finish();
+        if (isset($progressBar)) {
+            $progressBar->finish();
+        }
         $output->writeln('');
         $output->writeln('');
 
