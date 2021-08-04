@@ -6,10 +6,8 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait IdField
 {
-    /**
-     * @ORM\Id()
-     * @ORM\Column(name="id", type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\Column(name: 'id', type: 'integer')]
     private int $id;
 
     public function getId(): int

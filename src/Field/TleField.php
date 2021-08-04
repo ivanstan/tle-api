@@ -6,14 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait TleField
 {
-    /**
-     * @ORM\Column(name="line1", type="string")
-     */
+    #[ORM\Column(name: 'line1', type: 'string')]
     private string $line1;
 
-    /**
-     * @ORM\Column(name="line2", type="string")
-     */
+    #[ORM\Column(name: 'line2', type: 'string')]
     private string $line2;
 
     public function getLine1(): string
