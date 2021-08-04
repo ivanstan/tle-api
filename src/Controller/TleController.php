@@ -80,7 +80,6 @@ final class TleController extends AbstractApiController
         $search = $request->get(self::SEARCH_PARAM);
         $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::POPULARITY);
         $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::DESCENDING);
-        $pageSize = (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), self::MAX_PAGE_SIZE);
 
         $builder = $this->repository->collection(
             $search,
@@ -90,13 +89,17 @@ final class TleController extends AbstractApiController
         );
 
         $pagination = new PaginationCollection($builder);
+        $pagination->setPageSize($this->getPageSize($request, self::MAX_PAGE_SIZE));
+        $pagination->setCurrentPage(
+            $this->getPage($request)
+        );
 
         $parameters = [
             self::SEARCH_PARAM => $search ?? '*',
             self::SORT_PARAM => $sort,
             self::SORT_DIR_PARAM => $sortDir,
             self::PAGE_PARAM => $this->getPage($request),
-            self::PAGE_SIZE_PARAM => $pageSize,
+            self::PAGE_SIZE_PARAM => $this->getPageSize($request, self::MAX_PAGE_SIZE),
         ];
 
         foreach ($filters as $filter) {
@@ -111,19 +114,14 @@ final class TleController extends AbstractApiController
             $parameters[$name] = $satelliteId;
         }
 
-        $total = $pagination->getTotal();
-
         $response = [
             '@context' => self::HYDRA_CONTEXT,
             '@id' => $this->router->generate('tle_collection', [], UrlGeneratorInterface::ABSOLUTE_URL),
             '@type' => 'Collection',
-            'totalItems' => $total,
-            'member' => $pagination->getCollection(
-                $pageSize,
-                $this->getPageOffset($this->getPage($request), $pageSize),
-            ),
+            'totalItems' => $pagination->getTotal(),
+            'member' => $pagination->getCollection(),
             'parameters' => $parameters,
-            'view' => $this->getPagination($request, $total, $pageSize),
+            'view' => $pagination->getView($request, $this->router),
         ];
 
         return $this->response(
