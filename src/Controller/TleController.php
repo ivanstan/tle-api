@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\TleRepository;
 use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
+use App\ViewModel\Model\PaginationCollection;
 use App\ViewModel\SortDirectionEnum;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -81,14 +82,14 @@ final class TleController extends AbstractApiController
         $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::DESCENDING);
         $pageSize = (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), self::MAX_PAGE_SIZE);
 
-        $collection = $this->repository->collection(
+        $builder = $this->repository->collection(
             $search,
             $sort,
             $sortDir,
-            $pageSize,
-            $this->getPageOffset($this->getPage($request), $pageSize),
             $filters,
         );
+
+        $pagination = new PaginationCollection($builder);
 
         $parameters = [
             self::SEARCH_PARAM => $search ?? '*',
@@ -110,14 +111,19 @@ final class TleController extends AbstractApiController
             $parameters[$name] = $satelliteId;
         }
 
+        $total = $pagination->getTotal();
+
         $response = [
             '@context' => self::HYDRA_CONTEXT,
             '@id' => $this->router->generate('tle_collection', [], UrlGeneratorInterface::ABSOLUTE_URL),
             '@type' => 'Collection',
-            'totalItems' => $collection->getTotal(),
-            'member' => $collection->getCollection(),
+            'totalItems' => $total,
+            'member' => $pagination->getCollection(
+                $pageSize,
+                $this->getPageOffset($this->getPage($request), $pageSize),
+            ),
             'parameters' => $parameters,
-            'view' => $this->getPagination($request, $collection->getTotal(), $pageSize),
+            'view' => $this->getPagination($request, $total, $pageSize),
         ];
 
         return $this->response(

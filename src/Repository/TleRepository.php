@@ -36,10 +36,8 @@ class TleRepository extends ServiceEntityRepository
         ?string $search,
         string $sort,
         string $sortDir,
-        int $pageSize,
-        int $offset,
         array $filters,
-    ): PaginationCollection {
+    ): QueryBuilder {
         $builder = $this->createQueryBuilder('tle');
 
         $builder->select('tle');
@@ -85,43 +83,7 @@ class TleRepository extends ServiceEntityRepository
             $builder->addOrderBy($this->getSortTableColumnMapping($sort), $sortDir);
         }
 
-        $total = $this->getCount($builder);
-
-        // limit
-        $builder->setMaxResults($pageSize);
-        $builder->setFirstResult($offset);
-
-        $collection = new PaginationCollection();
-
-        $collection->setCollection($builder->getQuery()->getResult());
-        $collection->setTotal($total);
-
-        return $collection;
-    }
-
-    /**
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    private function getCount(QueryBuilder $builder): int
-    {
-        $builder = clone $builder;
-
-        $alias = $builder->getRootAliases()[0] ?? null;
-        $entity = $builder->getRootEntities()[0] ?? null;
-
-        $meta = $builder->getEntityManager()->getClassMetadata($entity);
-        $identifier = $meta->identifier[0] ?? null;
-
-        $builder->select("COUNT($alias.$identifier)");
-
-        try {
-            return $builder->getQuery()->getSingleScalarResult();
-        } catch (NonUniqueResultException) {
-            $result = array_map(static fn($item) => (int)$item, $builder->getQuery()->getScalarResult());
-
-            return array_sum($result);
-        }
+        return $builder;
     }
 
     private function getSortTableColumnMapping(string $sort): ?string
