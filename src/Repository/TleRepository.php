@@ -106,7 +106,13 @@ class TleRepository extends ServiceEntityRepository
     {
         $builder = clone $builder;
 
-        $builder->select('count(tle.id)');
+        $alias = $builder->getRootAliases()[0] ?? null;
+        $entity = $builder->getRootEntities()[0] ?? null;
+
+        $meta = $builder->getEntityManager()->getClassMetadata($entity);
+        $identifier = $meta->identifier[0] ?? null;
+
+        $builder->select("COUNT($alias.$identifier)");
 
         return $builder->getQuery()->getSingleScalarResult();
     }
