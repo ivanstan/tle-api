@@ -10,6 +10,7 @@ use App\ViewModel\Model\PaginationCollection;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
@@ -73,8 +74,6 @@ class TleRepository extends ServiceEntityRepository
             $builder->setParameter($placeholder, $filter->value);
         }
 
-        $total = $this->getCount($builder);
-
         // sort
         if ($sort === TleCollectionSortableFieldsEnum::POPULARITY) {
             $before = (new \DateTime())->sub(new \DateInterval('P7D'));
@@ -85,6 +84,8 @@ class TleRepository extends ServiceEntityRepository
         } else {
             $builder->addOrderBy($this->getSortTableColumnMapping($sort), $sortDir);
         }
+
+        $total = $this->getCount($builder);
 
         // limit
         $builder->setMaxResults($pageSize);
@@ -114,7 +115,13 @@ class TleRepository extends ServiceEntityRepository
 
         $builder->select("COUNT($alias.$identifier)");
 
-        return $builder->getQuery()->getSingleScalarResult();
+        try {
+            return $builder->getQuery()->getSingleScalarResult();
+        } catch (NonUniqueResultException) {
+            $result = array_map(static fn($item) => (int)$item, $builder->getQuery()->getScalarResult());
+
+            return array_sum($result);
+        }
     }
 
     private function getSortTableColumnMapping(string $sort): ?string
