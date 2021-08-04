@@ -3,9 +3,8 @@
 <!-- https://phpunit.readthedocs.io/en/latest/configuraton.html -->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="bin/.phpunit/phpunit.xsd"
-         backupGlobals="false"
          colors="true"
-         bootstrap="config/bootstrap.php"
+         bootstrap="etc/bootstrap.php"
 >
     <php>
         <ini name="error_reporting" value="-1" />
