@@ -3,14 +3,13 @@
 namespace App\Service\Traits;
 
 use App\Service\FileManager;
+use Symfony\Contracts\Service\Attribute\Required;
 
 trait FileSystemAwareTrait
 {
     private FileManager $fileManager;
 
-    /**
-     * @required
-     */
+    #[Required]
     public function setFileManager(FileManager $manager): void
     {
         $this->fileManager = $manager;
