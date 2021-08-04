@@ -6,9 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 trait NameField
 {
-    /**
-     * @ORM\Column(name="name", type="string")
-     */
+    #[ORM\Column(name: 'name', type: 'string')]
     private string $name;
 
     public function getName(): string
