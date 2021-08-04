@@ -21,7 +21,7 @@ abstract class AbstractApiController extends AbstractController
     protected const SORT_DIR_PARAM = 'sort-dir';
     protected const PAGE_SIZE_PARAM = 'page-size';
     protected const PAGE_PARAM = 'page';
-    protected const PAGE_SIZE = 50;
+    protected const PAGE_SIZE = 20;
     protected const SEARCH_PARAM = 'search';
 
     protected RouterInterface $router;

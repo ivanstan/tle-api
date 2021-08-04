@@ -21,8 +21,6 @@ final class TleController extends AbstractApiController
 
     protected const MAX_PAGE_SIZE = 100;
 
-    protected const PAGE_SIZE = 20;
-
     public const PARAM_EXTRA = 'extra';
 
     protected const COLLECTION_FILTERS = [
