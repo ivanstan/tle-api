@@ -8,7 +8,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -38,71 +37,9 @@ abstract class AbstractApiController extends AbstractController
         return (int)$request->get(self::PAGE_PARAM, 1);
     }
 
-    public function getPageOffset(int $page, int $pageSize): int
+    public function getPageSize(Request $request, int $maxPageSize): int
     {
-        $offset = 0;
-        if ($page > 1) {
-            $offset = ($page - 1) * $pageSize;
-        }
-
-        return $offset;
-    }
-
-    public function getPagination(Request $request, int $total, int $pageSize): array
-    {
-        $params = $request->query->all();
-
-        $page = $this->getPage($request);
-        $pages = max(1, ceil($total / $pageSize));
-
-        $nextPage = $page;
-        if ($page < $pages) {
-            $nextPage = $page + 1;
-        }
-
-        $previousPage = $page;
-        if ($page > 1) {
-            $previousPage = $page - 1;
-        }
-
-        $result = [
-            '@id' => $this->router->generate(
-                $request->attributes->get('_route'),
-                array_merge($params, ['page' => $page]),
-                UrlGeneratorInterface::ABSOLUTE_URL
-            ),
-            '@type' => 'PartialCollectionView',
-            'first' => $this->router->generate(
-                $request->attributes->get('_route'),
-                array_merge($params, ['page' => 1]),
-                UrlGeneratorInterface::ABSOLUTE_URL
-            ),
-            'previous' => $this->router->generate(
-                $request->attributes->get('_route'),
-                array_merge($params, ['page' => $previousPage]),
-                UrlGeneratorInterface::ABSOLUTE_URL
-            ),
-            'next' => $this->router->generate(
-                $request->attributes->get('_route'),
-                array_merge($params, ['page' => $nextPage]),
-                UrlGeneratorInterface::ABSOLUTE_URL
-            ),
-            'last' => $this->router->generate(
-                $request->attributes->get('_route'),
-                array_merge($params, ['page' => $pages]),
-                UrlGeneratorInterface::ABSOLUTE_URL
-            ),
-        ];
-
-        if ($page === 1) {
-            unset($result['previous']);
-        }
-
-        if ($page === $nextPage) {
-            unset($result['next']);
-        }
-
-        return $result;
+        return (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), $maxPageSize);
     }
 
     public function response(array $data): JsonResponse
