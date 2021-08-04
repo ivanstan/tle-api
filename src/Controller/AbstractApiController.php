@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
+use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractApiController extends AbstractController
 {
@@ -26,11 +27,7 @@ abstract class AbstractApiController extends AbstractController
 
     protected RouterInterface $router;
 
-    /**
-     * @required
-     *
-     * @param RouterInterface $router
-     */
+    #[Required]
     public function setRouter(RouterInterface $router): void
     {
         $this->router = $router;
