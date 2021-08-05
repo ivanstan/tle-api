@@ -9,6 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Ivanstan\Tle\Model\TleFile;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
@@ -17,6 +18,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
+#[AsCommand(
+    name: 'import:tle', description: 'Update TLE database'
+)]
 final class ImportTleCommand extends Command
 {
     use FileSystemAwareTrait;
@@ -26,23 +30,17 @@ final class ImportTleCommand extends Command
 
     public const SOURCE = '/etc/custom/source.yaml';
 
-    private EntityManagerInterface $em;
-    private TleRepository $repository;
-
     private array $satellites = [];
 
-    public function __construct(EntityManagerInterface $em, TleRepository $repository)
+    public function __construct(private EntityManagerInterface $em, private TleRepository $repository)
     {
         parent::__construct();
-        $this->em = $em;
-        $this->repository = $repository;
     }
 
     /** @noinspection PhpMissingParentCallCommonInspection */
     protected function configure(): void
     {
-        $this->setName('import:tle')
-            ->addOption(self::OPTION_NO_PROGRESS, null, InputOption::VALUE_OPTIONAL, 'Hide progress bar', false);
+        $this->addOption(self::OPTION_NO_PROGRESS, null, InputOption::VALUE_OPTIONAL, 'Hide progress bar', false);
     }
 
     /** @noinspection PhpMissingParentCallCommonInspection */
@@ -103,7 +101,6 @@ final class ImportTleCommand extends Command
 
             $this->flush($insert, true);
             $this->flush($update);
-
         }
 
         if (isset($progressBar)) {
@@ -115,8 +112,8 @@ final class ImportTleCommand extends Command
         $table = new Table($output);
         $table
             ->setHeaders([
-                'Output'
-            ])
+                             'Output'
+                         ])
             ->setStyle('box')
             ->setRows(
                 [

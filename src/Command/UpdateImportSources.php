@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Service\Traits\FileSystemAwareTrait;
 use DOMElement;
 use GuzzleHttp\Client;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -12,6 +13,9 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Yaml\Yaml;
 
+#[AsCommand(
+    name: 'tle:source', description: 'Update TLE sources'
+)]
 final class UpdateImportSources extends Command
 {
     use FileSystemAwareTrait;
@@ -43,11 +47,6 @@ final class UpdateImportSources extends Command
 
     private SymfonyStyle $io;
     private array $sources = [];
-
-    protected function configure(): void
-    {
-        $this->setName('tle:source');
-    }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
