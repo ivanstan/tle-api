@@ -6,17 +6,19 @@ use App\Entity\Tle;
 use App\Entity\TleInformation;
 use Doctrine\ORM\EntityManagerInterface;
 use Ivanstan\Tle\Specification\GeostationaryOrbitTleSpecification;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(
+    name: 'tle:calculate', description: 'Calculate and persist data in TleInformation entity'
+)]
 final class TleCalculate extends Command
 {
     protected const BATCH_SIZE = 20;
     protected const OPTION_TLE = 'tle';
-
-    protected static $defaultName = 'tle:calculate';
 
     public function __construct(protected EntityManagerInterface $entityManager)
     {
@@ -25,7 +27,6 @@ final class TleCalculate extends Command
 
     protected function configure(): void
     {
-        $this->setDescription('Calculate and persist data in TleInformation entity');
         $this->addOption(self::OPTION_TLE, 't', InputOption::VALUE_REQUIRED, 'Calculate only for specified record');
     }
 

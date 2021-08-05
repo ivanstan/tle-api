@@ -3,23 +3,19 @@
 namespace App\Command;
 
 use App\Repository\RequestRepository;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+#[AsCommand(
+    name: 'cleanup', description: 'Performs periodic cleanup on unused data'
+)]
 final class CleanupCommand extends Command
 {
-    /** @noinspection PhpOptionalBeforeRequiredParametersInspection */
-    public function __construct(string $name = null, private RequestRepository $repository)
+    public function __construct(private RequestRepository $repository)
     {
-        parent::__construct($name);
-    }
-
-    protected function configure(): void
-    {
-        $this
-            ->setName('cleanup')
-            ->setDescription('Performs periodic cleanup on unused data');
+        parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
