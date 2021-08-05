@@ -5,7 +5,7 @@ namespace App\Controller;
 use App\Repository\TleRepository;
 use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
-use App\ViewModel\Model\PaginationCollection;
+use App\ViewModel\Model\QueryBuilderPaginator;
 use App\ViewModel\SortDirectionEnum;
 use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -86,7 +86,7 @@ final class TleController extends AbstractApiController
             $filters,
         );
 
-        $pagination = new PaginationCollection($builder);
+        $pagination = new QueryBuilderPaginator($builder);
         $pagination->setPageSize($this->getPageSize($request, self::MAX_PAGE_SIZE));
         $pagination->setCurrentPage(
             $this->getPage($request)
@@ -112,15 +112,8 @@ final class TleController extends AbstractApiController
             $parameters[$name] = $satelliteId;
         }
 
-        $response = [
-            '@context' => self::HYDRA_CONTEXT,
-            '@id' => $this->router->generate('tle_collection', [], UrlGeneratorInterface::ABSOLUTE_URL),
-            '@type' => 'Collection',
-            'totalItems' => $pagination->getTotal(),
-            'member' => $pagination->getCollection(),
-            'parameters' => $parameters,
-            'view' => $pagination->getView($request, $this->router),
-        ];
+        $response = $pagination->getCollection($request, $this->router);
+        $response['parameters'] = $parameters;
 
         return $this->response(
             $normalizer->normalize($response, null, [self::PARAM_EXTRA => $extra])
