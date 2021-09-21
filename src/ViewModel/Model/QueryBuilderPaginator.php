@@ -3,6 +3,7 @@
 namespace App\ViewModel\Model;
 
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -68,6 +69,8 @@ class QueryBuilderPaginator
             $result = array_sum(
                 array_map(static fn($item) => (int)$item, $builder->getQuery()->getScalarResult())
             );
+        } catch (NoResultException) {
+            $result = 0;
         }
 
         $this->total = $result;
