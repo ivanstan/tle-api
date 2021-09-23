@@ -11,6 +11,7 @@
         "ext-iconv": "*",
         "ext-json": "*",
         "beberlei/doctrineextensions": "^1.3",
+        "doctrine/annotations": "^1.13",
         "ivanstan/tle-php": "dev-master",
         "myclabs/php-enum": "^1.7",
         "sentry/sentry-symfony": "^4.0",
@@ -28,6 +29,7 @@
         "symfony/rate-limiter": "5.3.*",
         "symfony/runtime": "5.3.*",
         "symfony/serializer": "5.3.*",
+        "symfony/validator": "5.3.*",
         "symfony/yaml": "5.3.*"
     },
     "require-dev": {

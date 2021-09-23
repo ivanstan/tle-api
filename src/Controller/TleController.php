@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Attributes\RequestValidator;
 use App\Repository\TleRepository;
 use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
@@ -11,8 +12,8 @@ use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Route("/api/tle")]
 final class TleController extends AbstractApiController
@@ -35,6 +36,14 @@ final class TleController extends AbstractApiController
     }
 
     #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
+    #[RequestValidator([
+        self::PARAM_EXTRA => [
+            Assert\Choice::class => [
+                'choices' => ['0', '1'],
+                'message' => 'Invalid request value {{ value }}. Allowed values are {{ choices }}.',
+            ],
+        ],
+    ])]
     public function record(
         int $id,
         NormalizerInterface $normalizer,
