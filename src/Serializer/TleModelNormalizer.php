@@ -4,7 +4,7 @@ namespace App\Serializer;
 
 use App\Controller\TleController;
 use App\Entity\Tle;
-use App\ViewModel\TleCollectionSortableFieldsEnum;
+use App\Enum\TleCollectionSortableFieldsEnum;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;

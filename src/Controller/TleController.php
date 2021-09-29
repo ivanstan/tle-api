@@ -3,12 +3,12 @@
 namespace App\Controller;
 
 use App\Attributes\RequestValidator;
+use App\Enum\SortDirectionEnum;
+use App\Enum\TleCollectionSortableFieldsEnum;
 use App\Repository\TleRepository;
 use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
 use App\ViewModel\Model\QueryBuilderPaginator;
-use App\ViewModel\SortDirectionEnum;
-use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;

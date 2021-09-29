@@ -3,7 +3,6 @@
 namespace App\Service\Validator;
 
 use App\ViewModel\Filter;
-use App\ViewModel\TleCollectionSortableFieldsEnum;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
