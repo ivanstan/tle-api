@@ -32,7 +32,7 @@ class CollectionRequest extends AbstractRequest
 
     public function getSortDirection(): string
     {
-        return $this->get(static::$sortDirParam, SortDirectionEnum::ASCENDING);
+        return $this->get(static::$sortDirParam, SortDirectionEnum::DESCENDING);
     }
 
     public function getSort(string $default = null): ?string
@@ -58,7 +58,7 @@ class CollectionRequest extends AbstractRequest
                             new Assert\Sequentially(
                                 [
                                     new Assert\Type('numeric'),
-                                    new Assert\GreaterThanOrEqual(0),
+                                    new Assert\GreaterThanOrEqual(1),
                                 ]
                             )
                         ),
