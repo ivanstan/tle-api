@@ -3,7 +3,7 @@
 namespace App\Controller;
 
 use App\Service\DateTimeService;
-use App\Service\Validator\RequestValidator;
+use App\ViewModel\Filter;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,14 +13,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 abstract class AbstractApiController extends AbstractController
 {
-    use RequestValidator;
-
     protected const HYDRA_CONTEXT = 'https://www.w3.org/ns/hydra/context.jsonld';
-
-    protected const SORT_PARAM = 'sort';
-    protected const SORT_DIR_PARAM = 'sort-dir';
-    protected const PAGE_SIZE_PARAM = 'page-size';
-    protected const PAGE_PARAM = 'page';
 
     protected RouterInterface $router;
 
@@ -43,5 +36,26 @@ abstract class AbstractApiController extends AbstractController
         $date = $request->get($name, DateTimeService::getCurrentUTC()->format(\DateTimeInterface::ATOM));
 
         return \DateTime::createFromFormat(\DateTimeInterface::ATOM, str_replace(' ', '+', $date));
+    }
+
+    protected function assertFilter(Request $request, array $filters): array
+    {
+        $result = [];
+
+        foreach ($filters as $filter => $type) {
+            $values = $request->get($filter, []);
+
+            if ($type === Filter::FILTER_TYPE_ARRAY && !empty($values)) {
+                $result[] = new Filter($filter, $type, Filter::OPERATOR_EQUAL, $values);
+
+                continue;
+            }
+
+            foreach ($values as $operator => $value) {
+                $result[] = new Filter($filter, $type, $operator, $value);
+            }
+        }
+
+        return $result;
     }
 }

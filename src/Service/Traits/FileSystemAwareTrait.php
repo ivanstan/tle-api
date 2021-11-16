@@ -2,21 +2,21 @@
 
 namespace App\Service\Traits;
 
-use App\Service\FileManager;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
 trait FileSystemAwareTrait
 {
-    private FileManager $fileManager;
+    private ParameterBagInterface $parameters;
 
     #[Required]
-    public function setFileManager(FileManager $manager): void
+    public function setFileManager(ParameterBagInterface $parameters): void
     {
-        $this->fileManager = $manager;
+        $this->parameters = $parameters;
     }
 
     public function getProjectDir(): string
     {
-        return $this->fileManager->getProjectDir();
+        return $this->parameters->get('kernel.project_dir');
     }
 }
