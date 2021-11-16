@@ -21,8 +21,6 @@ abstract class AbstractApiController extends AbstractController
     protected const SORT_DIR_PARAM = 'sort-dir';
     protected const PAGE_SIZE_PARAM = 'page-size';
     protected const PAGE_PARAM = 'page';
-    protected const PAGE_SIZE = 20;
-    protected const SEARCH_PARAM = 'search';
 
     protected RouterInterface $router;
 
@@ -30,16 +28,6 @@ abstract class AbstractApiController extends AbstractController
     public function setRouter(RouterInterface $router): void
     {
         $this->router = $router;
-    }
-
-    public function getPage(Request $request): int
-    {
-        return (int)$request->get(self::PAGE_PARAM, 1);
-    }
-
-    public function getPageSize(Request $request, int $maxPageSize): int
-    {
-        return (int)min($request->get(self::PAGE_SIZE_PARAM, self::PAGE_SIZE), $maxPageSize);
     }
 
     public function response(array $data): JsonResponse

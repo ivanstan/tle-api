@@ -5,11 +5,13 @@ namespace App\Controller;
 use App\Enum\SortDirectionEnum;
 use App\Enum\TleCollectionSortableFieldsEnum;
 use App\Repository\TleRepository;
+use App\Request\CollectionRequest;
+use App\Request\TleCollectionRequest;
+use App\Request\TleRequest;
 use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
 use App\ViewModel\Model\QueryBuilderPaginator;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
@@ -35,26 +37,21 @@ final class TleController extends AbstractApiController
 
     #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
     public function record(
-        int $id,
         NormalizerInterface $normalizer,
-        Request $request,
+        TleRequest $request,
     ): JsonResponse {
-        $this->assertParamIsBoolean($request, self::PARAM_EXTRA);
-
-        $extra = (bool)$request->get(self::PARAM_EXTRA, false);
-
         $data = [
             '@context' => self::HYDRA_CONTEXT,
         ];
 
         return $this->response(
-            array_merge($data, $normalizer->normalize($this->getTle($id), null, [self::PARAM_EXTRA => $extra])),
+            array_merge($data, $normalizer->normalize($this->getTle($request->getId()), null, [self::PARAM_EXTRA => $request->getExtra()])),
         );
     }
 
     #[Route("/", name: "tle_collection")]
     public function collection(
-        Request $request,
+        TleCollectionRequest $request,
         NormalizerInterface $normalizer
     ): JsonResponse {
         $this
@@ -67,36 +64,28 @@ final class TleController extends AbstractApiController
             ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray())
             ->assertParamIsBoolean($request, self::PARAM_EXTRA);
 
-        $extra = (bool)$request->get(self::PARAM_EXTRA, false);
-
         $satelliteIds = $request->get(TleCollectionSortableFieldsEnum::SATELLITE_ID, []);
 
         /** @var Filter[] $filters */
         $filters = $this->assertFilter($request, self::COLLECTION_FILTERS);
 
-        $search = $request->get(self::SEARCH_PARAM);
-        $sort = $request->get(self::SORT_PARAM, TleCollectionSortableFieldsEnum::POPULARITY);
-        $sortDir = $request->get(self::SORT_DIR_PARAM, SortDirectionEnum::DESCENDING);
-
         $builder = $this->repository->collection(
-            $search,
-            $sort,
-            $sortDir,
+            $request->getSearch(),
+            $request->getSort(TleCollectionSortableFieldsEnum::POPULARITY),
+            $request->getSortDirection(),
             $filters,
         );
 
         $pagination = new QueryBuilderPaginator($builder);
-        $pagination->setPageSize($this->getPageSize($request, self::MAX_PAGE_SIZE));
-        $pagination->setCurrentPage(
-            $this->getPage($request)
-        );
+        $pagination->setPageSize($request->getPageSize());
+        $pagination->setCurrentPage($request->getPage());
 
         $parameters = [
-            self::SEARCH_PARAM => $search ?? '*',
-            self::SORT_PARAM => $sort,
-            self::SORT_DIR_PARAM => $sortDir,
-            self::PAGE_PARAM => $this->getPage($request),
-            self::PAGE_SIZE_PARAM => $this->getPageSize($request, self::MAX_PAGE_SIZE),
+            CollectionRequest::SEARCH_PARAM => $request->getSearch() ?? '*',
+            CollectionRequest::SORT_PARAM => $request->getSort(TleCollectionSortableFieldsEnum::POPULARITY),
+            CollectionRequest::SORT_DIR_PARAM => $request->getSortDirection(),
+            CollectionRequest::PAGE_PARAM => $request->getPage(),
+            CollectionRequest::PAGE_SIZE_PARAM => $request->getPageSize(),
         ];
 
         foreach ($filters as $filter) {
@@ -115,7 +104,7 @@ final class TleController extends AbstractApiController
         $response['parameters'] = $parameters;
 
         return $this->response(
-            $normalizer->normalize($response, null, [self::PARAM_EXTRA => $extra])
+            $normalizer->normalize($response, null, [self::PARAM_EXTRA => $request->getExtra()])
         );
     }
 }
