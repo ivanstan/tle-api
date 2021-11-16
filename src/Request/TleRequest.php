@@ -20,6 +20,9 @@ class TleRequest extends AbstractRequest
 
     public function validate(ValidatorInterface $validator): ConstraintViolationListInterface
     {
-        return $this->validateExtraParam($validator);
+        $violations = $this->validateExtraParam($validator);
+        $violations->addAll(parent::validate($validator));
+
+        return $violations;
     }
 }
