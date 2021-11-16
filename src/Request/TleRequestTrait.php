@@ -20,9 +20,10 @@ trait TleRequestTrait
             $this->query->all(),
             new Assert\Collection(
                 [
+                    'allowExtraFields' => true,
                     'allowMissingFields' => true,
                     'fields' => [
-                        'extra' => new Assert\Optional(new Assert\Choice(Filter::BOOLEAN_VALUES)),
+                        TleRequest::EXTRA_PARAM => new Assert\Optional(new Assert\Choice(Filter::BOOLEAN_VALUES)),
                     ],
                 ]
             )

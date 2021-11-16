@@ -20,8 +20,6 @@ final class TleController extends AbstractApiController
 {
     use TleHttpTrait;
 
-    protected const MAX_PAGE_SIZE = 100;
-
     public const PARAM_EXTRA = 'extra';
 
     protected const COLLECTION_FILTERS = [
@@ -54,16 +52,6 @@ final class TleController extends AbstractApiController
         TleCollectionRequest $request,
         NormalizerInterface $normalizer
     ): JsonResponse {
-        $this
-            ->assertParamIsInteger($request, self::PAGE_PARAM)
-            ->assertParamIsGreaterThan($request, self::PAGE_PARAM, 0)
-            ->assertParamIsInteger($request, self::PAGE_SIZE_PARAM)
-            ->assertParamIsGreaterThan($request, self::PAGE_SIZE_PARAM, 0)
-            ->assertParamIsLessThan($request, self::PAGE_SIZE_PARAM, self::MAX_PAGE_SIZE)
-            ->assertParamInEnum($request, self::SORT_DIR_PARAM, SortDirectionEnum::toArray())
-            ->assertParamInEnum($request, self::SORT_PARAM, TleCollectionSortableFieldsEnum::toArray())
-            ->assertParamIsBoolean($request, self::PARAM_EXTRA);
-
         $satelliteIds = $request->get(TleCollectionSortableFieldsEnum::SATELLITE_ID, []);
 
         /** @var Filter[] $filters */
@@ -77,15 +65,16 @@ final class TleController extends AbstractApiController
         );
 
         $pagination = new QueryBuilderPaginator($builder);
-        $pagination->setPageSize($request->getPageSize());
-        $pagination->setCurrentPage($request->getPage());
+        $pagination
+            ->setPageSize($request->getPageSize())
+            ->setCurrentPage($request->getPage());
 
         $parameters = [
-            CollectionRequest::SEARCH_PARAM => $request->getSearch() ?? '*',
-            CollectionRequest::SORT_PARAM => $request->getSort(TleCollectionSortableFieldsEnum::POPULARITY),
-            CollectionRequest::SORT_DIR_PARAM => $request->getSortDirection(),
-            CollectionRequest::PAGE_PARAM => $request->getPage(),
-            CollectionRequest::PAGE_SIZE_PARAM => $request->getPageSize(),
+            CollectionRequest::$searchParam => $request->getSearch() ?? '*',
+            CollectionRequest::$sortParam => $request->getSort(TleCollectionSortableFieldsEnum::POPULARITY),
+            CollectionRequest::$sortDirParam => $request->getSortDirection(),
+            CollectionRequest::$pageParam => $request->getPage(),
+            CollectionRequest::$pageSizeParam => $request->getPageSize(),
         ];
 
         foreach ($filters as $filter) {
