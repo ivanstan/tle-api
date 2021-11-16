@@ -25,6 +25,9 @@ class CustomRequestResolver implements ArgumentValueResolverInterface
         /** @var AbstractRequest $customRequest */
         $customRequest = forward_static_call([$argument->getType(), 'createFromGlobals']);
         $customRequest->attributes = $request->attributes;
+        $customRequest->query = $request->query;
+        $customRequest->files = $request->files;
+        $customRequest->request = $request->request;
 
         if (method_exists($customRequest, 'validate')) {
             $violations = $customRequest->validate($this->validator);
