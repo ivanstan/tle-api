@@ -18,7 +18,6 @@ services:
         exclude: '../src/{DependencyInjection,Entity,ViewModel,Enum,Migrations,Tests,Kernel.php}'
         bind:
             $env: '%kernel.environment%'
-            $projectDir: "%kernel.project_dir%"
 
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
