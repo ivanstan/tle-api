@@ -2,19 +2,26 @@
 
 namespace App\Request;
 
+use App\ViewModel\Filter;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\ConstraintViolationListInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
+
 class TleRequest extends AbstractRequest
 {
     public const EXTRA_PARAM = 'extra';
 
-    use TleRequestTrait;
+    use TleRequestTrait {
+        validate as validateExtraParam;
+    }
 
     public function getId(): int
     {
         return $this->attributes->get('id');
     }
 
-    public function validate(): void
+    public function validate(ValidatorInterface $validator): ConstraintViolationListInterface
     {
-        $this->assertParamIsBoolean($this, self::EXTRA_PARAM);
+        return $this->validateExtraParam($validator);
     }
 }
