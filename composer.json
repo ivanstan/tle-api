@@ -4,6 +4,8 @@
     "type": "project",
     "license": "proprietary",
     "version": "1.3.2",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {
         "php": "^8.0",
         "ext-ctype": "*",
@@ -16,6 +18,7 @@
         "doctrine/doctrine-bundle": "^2",
         "doctrine/doctrine-migrations-bundle": "^2",
         "doctrine/orm": "^2",
+        "ivanstan/symfony-support": "dev-master",
         "ivanstan/tle-php": "dev-master",
         "myclabs/php-enum": "^1.7",
         "sentry/sentry-symfony": "^4.0",

@@ -2,10 +2,8 @@
 
 namespace App\Controller;
 
-use App\Enum\SortDirectionEnum;
 use App\Enum\TleCollectionSortableFieldsEnum;
 use App\Repository\TleRepository;
-use App\Request\CollectionRequest;
 use App\Request\TleCollectionRequest;
 use App\Request\TleRequest;
 use App\Service\Traits\TleHttpTrait;
@@ -35,8 +33,8 @@ final class TleController extends AbstractApiController
 
     #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
     public function record(
-        NormalizerInterface $normalizer,
         TleRequest $request,
+        NormalizerInterface $normalizer,
     ): JsonResponse {
         $data = [
             '@context' => self::HYDRA_CONTEXT,
@@ -70,11 +68,11 @@ final class TleController extends AbstractApiController
             ->setCurrentPage($request->getPage());
 
         $parameters = [
-            CollectionRequest::$searchParam => $request->getSearch() ?? '*',
-            CollectionRequest::$sortParam => $request->getSort(TleCollectionSortableFieldsEnum::POPULARITY),
-            CollectionRequest::$sortDirParam => $request->getSortDirection(),
-            CollectionRequest::$pageParam => $request->getPage(),
-            CollectionRequest::$pageSizeParam => $request->getPageSize(),
+            TleCollectionRequest::$searchParam => $request->getSearch() ?? '*',
+            TleCollectionRequest::$sortParam => $request->getSort(TleCollectionSortableFieldsEnum::POPULARITY),
+            TleCollectionRequest::$sortDirParam => $request->getSortDirection(),
+            TleCollectionRequest::$pageParam => $request->getPage(),
+            TleCollectionRequest::$pageSizeParam => $request->getPageSize(),
         ];
 
         foreach ($filters as $filter) {

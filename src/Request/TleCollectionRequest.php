@@ -2,6 +2,7 @@
 
 namespace App\Request;
 
+use Ivanstan\SymfonySupport\Request\CollectionRequest;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
