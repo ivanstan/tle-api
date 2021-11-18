@@ -4,8 +4,8 @@ namespace App\Entity;
 
 use App\Field\IdField;
 use App\Repository\RequestRepository;
-use App\Service\DateTimeService;
 use Doctrine\ORM\Mapping as ORM;
+use Ivanstan\SymfonySupport\Services\DateTimeService;
 
 #[ORM\Entity(repositoryClass: RequestRepository::class)]
 #[ORM\HasLifecycleCallbacks]
