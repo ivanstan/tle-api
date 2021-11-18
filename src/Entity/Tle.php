@@ -5,9 +5,9 @@ namespace App\Entity;
 use App\Field\IdField;
 use App\Field\TleField;
 use App\Repository\TleRepository;
-use App\Service\DateTimeService;
 use Doctrine\ORM\Mapping as ORM;
 use Ivanstan\SymfonySupport\Field\NameField;
+use Ivanstan\SymfonySupport\Services\DateTimeService;
 
 #[ORM\Entity(repositoryClass: TleRepository::class)]
 #[ORM\HasLifecycleCallbacks]
