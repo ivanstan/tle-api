@@ -61,9 +61,7 @@ final class TleController extends AbstractApiController
         );
 
         $pagination = new QueryBuilderPaginator($builder);
-        $pagination
-            ->setPageSize($request->getPageSize())
-            ->setCurrentPage($request->getPage());
+        $pagination->setFromRequest($request);
 
         $parameters = [
             TleCollectionRequest::$searchParam => $request->getSearch() ?? '*',
