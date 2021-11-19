@@ -114,5 +114,14 @@
             "allow-contrib": false,
             "require": "5.3.*"
         }
+    },
+    "repositories": {
+        "ivanstan/symfony-support": {
+            "type": "path",
+            "url": "../symfony-support",
+            "options": {
+                "symlink": true
+            }
+        }
     }
 }
