@@ -4,9 +4,9 @@ namespace App\Command;
 
 use App\Entity\Tle;
 use App\Repository\TleRepository;
-use App\Service\Traits\FileSystemAwareTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
+use Ivanstan\SymfonySupport\Traits\FileSystemAwareTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Ivanstan\Tle\Model\TleFile;
 use Symfony\Component\Console\Attribute\AsCommand;

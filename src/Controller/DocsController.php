@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Service\Traits\FileSystemAwareTrait;
+use Ivanstan\SymfonySupport\Traits\FileSystemAwareTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

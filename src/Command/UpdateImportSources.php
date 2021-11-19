@@ -2,9 +2,9 @@
 
 namespace App\Command;
 
-use App\Service\Traits\FileSystemAwareTrait;
 use DOMElement;
 use GuzzleHttp\Client;
+use Ivanstan\SymfonySupport\Traits\FileSystemAwareTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ef8fa37418ac24eeb5b41d1f59f02d89",
+    "content-hash": "c44a426e031d9a87bcef3c2de7cb8c69",
     "packages": [
         {
             "name": "beberlei/doctrineextensions",
@@ -1953,16 +1953,10 @@
         {
             "name": "ivanstan/symfony-support",
             "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/ivanstan/symfony-support.git",
-                "reference": "79517573dd72b056425a3d002e0ed005fd6850b9"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/ivanstan/symfony-support/zipball/79517573dd72b056425a3d002e0ed005fd6850b9",
-                "reference": "79517573dd72b056425a3d002e0ed005fd6850b9",
-                "shasum": ""
+                "type": "path",
+                "url": "../symfony-support",
+                "reference": "0b97e2f544596d9b37d1499ed6d853d4f406b71e"
             },
             "require": {
                 "php": ">=8.0",
@@ -1976,14 +1970,22 @@
                 "phpunit/php-code-coverage": "^9.2",
                 "phpunit/phpunit": "^9"
             },
-            "default-branch": true,
             "type": "symfony-bundle",
             "autoload": {
                 "psr-4": {
                     "Ivanstan\\SymfonySupport\\": "src/"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Ivanstan\\SymfonyRest\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "php -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text --coverage-html tests/coverage"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -1994,11 +1996,10 @@
                 }
             ],
             "description": "Symfony support API toolkit",
-            "support": {
-                "issues": "https://github.com/ivanstan/symfony-support/issues",
-                "source": "https://github.com/ivanstan/symfony-support/tree/master"
-            },
-            "time": "2021-11-18T13:02:19+00:00"
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
         },
         {
             "name": "ivanstan/tle-php",
