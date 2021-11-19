@@ -18,8 +18,6 @@ final class TleController extends AbstractApiController
 {
     use TleHttpTrait;
 
-    public const PARAM_EXTRA = 'extra';
-
     protected const COLLECTION_FILTERS = [
         TleCollectionSortableFieldsEnum::ECCENTRICITY => Filter::FILTER_TYPE_FLOAT,
         TleCollectionSortableFieldsEnum::INCLINATION => Filter::FILTER_TYPE_FLOAT,
@@ -41,7 +39,7 @@ final class TleController extends AbstractApiController
         ];
 
         return $this->response(
-            array_merge($data, $normalizer->normalize($this->getTle($request->getId()), null, [self::PARAM_EXTRA => $request->getExtra()])),
+            array_merge($data, $normalizer->normalize($this->getTle($request->getId()), null, [TleRequest::EXTRA_PARAM => $request->getExtra()])),
         );
     }
 
@@ -87,7 +85,7 @@ final class TleController extends AbstractApiController
             $parameters[$name] = $satelliteId;
         }
 
-        $response = $normalizer->normalize($pagination, null, [self::PARAM_EXTRA => $request->getExtra()]);
+        $response = $normalizer->normalize($pagination, null, [TleRequest::EXTRA_PARAM => $request->getExtra()]);
         $response['parameters'] = $parameters;
 
         return $this->response($response);
