@@ -8,7 +8,7 @@ use App\Request\TleCollectionRequest;
 use App\Request\TleRequest;
 use App\Service\Traits\TleHttpTrait;
 use App\ViewModel\Filter;
-use App\ViewModel\Model\QueryBuilderPaginator;
+use Ivanstan\SymfonySupport\Services\QueryBuilderPaginator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -87,11 +87,9 @@ final class TleController extends AbstractApiController
             $parameters[$name] = $satelliteId;
         }
 
-        $response = $pagination->getCollection($request, $this->router);
+        $response = $normalizer->normalize($pagination, null, [self::PARAM_EXTRA => $request->getExtra()]);
         $response['parameters'] = $parameters;
 
-        return $this->response(
-            $normalizer->normalize($response, null, [self::PARAM_EXTRA => $request->getExtra()])
-        );
+        return $this->response($response);
     }
 }
