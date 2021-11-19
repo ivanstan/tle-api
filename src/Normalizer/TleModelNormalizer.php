@@ -2,9 +2,9 @@
 
 namespace App\Normalizer;
 
-use App\Controller\TleController;
 use App\Entity\Tle;
 use App\Enum\TleCollectionSortableFieldsEnum;
+use App\Request\TleRequest;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -28,7 +28,7 @@ class TleModelNormalizer implements NormalizerInterface
 
         $model = new TleModel($object->getLine1(), $object->getLine2(), $object->getName());
 
-        $isExtra = ($context[TleController::PARAM_EXTRA] ?? null) === true;
+        $isExtra = ($context[TleRequest::EXTRA_PARAM] ?? null) === true;
 
         $normalized = [
             '@id' => $id,
