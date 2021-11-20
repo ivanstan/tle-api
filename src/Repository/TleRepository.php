@@ -12,8 +12,9 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
+use Ivanstan\SymfonySupport\Repository\EntityRepository;
 
-class TleRepository extends ServiceEntityRepository
+class TleRepository extends EntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -41,17 +42,7 @@ class TleRepository extends ServiceEntityRepository
         $builder->select('tle');
         $builder->leftJoin(TleInformation::class, 'info', Expr\Join::WITH, 'info.tle = tle.id');
 
-        // search
-        if ($search) {
-            $builder
-                ->where(
-                    $builder->expr()->orX(
-                        $builder->expr()->like('tle.id', ':search'),
-                        $builder->expr()->like('tle.name', ':search')
-                    )
-                )
-                ->setParameter('search', '%' . $search . '%');
-        }
+        $builder = $this->search($builder, ['tle.id', 'tle.name'], $search);
 
         // filters
         foreach ($filters as $index => $filter) {
