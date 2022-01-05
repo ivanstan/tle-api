@@ -60,7 +60,7 @@ final class TleTest extends AbstractWebTestCase
         self::assertEquals('http://localhost/api/tle/', $response['@id']);
 
         self::assertArrayHasKey('@type', $response);
-        self::assertEquals('Collection', $response['@type']);
+        self::assertEquals('Tle[]', $response['@type']);
 
         self::assertArrayHasKey('totalItems', $response);
         self::assertEquals(11, $response['totalItems']);

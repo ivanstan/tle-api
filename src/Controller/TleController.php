@@ -34,12 +34,11 @@ final class TleController extends AbstractApiController
         TleRequest $request,
         NormalizerInterface $normalizer,
     ): JsonResponse {
-        $data = [
-            '@context' => self::HYDRA_CONTEXT,
-        ];
-
         return $this->response(
-            array_merge($data, $normalizer->normalize($this->getTle($request->getId()), null, [TleRequest::EXTRA_PARAM => $request->getExtra()])),
+            [
+                '@context' => self::HYDRA_CONTEXT,
+                ...$normalizer->normalize($this->getTle($request->getId()), null, [TleRequest::EXTRA_PARAM => $request->getExtra()]),
+            ]
         );
     }
 

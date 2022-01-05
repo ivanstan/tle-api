@@ -22,12 +22,10 @@ class ObserverNormalizer implements NormalizerInterface
      */
     public function normalize($object, string $format = null, array $context = []): array
     {
-        return array_merge(
-            [
-                '@type' => 'Observer',
-            ],
-            $this->normalizer->normalize($object)
-        );
+        return [
+            '@type' => 'Observer',
+            ...$this->normalizer->normalize($object),
+        ];
     }
 
     public function supportsNormalization($data, string $format = null): bool
