@@ -53,7 +53,7 @@ final class FlyOverController extends AbstractApiController
 
         $url = $this->router->generate(
             'tle_flyover',
-            array_merge($request->request->all(), $parameters, ['id' => $id]),
+            ['id' => $id, ...$parameters, ...$request->request->all()],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
@@ -110,22 +110,23 @@ final class FlyOverController extends AbstractApiController
 
         $url = $this->router->generate(
             'tle_flyover_details',
-            array_merge($request->request->all(), ['id' => $id, 'passId' => $passId]),
+            [
+                ...$request->request->all(),
+                'id' => $id,
+                'passId' => $passId,
+            ],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $data = [
-            '@context' => self::HYDRA_CONTEXT,
-            '@id' => $url,
-            'observer' => $this->normalizer->normalize($observer),
-            'tle' => $this->normalizer->normalize($tle),
-        ];
-
         return $this->response(
-            array_merge(
-                $data,
-                $this->normalizer->normalize($pass, null, ['timezone' => $observer->getTimezone(), 'details' => true])
-            )
+            [
+                '@context' => self::HYDRA_CONTEXT,
+                '@id' => $url,
+                'observer' => $this->normalizer->normalize($observer),
+                'tle' => $this->normalizer->normalize($tle),
+                ...$this->normalizer->normalize($pass, null, ['timezone' => $observer->getTimezone(), 'details' => true]
+                ),
+            ]
         );
     }
 
