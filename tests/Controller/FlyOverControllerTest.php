@@ -57,4 +57,76 @@ class FlyOverControllerTest extends AbstractWebTestCase
 
         // ToDo: additional assertions
     }
+
+    public function testLatitudeAbove90(): void {
+        $tle = TleFixtures::create();
+
+        $response = $this->get(
+            '/api/tle/'.$tle->getId().'/flyover',
+            [
+                'latitude' => 100,
+                'longitude' => 0,
+            ]
+        );
+
+        self::assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('Invalid latitude value', $response['response']['message']);
+    }
+
+    public function testLatitudeBellow90(): void {
+        $tle = TleFixtures::create();
+
+        $response = $this->get(
+            '/api/tle/'.$tle->getId().'/flyover',
+            [
+                'latitude' => -100,
+                'longitude' => 0,
+            ]
+        );
+
+        self::assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('Invalid latitude value', $response['response']['message']);
+    }
+
+    public function testLongitudeAbove180(): void {
+        $tle = TleFixtures::create();
+
+        $response = $this->get(
+            '/api/tle/'.$tle->getId().'/flyover',
+            [
+                'latitude' => 0,
+                'longitude' => 190,
+            ]
+        );
+
+        self::assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('Invalid longitude value', $response['response']['message']);
+    }
+
+    public function testLongitudeBellow180(): void {
+        $tle = TleFixtures::create();
+
+        $response = $this->get(
+            '/api/tle/'.$tle->getId().'/flyover',
+            [
+                'latitude' => 0,
+                'longitude' => -190,
+            ]
+        );
+
+        self::assertEquals(Response::HTTP_BAD_REQUEST, $response->getStatusCode());
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('Invalid longitude value', $response['response']['message']);
+    }
 }
