@@ -12,7 +12,7 @@ trait AssertionTrait
 
         self::assertEquals('https://www.w3.org/ns/hydra/context.jsonld', $response['@context']);
         self::assertEquals('http://localhost/api/tle/' . $tle->getId(), $response['@id']);
-        self::assertEquals('TleModel', $response['@type']);
+        self::assertEquals('Tle', $response['@type']);
         self::assertEquals($tle->getId(), $response['satelliteId']);
         self::assertEquals($tle->getName(), $response['name']);
         self::assertEquals($model->epochDateTime()->format(\DateTimeInterface::ATOM), $response['date']);
