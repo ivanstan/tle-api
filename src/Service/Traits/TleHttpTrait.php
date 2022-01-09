@@ -25,7 +25,10 @@ trait TleHttpTrait
     protected function getObserver(Request $request): Observer
     {
         try {
-            return new Observer((float)$request->get('latitude', 0), (float)$request->get('longitude', 0));
+            return new Observer(
+                (float)$request->get('latitude', 0),
+                (float)$request->get('longitude', 0),
+            );
         } catch (\InvalidArgumentException $exception) {
             throw new BadRequestHttpException($exception->getMessage());
         }
