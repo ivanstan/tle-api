@@ -32,7 +32,7 @@ class TleModelNormalizer implements NormalizerInterface
 
         $normalized = [
             '@id' => $id,
-            '@type' => 'TleModel',
+            '@type' => 'Tle',
             'satelliteId' => $model->getId(),
             'name' => $model->getName(),
             'date' => $model->epochDateTime()->format(\DateTimeInterface::ATOM),
@@ -41,17 +41,17 @@ class TleModelNormalizer implements NormalizerInterface
         ];
 
         if ($isExtra && $object->getInfo()) {
-            $extra = [
-                'extra' => [
-                    TleCollectionSortableFieldsEnum::ECCENTRICITY => $object->getInfo()->eccentricity,
-                    TleCollectionSortableFieldsEnum::INCLINATION => $object->getInfo()->inclination,
-                    TleCollectionSortableFieldsEnum::PERIOD => $object->getInfo()->period,
-                    TleCollectionSortableFieldsEnum::RAAN => $object->getInfo()->raan,
-                    TleCollectionSortableFieldsEnum::SEMI_MAJOR_AXIS => $object->getInfo()->semiMajorAxis,
-                ],
+            $normalized['extra'] = [
+                TleCollectionSortableFieldsEnum::ECCENTRICITY => $object->getInfo()->eccentricity,
+                TleCollectionSortableFieldsEnum::INCLINATION => $object->getInfo()->inclination,
+                TleCollectionSortableFieldsEnum::PERIOD => $object->getInfo()->period,
+                TleCollectionSortableFieldsEnum::RAAN => $object->getInfo()->raan,
+                TleCollectionSortableFieldsEnum::SEMI_MAJOR_AXIS => $object->getInfo()->semiMajorAxis,
             ];
 
-            $normalized = array_merge($normalized, $extra);
+            $normalized['orbit'] = [
+                'geostationary' => $object->getInfo()->geostationary,
+            ];
         }
 
         return $normalized;

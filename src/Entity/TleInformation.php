@@ -29,9 +29,6 @@ class TleInformation
     #[ORM\Column(name: '`period`', type: 'float', precision: 24, scale: 10, nullable: true)]
     public ?float $period;
 
-    /**
-     * Period for complete orbit in seconds
-     */
     #[ORM\Column(type: 'boolean', options: ['default' => 0])]
     public bool $geostationary = false;
 
