@@ -1973,12 +1973,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ivanstan/symfony-support.git",
-                "reference": "ed65c006a88b09e43eaa5fdc286432cccf6a0695"
+                "reference": "5b31f82016b4f082c70cf2c97afd37c359f27e32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ivanstan/symfony-support/zipball/ed65c006a88b09e43eaa5fdc286432cccf6a0695",
-                "reference": "ed65c006a88b09e43eaa5fdc286432cccf6a0695",
+                "url": "https://api.github.com/repos/ivanstan/symfony-support/zipball/5b31f82016b4f082c70cf2c97afd37c359f27e32",
+                "reference": "5b31f82016b4f082c70cf2c97afd37c359f27e32",
                 "shasum": ""
             },
             "require": {
@@ -2015,7 +2015,7 @@
                 "issues": "https://github.com/ivanstan/symfony-support/issues",
                 "source": "https://github.com/ivanstan/symfony-support/tree/master"
             },
-            "time": "2022-01-09T16:22:41+00:00"
+            "time": "2022-01-09T17:59:36+00:00"
         },
         {
             "name": "ivanstan/tle-php",

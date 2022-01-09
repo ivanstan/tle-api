@@ -12,6 +12,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
+/**
+ * ToDo: currently available only for current time, accept date from request
+ */
 final class FlyOverController extends AbstractApiController
 {
     use TleHttpTrait;
