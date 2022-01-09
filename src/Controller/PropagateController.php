@@ -4,10 +4,11 @@ namespace App\Controller;
 
 use App\Enum\PropagatorAlgorithm;
 use App\Repository\TleRepository;
+use App\Request\DateTimeDependantRequest;
 use App\Service\Traits\TleHttpTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
+
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -28,7 +29,7 @@ final class PropagateController extends AbstractApiController
     #[Route("/api/tle/{id}/propagate", name: "tle_propagate", requirements: ["id" => "\d+"])]
     public function propagate(
         int $id,
-        Request $request,
+        DateTimeDependantRequest $request,
         NormalizerInterface $normalizer
     ): JsonResponse {
         $tle = $this->getTle($id);
@@ -36,7 +37,7 @@ final class PropagateController extends AbstractApiController
         $tleModel = new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName());
         $sat = new \Predict_Sat(new \Predict_TLE($tle->getName(), $tle->getLine1(), $tle->getLine2()));
 
-        $datetime = $this->getDate($request, 'date');
+        $datetime = $request->getDateTime();
         $deltaT = ($datetime->getTimestamp() - $tleModel->epochDateTime()->getTimestamp()) / 60; // minutes
 
         $algorithm = ($tleModel->period() / 60) > self::DEEP_SATELLITE_PERIOD ? PropagatorAlgorithm::SDP4 : PropagatorAlgorithm::SGP4;

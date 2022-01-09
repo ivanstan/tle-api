@@ -30,32 +30,4 @@ abstract class AbstractApiController extends AbstractController
             Response::HTTP_OK,
         );
     }
-
-    protected function getDate(Request $request, string $name): \DateTime
-    {
-        $date = $request->get($name, DateTimeService::getCurrentUTC()->format(\DateTimeInterface::ATOM));
-
-        return \DateTime::createFromFormat(\DateTimeInterface::ATOM, str_replace(' ', '+', $date));
-    }
-
-    protected function assertFilter(Request $request, array $filters): array
-    {
-        $result = [];
-
-        foreach ($filters as $filter => $type) {
-            $values = $request->get($filter, []);
-
-            if ($type === Filter::FILTER_TYPE_ARRAY && !empty($values)) {
-                $result[] = new Filter($filter, $type, Filter::OPERATOR_EQUAL, $values);
-
-                continue;
-            }
-
-            foreach ($values as $operator => $value) {
-                $result[] = new Filter($filter, $type, $operator, $value);
-            }
-        }
-
-        return $result;
-    }
 }
