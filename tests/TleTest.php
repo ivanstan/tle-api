@@ -86,4 +86,63 @@ final class TleTest extends AbstractWebTestCase
         self::assertArrayHasKey('page-size', $parameters);
         self::assertEquals($parameters['page-size'], $pageSize);
     }
+
+    public function testTleCollectionExtra(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'extra' => 1,
+                'search' => 22049,
+            ]
+        );
+
+        $response = $this->toArray($response);
+
+        self::assertArrayHasKey('extra', $response['member'][0]);
+    }
+
+    public function testFloatFilter(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'extra' => 1,
+                'eccentricity[gt]' => .2,
+            ]
+        );
+
+        $response = $this->toArray($response);
+
+        self::assertEquals(.2, $response['parameters']['eccentricity[gt]']);
+        self::assertGreaterThan(.2, $response['member'][0]['extra']['eccentricity']);
+    }
+
+    public function testInvalidFloatFilterOperator(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'eccentricity[=>]' => .2,
+            ]
+        );
+
+        $response = $this->toArray($response);
+
+        self::assertEquals("Operator for filter 'eccentricity' should be one of the following gt, gte, lt, lte, '=>' provided", $response['response']['message']);
+    }
+
+    public function testArrayFilter(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'satellite_id[]' => 22049,
+            ]
+        );
+
+        $response = $this->toArray($response);
+
+        self::assertEquals(22049, $response['member'][0]['satelliteId']);
+    }
 }
