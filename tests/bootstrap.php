@@ -5,6 +5,7 @@ use Ivanstan\SymfonySupport\Command\DoctrineReloadCommand;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\ConsoleOutput;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 use Symfony\Component\Dotenv\Dotenv;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
@@ -34,18 +35,18 @@ if ($_SERVER['APP_ENV'] === 'test') {
     $kernel = new Kernel($_SERVER['APP_ENV'], true); // create a "test" kernel
     $kernel->boot();
 
-//    $command = new DoctrineReloadCommand($_SERVER['APP_ENV']);
-//    (new Application($kernel))->add($command);
+    $command = new DoctrineReloadCommand(new ParameterBag(['kernel.environment' => $_SERVER['APP_ENV']]));
+    (new Application($kernel))->add($command);
 
-//    $command->run(
-//        new ArrayInput(
-//            [
-//                'command' => 'doctrine:reload',
-//                '--no-interaction' => true,
-//            ]
-//        ),
-//        new ConsoleOutput()
-//    );
+    $command->run(
+        new ArrayInput(
+            [
+                'command' => 'doctrine:reload',
+                '--no-interaction' => true,
+            ]
+        ),
+        new ConsoleOutput()
+    );
 }
 
 $_SERVER += $_ENV;
