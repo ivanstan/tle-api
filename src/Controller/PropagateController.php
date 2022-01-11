@@ -4,7 +4,7 @@ namespace App\Controller;
 
 use App\Enum\PropagatorAlgorithm;
 use App\Repository\TleRepository;
-use App\Request\DateTimeDependantRequest;
+use App\Request\PropagateRequest;
 use App\Service\Traits\TleHttpTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,7 +29,7 @@ final class PropagateController extends AbstractApiController
     #[Route("/api/tle/{id}/propagate", name: "tle_propagate", requirements: ["id" => "\d+"])]
     public function propagate(
         int $id,
-        DateTimeDependantRequest $request,
+        PropagateRequest $request,
         NormalizerInterface $normalizer
     ): JsonResponse {
         $tle = $this->getTle($id);

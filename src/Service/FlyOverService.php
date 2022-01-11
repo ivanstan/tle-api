@@ -35,12 +35,7 @@ class FlyOverService
         return $this;
     }
 
-    public function getVisiblePasses(\DateTime $date): array
-    {
-        return $this->predict->filterVisiblePasses($this->getPasses($date));
-    }
-
-    public function getPasses(\DateTime $date): array
+    public function getPasses(\DateTime $date, bool $filterVisible): array
     {
         $this->predict->minEle = 10; // Minimum elevation for a pass
         $this->predict->timeRes = 10; // Pass details: time resolution in seconds
@@ -48,6 +43,12 @@ class FlyOverService
         $this->predict->threshold = -6; // Twilight threshold (sun must be at this lat or lower)
 
         // Get the passes and filter visible only, takes about 4 seconds for 10 days
-        return $this->predict->get_passes($this->sat, $this->qth, \Predict_Time::unix2daynum($date->getTimestamp()), 10);
+        $passes = $this->predict->get_passes($this->sat, $this->qth, \Predict_Time::unix2daynum($date->getTimestamp()), 10);
+
+        if($filterVisible) {
+            return $this->predict->filterVisiblePasses($passes);
+        }
+
+        return $passes;
     }
 }

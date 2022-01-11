@@ -12,14 +12,12 @@ class FlyOverControllerTest extends AbstractWebTestCase
     {
         $tle = TleFixtures::create();
 
-        $date = (new \DateTime())->format(\DateTimeInterface::ATOM);
-
         $response = $this->get(
             '/api/tle/'.$tle->getId().'/flyover',
             [
-                'latitude' => 0,
+                'latitude' => 45,
                 'longitude' => 0,
-//                'date' => '2022-01-09T18:16:04+00:00'
+                'date' => '2022-01-11T00:00:00+00:00'
             ]
         );
 
@@ -30,10 +28,10 @@ class FlyOverControllerTest extends AbstractWebTestCase
         self::assertEquals(
             [
                 '@type' => 'Observer',
-                'timezone' => 'UTC',
-                'date' => $date,
+                'timezone' => 'Europe/Andorra',
+                'date' => '2022-01-11T00:00:00+00:00',
                 'altitude' => 0,
-                'latitude' => 0,
+                'latitude' => 45,
                 'longitude' => 0,
             ],
             $response['observer']
