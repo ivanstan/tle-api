@@ -60,7 +60,7 @@ final class FlyOverController extends AbstractApiController
             $item = [
                 '@id' => $this->generateUrl('tle_flyover_details', [
                     'id' => $id,
-                    'passId' => $index,
+                    'passId' => $index+1,
                     'latitude' => $observer->latitude,
                     'longitude' => $observer->longitude,
                     'only_visible' => $request->filterVisible(),
@@ -101,7 +101,7 @@ final class FlyOverController extends AbstractApiController
 
         $results = $this->service->getPasses($date, $request->filterVisible());
 
-        $pass = $results[$passId] ?? null;
+        $pass = $results[$passId-1] ?? null;
 
         if ($pass === null) {
             throw new NotFoundHttpException('Unable to find requested flyover details');
