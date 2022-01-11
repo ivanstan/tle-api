@@ -2,9 +2,7 @@
 
 namespace App\Enum;
 
-use MyCLabs\Enum\Enum;
-
-class TleCollectionSortableFieldsEnum extends Enum
+enum TleCollectionSortableFieldsEnum
 {
     public const ID = 'id';
     public const NAME = 'name';
