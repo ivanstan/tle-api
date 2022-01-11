@@ -3,19 +3,15 @@
 namespace App\Controller;
 
 use App\Repository\TleRepository;
+use App\Request\FlyOverRequest;
 use App\Service\FlyOverService;
 use App\Service\Traits\TleHttpTrait;
-use DoctrineExtensions\Query\Mysql\Date;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-/**
- * ToDo: currently available only for current time, accept date from request
- */
 final class FlyOverController extends AbstractApiController
 {
     use TleHttpTrait;
@@ -30,33 +26,29 @@ final class FlyOverController extends AbstractApiController
     #[Route("/api/tle/{id}/flyover", name: "tle_flyover", requirements: ["id" => "\d+"])]
     public function flyover(
         int $id,
-        Request $request
+        FlyOverRequest $request
     ): JsonResponse {
         $observer = $this->getObserver($request);
-        $onlyVisible = $request->get('only_visible', true);
         $tle = $this->getTle($id);
 
-        $date = new \DateTime();
+        $date = $request->getDateTime();
 
         $this->service
             ->setObserver($observer)
             ->setTle($tle);
 
-        if ($onlyVisible) {
-            $results = $this->service->getVisiblePasses($date);
-        } else {
-            $results = $this->service->getPasses($date);
-        }
+        $results = $this->service->getPasses($date, $request->filterVisible());
 
         $parameters = [
             'latitude' => $observer->latitude,
             'longitude' => $observer->longitude,
-            'only_visible' => $onlyVisible,
+            'only_visible' => $request->filterVisible(),
+            'date' => $date->format(\DateTime::ATOM),
         ];
 
         $url = $this->router->generate(
             'tle_flyover',
-            ['id' => $id, ...$parameters, ...$request->request->all()],
+            [...$request->request->all(), 'id' => $id, ...$parameters],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
@@ -66,7 +58,14 @@ final class FlyOverController extends AbstractApiController
 
         foreach ($members as $index => &$member) {
             $item = [
-                '@id' => $this->generateUrl('tle_flyover_details', ['id' => $id, 'passId' => $index], UrlGeneratorInterface::ABSOLUTE_URL),
+                '@id' => $this->generateUrl('tle_flyover_details', [
+                    'id' => $id,
+                    'passId' => $index,
+                    'latitude' => $observer->latitude,
+                    'longitude' => $observer->longitude,
+                    'only_visible' => $request->filterVisible(),
+                    'date' => $date->format(\DateTime::ATOM),
+                ], UrlGeneratorInterface::ABSOLUTE_URL),
             ];
 
             $member = $item + $member;
@@ -89,21 +88,18 @@ final class FlyOverController extends AbstractApiController
     public function flyoverDetails(
         int $id,
         int $passId,
-        Request $request,
+        FlyOverRequest $request,
     ): JsonResponse {
         $observer = $this->getObserver($request);
-        $onlyVisible = $request->get('only_visible', true);
         $tle = $this->getTle($id);
 
         $this->service
             ->setObserver($observer)
             ->setTle($tle);
 
-        if ($onlyVisible) {
-            $results = $this->service->getVisiblePasses(\Predict_Time::get_current_daynum());
-        } else {
-            $results = $this->service->getPasses(\Predict_Time::get_current_daynum());
-        }
+        $date = $request->getDateTime();
+
+        $results = $this->service->getPasses($date, $request->filterVisible());
 
         $pass = $results[$passId] ?? null;
 
