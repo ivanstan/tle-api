@@ -3,10 +3,6 @@
 namespace App\Service\Traits;
 
 use App\Entity\Tle;
-use App\Request\FlyOverRequest;
-use App\ViewModel\Observer;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 trait TleHttpTrait
@@ -21,19 +17,5 @@ trait TleHttpTrait
         }
 
         return $tle;
-    }
-
-    protected function getObserver(FlyOverRequest $request): Observer
-    {
-        try {
-            return new Observer(
-                (float)$request->get('latitude', 0),
-                (float)$request->get('longitude', 0),
-                0,
-                $request->getDateTime(),
-            );
-        } catch (\InvalidArgumentException $exception) {
-            throw new BadRequestHttpException($exception->getMessage());
-        }
     }
 }

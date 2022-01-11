@@ -28,7 +28,7 @@ final class FlyOverController extends AbstractApiController
         int $id,
         FlyOverRequest $request
     ): JsonResponse {
-        $observer = $this->getObserver($request);
+        $observer = $request->getObserver();
         $tle = $this->getTle($id);
 
         $date = $request->getDateTime();
@@ -90,7 +90,7 @@ final class FlyOverController extends AbstractApiController
         int $passId,
         FlyOverRequest $request,
     ): JsonResponse {
-        $observer = $this->getObserver($request);
+        $observer = $request->getObserver();
         $tle = $this->getTle($id);
 
         $this->service
@@ -113,6 +113,10 @@ final class FlyOverController extends AbstractApiController
                 ...$request->request->all(),
                 'id' => $id,
                 'passId' => $passId,
+                'latitude' => $observer->latitude,
+                'longitude' => $observer->longitude,
+                'only_visible' => $request->filterVisible(),
+                'date' => $date->format(\DateTime::ATOM),
             ],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
