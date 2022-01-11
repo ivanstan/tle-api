@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Repository\TleRepository;
 use App\Service\FlyOverService;
 use App\Service\Traits\TleHttpTrait;
+use DoctrineExtensions\Query\Mysql\Date;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -35,14 +36,16 @@ final class FlyOverController extends AbstractApiController
         $onlyVisible = $request->get('only_visible', true);
         $tle = $this->getTle($id);
 
+        $date = new \DateTime();
+
         $this->service
             ->setObserver($observer)
             ->setTle($tle);
 
         if ($onlyVisible) {
-            $results = $this->service->getVisiblePasses(\Predict_Time::get_current_daynum());
+            $results = $this->service->getVisiblePasses($date);
         } else {
-            $results = $this->service->getPasses(\Predict_Time::get_current_daynum());
+            $results = $this->service->getPasses($date);
         }
 
         $parameters = [
