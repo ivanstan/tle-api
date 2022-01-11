@@ -98,6 +98,11 @@ final class UpdateImportSources extends Command
             foreach ($crawler->filter('a') as $anchor) {
                 $href = $anchor->getAttribute('href');
                 $path = parse_url($href, PHP_URL_PATH);
+
+                if ($path === null) {
+                    continue;
+                }
+
                 $extension = pathinfo($path, PATHINFO_EXTENSION);
 
                 if ($extension === 'txt') {
