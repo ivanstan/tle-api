@@ -2,9 +2,7 @@
 
 namespace App\Enum;
 
-use MyCLabs\Enum\Enum;
-
-class PropagatorAlgorithm extends Enum
+enum PropagatorAlgorithm
 {
     public const SGP4 = 'SGP4';
     public const SDP4 = 'SDP4';

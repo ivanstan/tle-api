@@ -7,7 +7,6 @@ use App\Entity\Tle;
 use App\Entity\TleInformation;
 use App\Enum\TleCollectionSortableFieldsEnum;
 use App\ViewModel\Filter;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;

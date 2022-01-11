@@ -7,7 +7,7 @@
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require": {
-        "php": "^8.0",
+        "php": "^8.1",
         "ext-ctype": "*",
         "ext-dom": "*",
         "ext-iconv": "*",
@@ -20,7 +20,6 @@
         "doctrine/orm": "^2",
         "ivanstan/symfony-support": "dev-master",
         "ivanstan/tle-php": "dev-master",
-        "myclabs/php-enum": "^1.7",
         "sentry/sentry-symfony": "^4.0",
         "symfony/apache-pack": "^1.0",
         "symfony/asset": "6.0.*",
