@@ -37,6 +37,8 @@ class TleControllerTest extends AbstractWebTestCase
 
         $response = $this->toArray($response);
 
+        self::assertEquals('https://www.w3.org/ns/hydra/context.jsonld', $response['@context']);
+
         $this->assertTle($tle, $response);
     }
 
@@ -47,6 +49,8 @@ class TleControllerTest extends AbstractWebTestCase
         $response = $this->get('/api/tle/' . $tle->getId(), ['extra' => 1]);
 
         $response = $this->toArray($response);
+
+        self::assertEquals('https://www.w3.org/ns/hydra/context.jsonld', $response['@context']);
 
         $this->assertTle($tle, $response);
     }

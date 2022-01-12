@@ -145,4 +145,20 @@ final class TleTest extends AbstractWebTestCase
 
         self::assertEquals(22049, $response['member'][0]['satelliteId']);
     }
+
+    public function testArrayInvalidFilter(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'satellite_id' => 22049,
+            ]
+        );
+
+        self::assertEquals(Response::HTTP_INTERNAL_SERVER_ERROR, $response->getStatusCode());
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('Filter satellite_id value should be array', $response['response']['message']);
+    }
 }
