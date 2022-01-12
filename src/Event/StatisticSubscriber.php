@@ -24,6 +24,11 @@ class StatisticSubscriber implements EventSubscriberInterface
     {
     }
 
+    /**
+     * @codeCoverageIgnore
+     *
+     * @return string[]
+     */
     public static function getSubscribedEvents(): array
     {
         return [
