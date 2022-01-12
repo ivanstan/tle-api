@@ -28,6 +28,11 @@ class ApiLimiterSubscriber implements EventSubscriberInterface
         $this->limiter = $anonymousApiLimiter;
     }
 
+    /**
+     * @codeCoverageIgnore
+     *
+     * @return string[]
+     */
     public static function getSubscribedEvents(): array
     {
         return [
