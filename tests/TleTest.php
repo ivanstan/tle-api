@@ -161,4 +161,20 @@ final class TleTest extends AbstractWebTestCase
 
         self::assertEquals('Filter satellite_id value should be array', $response['response']['message']);
     }
+
+    public function testCollectionSort(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'sort' => 'eccentricity',
+                'sort-dir' => 'desc',
+            ]
+        );
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('eccentricity', $response['parameters']['sort']);
+        self::assertEquals('desc', $response['parameters']['sort-dir']);
+    }
 }
