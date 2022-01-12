@@ -77,8 +77,7 @@ class TleRepository extends EntityRepository
     private function getSortTableColumnMapping(string $sort): ?string
     {
         return match ($sort) {
-            TleCollectionSortableFieldsEnum::ID => 'tle.id',
-            TleCollectionSortableFieldsEnum::SATELLITE_ID => 'tle.id',
+            TleCollectionSortableFieldsEnum::ID, TleCollectionSortableFieldsEnum::SATELLITE_ID => 'tle.id',
             TleCollectionSortableFieldsEnum::NAME => 'tle.name',
             TleCollectionSortableFieldsEnum::POPULARITY => null,
             TleCollectionSortableFieldsEnum::INCLINATION => 'info.inclination',

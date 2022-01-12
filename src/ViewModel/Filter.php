@@ -67,7 +67,7 @@ class Filter
         return '';
     }
 
-    protected function validateValue(mixed $value): mixed
+    protected function validateValue(mixed $value): array|null|float
     {
         if ($this->type === self::FILTER_TYPE_FLOAT) {
             $value = (float)$value;

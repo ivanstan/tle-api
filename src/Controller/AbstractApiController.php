@@ -2,11 +2,8 @@
 
 namespace App\Controller;
 
-use App\ViewModel\Filter;
-use Ivanstan\SymfonySupport\Services\DateTimeService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Service\Attribute\Required;
