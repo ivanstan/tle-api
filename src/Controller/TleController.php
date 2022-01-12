@@ -7,7 +7,6 @@ use App\Repository\TleRepository;
 use App\Request\TleCollectionRequest;
 use App\Request\TleRequest;
 use App\Service\Traits\TleHttpTrait;
-use App\ViewModel\Filter;
 use Ivanstan\SymfonySupport\Services\QueryBuilderPaginator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;

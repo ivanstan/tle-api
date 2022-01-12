@@ -6,6 +6,7 @@ use App\Repository\TleRepository;
 use App\Request\FlyOverRequest;
 use App\Service\FlyOverService;
 use App\Service\Traits\TleHttpTrait;
+use DateTimeInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\Annotation\Route;
@@ -43,7 +44,7 @@ final class FlyOverController extends AbstractApiController
             'latitude' => $observer->latitude,
             'longitude' => $observer->longitude,
             'only_visible' => $request->filterVisible(),
-            'date' => $date->format(\DateTime::ATOM),
+            'date' => $date->format(DateTimeInterface::ATOM),
         ];
 
         $url = $this->router->generate(
@@ -64,7 +65,7 @@ final class FlyOverController extends AbstractApiController
                     'latitude' => $observer->latitude,
                     'longitude' => $observer->longitude,
                     'only_visible' => $request->filterVisible(),
-                    'date' => $date->format(\DateTime::ATOM),
+                    'date' => $date->format(DateTimeInterface::ATOM),
                 ], UrlGeneratorInterface::ABSOLUTE_URL),
             ];
 
@@ -116,7 +117,7 @@ final class FlyOverController extends AbstractApiController
                 'latitude' => $observer->latitude,
                 'longitude' => $observer->longitude,
                 'only_visible' => $request->filterVisible(),
-                'date' => $date->format(\DateTime::ATOM),
+                'date' => $date->format(DateTimeInterface::ATOM),
             ],
             UrlGeneratorInterface::ABSOLUTE_URL
         );

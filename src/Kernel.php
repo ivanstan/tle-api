@@ -9,6 +9,7 @@ class Kernel extends BaseKernel
 {
     use MicroKernelTrait;
 
+    /** @noinspection PhpUnusedPrivateMethodInspection */
     private function getConfigDir(): string
     {
         return $this->getProjectDir().'/etc';
