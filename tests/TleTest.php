@@ -162,7 +162,7 @@ final class TleTest extends AbstractWebTestCase
         self::assertEquals('Filter satellite_id value should be array', $response['response']['message']);
     }
 
-    public function testCollectionSort(): void
+    public function testCollectionSortEccentricity(): void
     {
         $response = $this->get(
             '/api/tle/',
@@ -175,6 +175,38 @@ final class TleTest extends AbstractWebTestCase
         $response = $this->toArray($response);
 
         self::assertEquals('eccentricity', $response['parameters']['sort']);
+        self::assertEquals('desc', $response['parameters']['sort-dir']);
+    }
+
+    public function testCollectionSortPeriod(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'sort' => 'period',
+                'sort-dir' => 'desc',
+            ]
+        );
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('period', $response['parameters']['sort']);
+        self::assertEquals('desc', $response['parameters']['sort-dir']);
+    }
+
+    public function testCollectionSortSemiMajorAxis(): void
+    {
+        $response = $this->get(
+            '/api/tle/',
+            [
+                'sort' => 'semi_major_axis',
+                'sort-dir' => 'desc',
+            ]
+        );
+
+        $response = $this->toArray($response);
+
+        self::assertEquals('semi_major_axis', $response['parameters']['sort']);
         self::assertEquals('desc', $response['parameters']['sort-dir']);
     }
 }
