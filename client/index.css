@@ -1,0 +1,173 @@
+html {
+    height: 100%;
+    width: 100%;
+    overflow: -moz-scrollbars-vertical;
+    overflow-y: scroll;
+}
+
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.slide-container {
+    height: calc(100% * 2 - 64px);
+}
+
+.slide-container a {
+    color: #dd361c;
+}
+
+.slide-container a:visited {
+    color: #c62d1f;
+}
+
+.slide {
+    padding: 40px 0;
+    min-height: 100vh;
+}
+
+.first-slide {
+    padding: 40px 0;
+    min-height: calc(100vh - 64px);
+}
+
+.code {
+    font-family: 'Anonymous Pro', monospace;
+    background: #f1f1f1;
+    padding: 20px 40px;
+}
+
+#root {
+    height: 100%;
+}
+
+.bg-darker {
+
+}
+
+.bg-dark {
+    background: #6e7a87;
+}
+
+.bg-white {
+    background: #fff;
+}
+
+#home-page {
+    min-height: calc(100% - 64px);
+}
+
+.tle-display .element {
+    /*border: 2px solid transparent;*/
+    border-radius: 8px;
+}
+
+.tle-display .element:hover {
+    /*border: 2px solid red;*/
+}
+
+.element {
+    border: 2px solid transparent;
+}
+
+.element-detail {
+    padding: 15px;
+}
+
+.element.name {
+    border-color: #fc8080;
+}
+
+.element.line_number {
+    border-color: #94dafb;
+}
+
+.element.satellite_id {
+    border-color: #6d838e;
+}
+
+.element.inclination {
+    border-color: #aed9c5;
+}
+
+.element.raan {
+    border-color: #fdbc3a;
+}
+
+.element.eccentricity {
+    border-color: #26a0fc;
+}
+
+.element.argument-of-perigee {
+    border-color: #cff57b;
+}
+
+.element.mean-anomaly {
+    border-color: #8b75d7;
+}
+
+.element.mean-motion {
+    border-color: #26e7a6;
+}
+
+.element.revolution-number {
+    border-color: #f2d3d9;
+}
+
+.element.epoch-year {
+    border-color: #a8e5dd;
+}
+
+.element.epoch-day {
+    border-color: #a8e5dd;
+}
+
+.element.classification {
+    border-color: #c7cbe6;
+}
+
+.element.launch-year {
+    border-color: #e1ebb9;
+}
+
+.element.launch-number {
+    border-color: #e1ebb9;
+}
+
+.element.launch-piece {
+    border-color: #e1ebb9;
+}
+
+.element.checksum {
+    border-color: #c9e7f2;
+}
+
+.element.first-derivative {
+    border-color: #c4a296;
+}
+
+.element.second-derivative {
+    border-color: #a7babe;
+}
+
+.element.drag-term {
+    border-color: #f9e0e3;
+}
+
+.element.element-number {
+    border-color: #ddd5be;
+}
+
+.element.ephemeris-type {
+    border-color: #b3b6c5;
+}
+
+.MuiAppBar-root .MuiButton-label {
+    color: #f1f1f1;
+}
