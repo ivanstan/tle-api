@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+set -e
+
+# Setup exported env
+export DEPLOY_PATH=/home/glutenfr/projects/tle.ivanstanojevic.me/shared/public
+
+# Setup local env
+HOST=ivanstanojevic.me
+USER=glutenfr
+PORT=2233
+
+# Setup
+mkdir -p build
+
+# Custom commands
+yarn build prod
+
+# Sync
+rsync -arvz -e "ssh -p ${PORT}" --rsync-path=~/bin/rsync --progress --delete ./build ${USER}@${HOST}:${DEPLOY_PATH}
+
+# Run ./post-deploy on remote
+ssh ${USER}@${HOST} -p${PORT} 'bash -s' < ./bin/post-deploy ${DEPLOY_PATH}

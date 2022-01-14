@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# Executed on remote server
+
+DEPLOY_PATH=$1
+
+cd ${DEPLOY_PATH}

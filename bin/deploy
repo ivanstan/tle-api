@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -e
+
+composer deploy
+
+sh ./deploy-frontend
