@@ -10,43 +10,6 @@
     }
   ],
   "paths": {
-    "/api/tle/{id}": {
-      "get": {
-        "summary": "Record",
-        "operationId": "record",
-        "description": "Return single TleModel for requested satellite id",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "Satellite id",
-            "required": true,
-            "schema": {
-              "example": 43638,
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Resource found",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/TleModel"
-                }
-              }
-            }
-          },
-          "404": {
-            "$ref": "#/components/responses/404"
-          },
-          "500": {
-            "$ref": "#/components/responses/500"
-          }
-        }
-      }
-    },
     "/api/tle": {
       "get": {
         "summary": "Collection",
@@ -185,6 +148,43 @@
                 }
               }
             }
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      }
+    },
+    "/api/tle/{id}": {
+      "get": {
+        "summary": "Record",
+        "operationId": "record",
+        "description": "Return single TleModel for requested satellite id",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Satellite id",
+            "required": true,
+            "schema": {
+              "example": 43638,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resource found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TleModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
           },
           "500": {
             "$ref": "#/components/responses/500"
