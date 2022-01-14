@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Tests;
+namespace App\Tests\Controller;
 
+use App\Tests\AbstractWebTestCase;
 use Symfony\Component\HttpFoundation\Response;
 
 final class CollectionTest extends AbstractWebTestCase
