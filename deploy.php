@@ -29,7 +29,7 @@ add('shared_dirs', [
 ]);
 add('writable_dirs', ['var']);
 
-host('ivanstanojevic.me')
+host('tle.ivanstanojevic.me')
     ->user('glutenfr')
     ->port(2233)
     ->stage('production')
