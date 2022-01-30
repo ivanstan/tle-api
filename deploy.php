@@ -36,7 +36,7 @@ host('tle.ivanstanojevic.me')
     ->set('deploy_path', '~/projects/tle.ivanstanojevic.me');
 
 task('test', function () {
-    set('symfony_env', 'test');
+    set('symfony_env', 'dev');
     runLocally('bin/phpunit');
 });
 
