@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use Ivanstan\SymfonySupport\Traits\FileSystemAwareTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Ivanstan\Tle\Model\TleFile;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -19,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
 
 #[AsCommand(
-    name: 'import:tle', description: 'Update TLE database'
+    name: 'tle:import', description: 'Update TLE database', aliases: ['import:tle']
 )]
 final class ImportTleCommand extends Command
 {
@@ -32,7 +33,7 @@ final class ImportTleCommand extends Command
 
     private array $satellites = [];
 
-    public function __construct(private EntityManagerInterface $em, private TleRepository $repository)
+    public function __construct(private EntityManagerInterface $em, private TleRepository $repository, private LoggerInterface $logger)
     {
         parent::__construct();
     }
@@ -69,17 +70,18 @@ final class ImportTleCommand extends Command
             try {
                 $response = (new Client())->request('GET', $uri);
             } catch (\Exception $exception) {
-                $output->writeln(
-                    \sprintf(
-                        'Unable to fetch resource "%s" with exception message "%s"',
-                        $uri,
-                        $exception->getMessage()
-                    )
-                );
+                $message = \sprintf('Unable to fetch resource "%s" with exception message "%s"', $uri, $exception->getMessage());
+
+                $this->logger->error($message);
+                $output->writeln($message);
                 continue;
             }
 
             if (!$response->getBody()) {
+                $message = \sprintf('URI "%s" returned empty body, skipping', $uri);
+
+                $this->logger->error($message);
+                $output->writeln($message);
                 continue;
             }
 
@@ -111,9 +113,11 @@ final class ImportTleCommand extends Command
 
         $table = new Table($output);
         $table
-            ->setHeaders([
-                             'Output'
-                         ])
+            ->setHeaders(
+                [
+                    'Output',
+                ]
+            )
             ->setStyle('box')
             ->setRows(
                 [
