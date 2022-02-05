@@ -4,13 +4,12 @@ namespace App\Service;
 
 use Ivanstan\SymfonySupport\Traits\FileSystemAwareTrait;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Contracts\Cache\CacheInterface;
 
 class ApiDocService
 {
     use FileSystemAwareTrait;
 
-    public function __construct(protected ParameterBagInterface $bag, private CacheInterface $cache)
+    public function __construct(protected ParameterBagInterface $bag)
     {
     }
 
