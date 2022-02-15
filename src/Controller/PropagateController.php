@@ -5,18 +5,14 @@ namespace App\Controller;
 use App\Enum\PropagatorAlgorithm;
 use App\Repository\TleRepository;
 use App\Request\PropagateRequest;
-use App\Service\Traits\TleHttpTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
-
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final class PropagateController extends AbstractApiController
 {
-    use TleHttpTrait;
-
     protected const DEEP_SATELLITE_PERIOD = 225; // minutes
 
     protected \Predict_SGPSDP $propagator;
@@ -28,11 +24,10 @@ final class PropagateController extends AbstractApiController
 
     #[Route("/api/tle/{id}/propagate", name: "tle_propagate", requirements: ["id" => "\d+"])]
     public function propagate(
-        int $id,
         PropagateRequest $request,
         NormalizerInterface $normalizer
     ): JsonResponse {
-        $tle = $this->getTle($id);
+        $tle = $request->getTle();
 
         $tleModel = new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName());
         $sat = new \Predict_Sat(new \Predict_TLE($tle->getName(), $tle->getLine1(), $tle->getLine2()));
@@ -58,11 +53,11 @@ final class PropagateController extends AbstractApiController
 
         $url = $this->router->generate(
             'tle_propagate',
-            array_merge($request->request->all(), $parameters, ['id' => $id]),
+            array_merge($request->request->all(), $parameters, ['id' => $request->getId()]),
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $parameters['satelliteId'] = $id;
+        $parameters['satelliteId'] = $request->getId();
 
         $data = [
             '@context' => self::HYDRA_CONTEXT,

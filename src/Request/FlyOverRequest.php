@@ -6,7 +6,7 @@ use App\ViewModel\Observer;
 use Ivanstan\SymfonySupport\Request\AbstractRequest;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class FlyOverRequest extends AbstractRequest
+class FlyOverRequest extends TleRequest
 {
     use DateTimeDependantRequest;
 

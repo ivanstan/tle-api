@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Repository\TleRepository;
 use App\Request\FlyOverRequest;
 use App\Service\FlyOverService;
-use App\Service\Traits\TleHttpTrait;
 use DateTimeInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -15,8 +14,6 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 final class FlyOverController extends AbstractApiController
 {
-    use TleHttpTrait;
-
     public function __construct(
         protected TleRepository $repository,
         protected NormalizerInterface $normalizer,
@@ -26,11 +23,10 @@ final class FlyOverController extends AbstractApiController
 
     #[Route("/api/tle/{id}/flyover", name: "tle_flyover", requirements: ["id" => "\d+"])]
     public function flyover(
-        int $id,
         FlyOverRequest $request
     ): JsonResponse {
         $observer = $request->getObserver();
-        $tle = $this->getTle($id);
+        $tle = $request->getTle();
 
         $date = $request->getDateTime();
 
@@ -49,19 +45,19 @@ final class FlyOverController extends AbstractApiController
 
         $url = $this->router->generate(
             'tle_flyover',
-            [...$request->request->all(), 'id' => $id, ...$parameters],
+            [...$request->request->all(), 'id' => $request->getId(), ...$parameters],
             UrlGeneratorInterface::ABSOLUTE_URL
         );
 
-        $parameters['satelliteId'] = $id;
+        $parameters['satelliteId'] = $request->getId();
 
         $members = $this->normalizer->normalize($results, null, ['timezone' => $observer->getTimezone()]);
 
         foreach ($members as $index => &$member) {
             $item = [
                 '@id' => $this->generateUrl('tle_flyover_details', [
-                    'id' => $id,
-                    'passId' => $index+1,
+                    'id' => $request->getId(),
+                    'passId' => $index + 1,
                     'latitude' => $observer->latitude,
                     'longitude' => $observer->longitude,
                     'only_visible' => $request->filterVisible(),
@@ -87,12 +83,11 @@ final class FlyOverController extends AbstractApiController
 
     #[Route("/api/tle/{id}/flyover/{passId}", name: "tle_flyover_details", requirements: ["id" => "\d+", "passId" => "\d+"])]
     public function flyoverDetails(
-        int $id,
         int $passId,
         FlyOverRequest $request,
     ): JsonResponse {
         $observer = $request->getObserver();
-        $tle = $this->getTle($id);
+        $tle = $request->getTle();
 
         $this->service
             ->setObserver($observer)
@@ -112,7 +107,7 @@ final class FlyOverController extends AbstractApiController
             'tle_flyover_details',
             [
                 ...$request->request->all(),
-                'id' => $id,
+                'id' => $request->getId(),
                 'passId' => $passId,
                 'latitude' => $observer->latitude,
                 'longitude' => $observer->longitude,

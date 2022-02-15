@@ -6,7 +6,6 @@ use App\Enum\TleCollectionSortableFieldsEnum;
 use App\Repository\TleRepository;
 use App\Request\TleCollectionRequest;
 use App\Request\TleRequest;
-use App\Service\Traits\TleHttpTrait;
 use Ivanstan\SymfonySupport\Services\QueryBuilderPaginator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
@@ -15,8 +14,6 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 #[Route("/api/tle")]
 final class TleController extends AbstractApiController
 {
-    use TleHttpTrait;
-
     public function __construct(protected TleRepository $repository)
     {
     }
@@ -29,7 +26,7 @@ final class TleController extends AbstractApiController
         return $this->response(
             [
                 '@context' => self::HYDRA_CONTEXT,
-                ...$normalizer->normalize($this->getTle($request->getId()), null, [TleRequest::EXTRA_PARAM => $request->getExtra()]),
+                ...$normalizer->normalize($request->getTle(), null, [TleRequest::EXTRA_PARAM => $request->getExtra()]),
             ]
         );
     }
