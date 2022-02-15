@@ -3,7 +3,6 @@
 namespace App\Request;
 
 use App\ViewModel\Observer;
-use Ivanstan\SymfonySupport\Request\AbstractRequest;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class FlyOverRequest extends TleRequest
