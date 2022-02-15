@@ -2,9 +2,7 @@
 
 namespace App\Request;
 
-use Ivanstan\SymfonySupport\Request\AbstractRequest;
-
-class PropagateRequest extends AbstractRequest
+class PropagateRequest extends TleRequest
 {
     use DateTimeDependantRequest;
 }
