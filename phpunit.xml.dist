@@ -30,7 +30,6 @@
 
         <exclude>
             <directory suffix=".php">src/Migrations</directory>
-            <directory suffix=".php">src/Command</directory>
             <directory suffix=".php">src/DataFixtures</directory>
             <file>src/Kernel.php</file>
         </exclude>
