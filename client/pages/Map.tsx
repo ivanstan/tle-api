@@ -69,7 +69,7 @@ export class Map extends AbstractPage<AbstractPagePropsInterface, Readonly<MapSt
     //
     // {
     //   marker: {
-    //     lat: response1.geodetic.latitude,
+    //       lat: response1.geodetic.latitude,
     //       lng: response1.geodetic.longitude,
     //   }
     // }
