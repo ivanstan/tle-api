@@ -26,6 +26,7 @@
     "computed-async-mobx": "^7.0.1-beta.1",
     "core-js": "^3.8.3",
     "date-fns": "^2.23.0",
+    "json-loader": "^0.5.7",
     "luxon": "^1.26.0",
     "mobx": "^6.1.5",
     "mobx-utils": "^6.0.4",
