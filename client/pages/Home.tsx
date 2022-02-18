@@ -130,8 +130,6 @@ class Home extends AbstractTlePage<any, HomeStateInterface> {
 
     const classes: any = this.props;
 
-    console.log(classes)
-
     return (
       <div className="container" id="home-page">
         <div className="row slide-container bg-white">
