@@ -91,6 +91,10 @@ final class ImportTleCommand extends Command
             $update = [];
 
             foreach ($file->parse() as $tle) {
+                if ($tle === null) {
+                    continue;
+                }
+
                 if (\array_key_exists($tle->getId(), $this->satellites)) {
                     $update[$tle->getId()] = $tle;
                 } else {
