@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source ./bin/.env.prod
+
+ssh -t ${USER}@${HOST} -p${PORT} -L 3306:127.0.0.1:3306 -N
