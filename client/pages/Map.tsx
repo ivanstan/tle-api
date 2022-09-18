@@ -14,6 +14,7 @@ import {MaterialUiPickersDate} from '@material-ui/pickers/typings/date'
 import AccessTimeIcon from '@material-ui/icons/AccessTime'
 import {getColor} from "../services/ColorPalette"
 import {AbstractPage, AbstractPagePropsInterface, AbstractPageStateInterface} from "./AbstractPage"
+import {TleMultiSelect} from "../components/TleMultiSelect";
 
 interface MapStateInterface extends AbstractPageStateInterface {
   satellites: any[]
@@ -121,10 +122,17 @@ export class Map extends AbstractPage<AbstractPagePropsInterface, Readonly<MapSt
   }
 
   render() {
+    const {satellites} = this.state
+
+    console.log(satellites)
+
+
     return (
       <>
         <Toolbar>
           <div style={{display: 'flex', flexDirection: 'row', width: '100%', alignItems: 'center'}}>
+            <TleMultiSelect/>
+
             <DateTimePicker
               style={{minWidth: 280}}
               label={null}

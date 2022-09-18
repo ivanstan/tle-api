@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+source ./bin/.env.prod
+
+ssh -t ${USER}@${HOST} -p${PORT} -i ~/.ssh/id_rsa "cd ${DEPLOY_PATH}; bash"
