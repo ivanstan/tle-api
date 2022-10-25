@@ -27,18 +27,18 @@
  */
 class Predict_Time
 {
-    /* The function Julian_Date_of_Epoch returns the Julian Date of     */
-    /* an epoch specified in the format used in the NORAD two-line      */
-    /* element sets. It has been modified to support dates beyond       */
-    /* the year 1999 assuming that two-digit years in the range 00-56   */
-    /* correspond to 2000-2056. Until the two-line element set format   */
+    /* The function Julian_Date_of_Epoch returns the Julian Date of */
+    /* an epoch specified in the format used in the NORAD two-line */
+    /* element sets. It has been modified to support dates beyond */
+    /* the year 1999 assuming that two-digit years in the range 00-56 */
+    /* correspond to 2000-2056. Until the two-line element set format */
     /* is changed, it is only valid for dates through 2056 December 31. */
     public static function Julian_Date_of_Epoch($epoch)
     {
         $year = 0;
 
         /* Modification to support Y2K */
-        /* Valid 1957 through 2056     */
+        /* Valid 1957 through 2056 */
         $day = self::modf($epoch * 1E-3, $year) * 1E3;
         if ($year < 57) {
             $year = $year + 2000;
@@ -51,14 +51,16 @@ class Predict_Time
     }
 
     /* Equivalent to the C modf function */
-    public static function modf($x, &$ipart) {
-        $ipart = (int)$x;
+    public static function modf($x, &$ipart)
+    {
+        $ipart = (int) $x;
+
         return $x - $ipart;
     }
 
-    /* The function Julian_Date_of_Year calculates the Julian Date  */
+    /* The function Julian_Date_of_Year calculates the Julian Date */
     /* of Day 0.0 of {year}. This function is used to calculate the */
-    /* Julian Date of any date by using Julian_Date_of_Year, DOY,   */
+    /* Julian Date of any date by using Julian_Date_of_Year, DOY, */
     /* and Fraction_of_Day. */
     public static function Julian_Date_of_Year($year)
     {
@@ -79,8 +81,8 @@ class Predict_Time
     /* The function ThetaG calculates the Greenwich Mean Sidereal Time */
     /* for an epoch specified in the format used in the NORAD two-line */
     /* element sets. It has now been adapted for dates beyond the year */
-    /* 1999, as described above. The function ThetaG_JD provides the   */
-    /* same calculation except that it is based on an input in the     */
+    /* 1999, as described above. The function ThetaG_JD provides the */
+    /* same calculation except that it is based on an input in the */
     /* form of a Julian Date. */
     public static function ThetaG($epoch, Predict_DeepArg $deep_arg)
     {
@@ -88,7 +90,7 @@ class Predict_Time
         // double year,day,UT,jd,TU,GMST,_ThetaG;
 
         /* Modification to support Y2K */
-        /* Valid 1957 through 2056     */
+        /* Valid 1957 through 2056 */
         $year = 0;
         $day = self::modf($epoch * 1E-3, $year) * 1E3;
 
@@ -113,9 +115,9 @@ class Predict_Time
     public static function ThetaG_JD($jd)
     {
         /* Reference:  The 1992 Astronomical Almanac, page B6. */
-        $UT   = Predict_Math::Frac($jd + 0.5);
-        $jd   = $jd - $UT;
-        $TU   = ($jd - 2451545.0) / 36525;
+        $UT = Predict_Math::Frac($jd + 0.5);
+        $jd = $jd - $UT;
+        $TU = ($jd - 2451545.0) / 36525;
         $GMST = 24110.54841 + $TU * (8640184.812866 + $TU * (0.093104 - $TU * 6.2E-6));
         $GMST = Predict_Math::Modulus($GMST + Predict::secday * Predict::omega_E * $UT, Predict::secday);
 
@@ -123,20 +125,22 @@ class Predict_Time
     }
 
     /**
-     * Read the system clock and return the current Julian day.  From phpPredict
+     * Read the system clock and return the current Julian day.  From phpPredict.
      *
      * @return float
      */
-    public static function get_current_daynum() {
+    public static function get_current_daynum()
+    {
         // Gets the current decimal day number from microtime
 
         list($usec, $sec) = explode(' ', microtime());
+
         return self::unix2daynum($sec, $usec);
     }
 
     /**
      * Converts a standard unix timestamp and optional
-     * milliseconds to a daynum
+     * milliseconds to a daynum.
      *
      * @param int $sec  Seconds from the unix epoch
      * @param int $usec Optional milliseconds
@@ -146,23 +150,24 @@ class Predict_Time
     public static function unix2daynum($sec, $usec = 0)
     {
         $time = ((($sec + $usec) / 86400.0) - 3651.0);
+
         return $time + 2444238.5;
     }
 
-    /* The function Delta_ET has been added to allow calculations on   */
+    /* The function Delta_ET has been added to allow calculations on */
     /* the position of the sun.  It provides the difference between UT */
-    /* (approximately the same as UTC) and ET (now referred to as TDT).*/
+    /* (approximately the same as UTC) and ET (now referred to as TDT). */
     /* This function is based on a least squares fit of data from 1950 */
     /* to 1991 and will need to be updated periodically. */
     public static function Delta_ET($year)
     {
-      /* Values determined using data from 1950-1991 in the 1990
-         Astronomical Almanac.  See DELTA_ET.WQ1 for details. */
+        /* Values determined using data from 1950-1991 in the 1990
+           Astronomical Almanac.  See DELTA_ET.WQ1 for details. */
 
-      $delta_et = 26.465 + 0.747622 * ($year - 1950) +
-                 1.886913 * sin(Predict::twopi * ($year - 1975) / 33);
+        $delta_et = 26.465 + 0.747622 * ($year - 1950) +
+                   1.886913 * sin(Predict::twopi * ($year - 1975) / 33);
 
-      return $delta_et;
+        return $delta_et;
     }
 
     /**
@@ -172,17 +177,18 @@ class Predict_Time
      *
      * @return float
      */
-    public static function daynum2unix($dn) {
+    public static function daynum2unix($dn)
+    {
         // Converts a daynum to a UNIX timestamp
 
-        return (86400.0 * ($dn - 2444238.5 + 3651.0));
+        return 86400.0 * ($dn - 2444238.5 + 3651.0);
     }
 
     /**
      * Converts a daynum to a readable time format.
      *
-     * @param float $dn The julian date
-     * @param string $zone The zone string, defaults to America/Los_Angeles
+     * @param float  $dn     The julian date
+     * @param string $zone   The zone string, defaults to America/Los_Angeles
      * @param string $format The date() function's format string.  Defaults to m-d-Y H:i:s
      *
      * @return string
@@ -190,23 +196,25 @@ class Predict_Time
     public static function daynum2readable($dn, $zone = 'America/Los_Angeles', $format = 'm-d-Y H:i:s')
     {
         $unix = self::daynum2unix($dn);
-        $date = new DateTime("@" . round($unix));
-        $dateTimezone = new DateTimezone($zone);
+        $date = new DateTime('@'.round($unix));
+        $dateTimezone = new DateTimeZone($zone);
         $date->setTimezone($dateTimezone);
+
         return $date->format($format);
     }
 
     public static function daynum2datetime($dn, $zone = 'UTC')
     {
         $unix = self::daynum2unix($dn);
-        $date = new DateTime("@" . round($unix));
-        $dateTimezone = new DateTimezone($zone);
+        $date = new DateTime('@'.round($unix));
+        $dateTimezone = new DateTimeZone($zone);
         $date->setTimezone($dateTimezone);
+
         return $date;
     }
 
     /**
-     * Returns the unix timestamp of a TLE's epoch
+     * Returns the unix timestamp of a TLE's epoch.
      *
      * @param Predict_TLE $tle The TLE object
      *
@@ -215,8 +223,8 @@ class Predict_Time
     public static function getEpochTimeStamp(Predict_TLE $tle)
     {
         $year = $tle->epoch_year;
-        $day  = $tle->epoch_day;
-        $sec  = round(86400 * $tle->epoch_fod);
+        $day = $tle->epoch_day;
+        $sec = round(86400 * $tle->epoch_fod);
 
         $zone = new DateTimeZone('GMT');
         $date = new DateTime();

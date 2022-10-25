@@ -37,7 +37,7 @@ class SentryCallbackTest extends TestCase
             ]
         );
 
-        /** @noinspection GetClassUsageInspection */
+        /* @noinspection GetClassUsageInspection */
         self::assertEquals(Event::class, get_class($callback($event)));
     }
 }

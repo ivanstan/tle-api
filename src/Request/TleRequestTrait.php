@@ -3,15 +3,15 @@
 namespace App\Request;
 
 use App\ViewModel\Filter;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\Validator\Constraints as Assert;
 
 trait TleRequestTrait
 {
     public function getExtra(): bool
     {
-        return (bool)$this->get(TleRequest::EXTRA_PARAM, false);
+        return (bool) $this->get(TleRequest::EXTRA_PARAM, false);
     }
 
     public function validate(ValidatorInterface $validator): ConstraintViolationListInterface

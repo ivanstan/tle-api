@@ -22,7 +22,7 @@ final class PropagateController extends AbstractApiController
         $this->propagator = new \Predict_SGPSDP();
     }
 
-    #[Route("/api/tle/{id}/propagate", name: "tle_propagate", requirements: ["id" => "\d+"])]
+    #[Route('/api/tle/{id}/propagate', name: 'tle_propagate', requirements: ['id' => "\d+"])]
     public function propagate(
         PropagateRequest $request,
         NormalizerInterface $normalizer

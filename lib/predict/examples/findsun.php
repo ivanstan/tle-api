@@ -2,15 +2,13 @@
 
 /**
  *  An example for looking up the current solar position in the sky from a given
- * location (elevation/azimuth)
+ * location (elevation/azimuth).
  */
-
-
 require_once 'Predict/Solar.php';
 require_once 'Predict/QTH.php';
 
 // Use current time in the form of a daynum
-$time   = time();
+$time = time();
 $daynum = Predict_Time::unix2daynum($time);
 
 // Set up the observer position on the ground
@@ -21,11 +19,11 @@ $qth->alt = 10; // Altitude above sea level in meters
 
 $sunInfo = Predict_Solar::FindSun($qth, $daynum);
 
-$output = array(
+$output = [
     'elevation' => $sunInfo->el,
-    'azimuth'   => $sunInfo->az,
-    'timestamp' => $time
-);
+    'azimuth' => $sunInfo->az,
+    'timestamp' => $time,
+];
 
 // output results
 echo json_encode($output);

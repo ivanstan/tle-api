@@ -13,10 +13,6 @@ class SatellitePassNormalizer implements NormalizerInterface
 
     /**
      * @param \Predict_Pass $object
-     * @param string|null $format
-     * @param array $context
-     *
-     * @return array
      */
     public function normalize($object, string $format = null, array $context = []): array
     {
@@ -52,7 +48,7 @@ class SatellitePassNormalizer implements NormalizerInterface
             foreach ($object->details as $item) {
                 $result['details'][] = [
                     'azimuth' => $item->az,
-                    'elevation' => $item->el
+                    'elevation' => $item->el,
                 ];
             }
         }

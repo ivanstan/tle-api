@@ -1,4 +1,6 @@
-<?php /** @noinspection HttpUrlsUsage */
+<?php
+
+/** @noinspection HttpUrlsUsage */
 
 namespace App\Command;
 
@@ -26,23 +28,23 @@ final class UpdateImportSources extends Command
     ];
 
     private const IGNORED = [
-        "https://celestrak.com/NORAD/elements/supplemental/starlink-V1.0-20.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/starlink.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/planet.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/oneweb.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/gps.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/glonass.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/meteosat.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/intelsat.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/ses.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/telesat.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/iss.rms.txt",
-        "https://nasa-public-data.s3.amazonaws.com/iss-coords/current/ISS_OEM/ISS.OEM_J2K_EPH.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/cpf.rms.txt",
-        "https://celestrak.com/NORAD/elements/supplemental/testcase/gps_2007_12_31_1300.txt",
-        "http://www.ngs.noaa.gov/orbits/sp3c.txt",
-        "https://celestrak.com/GPS/almanac/SEM/2007/almanac.sem.week0436.319488.txt",
-        "https://celestrak.com/GPS/almanac/SEM/almanac.sem.txt",
+        'https://celestrak.com/NORAD/elements/supplemental/starlink-V1.0-20.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/starlink.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/planet.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/oneweb.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/gps.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/glonass.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/meteosat.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/intelsat.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/ses.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/telesat.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/iss.rms.txt',
+        'https://nasa-public-data.s3.amazonaws.com/iss-coords/current/ISS_OEM/ISS.OEM_J2K_EPH.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/cpf.rms.txt',
+        'https://celestrak.com/NORAD/elements/supplemental/testcase/gps_2007_12_31_1300.txt',
+        'http://www.ngs.noaa.gov/orbits/sp3c.txt',
+        'https://celestrak.com/GPS/almanac/SEM/2007/almanac.sem.week0436.319488.txt',
+        'https://celestrak.com/GPS/almanac/SEM/almanac.sem.txt',
     ];
 
     private SymfonyStyle $io;
@@ -52,7 +54,7 @@ final class UpdateImportSources extends Command
     {
         $this->io = new SymfonyStyle($input, $output);
 
-        $sourceFile = $this->getProjectDir() . ImportTleCommand::SOURCE;
+        $sourceFile = $this->getProjectDir().ImportTleCommand::SOURCE;
 
         $this->sources = Yaml::parseFile($sourceFile);
 
@@ -66,14 +68,14 @@ final class UpdateImportSources extends Command
             return Command::SUCCESS;
         }
 
-        $this->io->writeln("");
-        $this->io->writeln(\sprintf("Following new tle sources found and written to %s", $sourceFile));
-        $this->io->writeln("");
+        $this->io->writeln('');
+        $this->io->writeln(\sprintf('Following new tle sources found and written to %s', $sourceFile));
+        $this->io->writeln('');
         foreach ($diff as $url) {
             $this->io->writeln($url);
         }
 
-        $this->io->writeln("");
+        $this->io->writeln('');
 
         $sources = array_merge($this->sources, $diff);
         sort($sources);
@@ -99,21 +101,21 @@ final class UpdateImportSources extends Command
                 $href = $anchor->getAttribute('href');
                 $path = parse_url($href, PHP_URL_PATH);
 
-                if ($path === null) {
+                if (null === $path) {
                     continue;
                 }
 
                 $extension = pathinfo($path, PATHINFO_EXTENSION);
 
-                if ($extension === 'txt') {
-                    if (parse_url($href, PHP_URL_HOST) === null) {
-                        /** @noinspection PhpArrayKeyDoesNotMatchArrayShapeInspection */
-                        if ($path[0] === '/') {
+                if ('txt' === $extension) {
+                    if (null === parse_url($href, PHP_URL_HOST)) {
+                        /* @noinspection PhpArrayKeyDoesNotMatchArrayShapeInspection */
+                        if ('/' === $path[0]) {
                             $scheme = parse_url($catalog, PHP_URL_SCHEME);
                             $host = parse_url($catalog, PHP_URL_HOST);
-                            $href = $scheme . '://' . $host . $href;
+                            $href = $scheme.'://'.$host.$href;
                         } else {
-                            $href = $catalog . trim($href, '/');
+                            $href = $catalog.trim($href, '/');
                         }
                     }
 
@@ -140,7 +142,7 @@ final class UpdateImportSources extends Command
         try {
             $response = (new Client())->request('GET', $url);
 
-            return $response->getStatusCode() === 200;
+            return 200 === $response->getStatusCode();
         } catch (\Exception) {
             return false;
         }

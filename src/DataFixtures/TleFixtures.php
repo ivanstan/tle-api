@@ -43,7 +43,7 @@ final class TleFixtures extends Fixture
         $manager->persist(self::createDeep());
 
         // create additional nine records with dummy satelliteIds
-        for ($satelliteId = 1; $satelliteId < 10; $satelliteId++) {
+        for ($satelliteId = 1; $satelliteId < 10; ++$satelliteId) {
             $tle = self::create();
             $tle->setId($satelliteId);
 

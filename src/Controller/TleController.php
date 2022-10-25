@@ -11,14 +11,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-#[Route("/api/tle")]
+#[Route('/api/tle')]
 final class TleController extends AbstractApiController
 {
     public function __construct(protected TleRepository $repository)
     {
     }
 
-    #[Route("/{id}", name: "tle_record", requirements: ["id" => "\d+"])]
+    #[Route('/{id}', name: 'tle_record', requirements: ['id' => "\d+"])]
     public function record(
         TleRequest $request,
         NormalizerInterface $normalizer,
@@ -31,7 +31,7 @@ final class TleController extends AbstractApiController
         );
     }
 
-    #[Route("/", name: "tle_collection")]
+    #[Route('/', name: 'tle_collection')]
     public function collection(
         TleCollectionRequest $request,
         NormalizerInterface $normalizer

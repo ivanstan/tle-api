@@ -45,7 +45,7 @@ class FlyOverService
         // Get the passes and filter visible only, takes about 4 seconds for 10 days
         $passes = $this->predict->get_passes($this->sat, $this->qth, \Predict_Time::unix2daynum($date->getTimestamp()), 10);
 
-        if($filterVisible) {
+        if ($filterVisible) {
             return $this->predict->filterVisiblePasses($passes);
         }
 

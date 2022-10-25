@@ -17,10 +17,6 @@ class TleModelNormalizer implements NormalizerInterface
 
     /**
      * @param Tle $object
-     * @param string|null $format
-     * @param array $context
-     *
-     * @return array
      */
     public function normalize($object, ?string $format = null, array $context = []): array
     {

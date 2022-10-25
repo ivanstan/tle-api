@@ -9,16 +9,17 @@ class FlyOverRequest extends TleRequest
 {
     use DateTimeDependantRequest;
 
-    public function filterVisible(): bool {
-        return (bool)$this->get('only_visible', true);
+    public function filterVisible(): bool
+    {
+        return (bool) $this->get('only_visible', true);
     }
 
     public function getObserver(): Observer
     {
         try {
             return new Observer(
-                (float)$this->get('latitude', 0),
-                (float)$this->get('longitude', 0),
+                (float) $this->get('latitude', 0),
+                (float) $this->get('longitude', 0),
                 0,
                 $this->getDateTime(),
             );

@@ -45,11 +45,11 @@ class TleRepository extends EntityRepository
 
         // filters
         foreach ($filters as $index => $filter) {
-            if ($filter->type === Filter::FILTER_TYPE_ARRAY) {
+            if (Filter::FILTER_TYPE_ARRAY === $filter->type) {
                 $paramName = \sprintf('param_%d', $index);
 
                 $builder
-                    ->andWhere(\sprintf("%s IN (:%s)", $this->getSortTableColumnMapping($filter->filter), $paramName))
+                    ->andWhere(\sprintf('%s IN (:%s)', $this->getSortTableColumnMapping($filter->filter), $paramName))
                     ->setParameter($paramName, $filter->value);
 
                 continue;
@@ -61,7 +61,7 @@ class TleRepository extends EntityRepository
         }
 
         // sort
-        if ($sort === TleCollectionSortableFieldsEnum::POPULARITY) {
+        if (TleCollectionSortableFieldsEnum::POPULARITY === $sort) {
             $before = (new \DateTime())->sub(new \DateInterval('P7D'));
             $builder->leftJoin(Request::class, 's', Expr\Join::WITH, 's.tle = tle.id AND s.createdAt < :date');
             $builder->setParameter('date', $before);

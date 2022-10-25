@@ -45,7 +45,7 @@ class StatisticSubscriber implements EventSubscriberInterface
         /** @var Tle|null $tle */
         $tle = $this->tleRepository->find($event->getRequest()->get('id'));
 
-        if ($tle === null) {
+        if (null === $tle) {
             return;
         }
 

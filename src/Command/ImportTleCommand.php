@@ -47,14 +47,14 @@ final class ImportTleCommand extends Command
     /** @noinspection PhpMissingParentCallCommonInspection */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $showProgress = $input->getOption(self::OPTION_NO_PROGRESS) === false;
+        $showProgress = false === $input->getOption(self::OPTION_NO_PROGRESS);
 
         $this->satellites = $this->repository->fetchAllIndexed();
 
         $totalInsert = 0;
         $totalUpdate = 0;
 
-        $sources = Yaml::parseFile($this->getProjectDir() . self::SOURCE);
+        $sources = Yaml::parseFile($this->getProjectDir().self::SOURCE);
 
         if ($showProgress) {
             $progressBar = new ProgressBar($output, \count($sources));
@@ -62,7 +62,7 @@ final class ImportTleCommand extends Command
         }
 
         foreach ($sources as $uri) {
-            /** @noinspection DisconnectedForeachInstructionInspection */
+            /* @noinspection DisconnectedForeachInstructionInspection */
             if (isset($progressBar)) {
                 $progressBar->advance();
             }
@@ -91,7 +91,7 @@ final class ImportTleCommand extends Command
             $update = [];
 
             foreach ($file->parse() as $tle) {
-                if ($tle === null) {
+                if (null === $tle) {
                     continue;
                 }
 

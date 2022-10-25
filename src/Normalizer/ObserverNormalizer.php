@@ -14,10 +14,7 @@ class ObserverNormalizer implements NormalizerInterface
 
     /**
      * @param Observer $object
-     * @param string|null $format
-     * @param array $context
      *
-     * @return array
      * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
      */
     public function normalize($object, string $format = null, array $context = []): array

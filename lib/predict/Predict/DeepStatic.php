@@ -1,6 +1,6 @@
 <?php
 /**
- *  Port of deep_static_t struct from sgp4sdp4.h
+ *  Port of deep_static_t struct from sgp4sdp4.h.
  */
 
 /* static data for DEEP */

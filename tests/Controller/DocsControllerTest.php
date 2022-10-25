@@ -22,7 +22,7 @@ final class DocsControllerTest extends AbstractWebTestCase
 
         $tle = TleFixtures::create();
 
-        $response = $this->toArray($this->get('/api/tle/' . $tle->getId()));
+        $response = $this->toArray($this->get('/api/tle/'.$tle->getId()));
 
         self::assertCount(\count($tleSchema), $response);
         self::assertEquals(array_keys($tleSchema), array_keys($response));
@@ -36,7 +36,8 @@ final class DocsControllerTest extends AbstractWebTestCase
         self::assertEquals(array_keys($response), array_keys($collectionSchema));
     }
 
-    public function testHomepage(): void {
+    public function testHomepage(): void
+    {
         $response = $this->get('/api/tle/docs');
 
         self::assertEmpty($response->getContent());
