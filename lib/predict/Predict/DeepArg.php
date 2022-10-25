@@ -1,6 +1,6 @@
 <?php
 /**
- *  Port of deep_arg_t struct from sgp4sdp4.h
+ *  Port of deep_arg_t struct from sgp4sdp4.h.
  */
 
 /* Common arguments between deep-space functions */

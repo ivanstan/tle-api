@@ -2,7 +2,7 @@
 /**
  * An example of looking up the lat/lon of the sun for putting on a map.
  * "dark" lat/lon is the anti-solar point, useful for drawing a
- * "solar terminator"
+ * "solar terminator".
  */
 
 // No autoloading here, require needed files
@@ -12,12 +12,11 @@ require_once 'Predict/Math.php';
 require_once 'Predict/Time.php';
 
 // Set up data constructs
-$solar_vector   = new Predict_Vector();
+$solar_vector = new Predict_Vector();
 $solar_geodetic = new Predict_Geodetic();
 
-
 // Use current time in the form of a daynum
-$time   = time();
+$time = time();
 $daynum = Predict_Time::unix2daynum($time);
 
 // Do calculations
@@ -32,13 +31,13 @@ $solar_lon = Predict_Math::Degrees($solar_geodetic->lon);
 $dark_lat = -$solar_lat;
 $dark_lon = -$solar_lon;
 
-$output = array(
+$output = [
     'solar_lat' => $solar_lat,
     'solar_lon' => $solar_lon,
-    'dark_lat'  => $dark_lat,
-    'dark_lon'  => $dark_lon,
-    'timestamp' => $time
-);
+    'dark_lat' => $dark_lat,
+    'dark_lon' => $dark_lon,
+    'timestamp' => $time,
+];
 
 // output results
 var_dump(json_encode($output));

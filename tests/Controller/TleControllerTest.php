@@ -33,7 +33,7 @@ class TleControllerTest extends AbstractWebTestCase
     {
         $tle = TleFixtures::createDeep();
 
-        $response = $this->get('/api/tle/' . $tle->getId(), ['extra' => 1]);
+        $response = $this->get('/api/tle/'.$tle->getId(), ['extra' => 1]);
 
         $response = $this->toArray($response);
 
@@ -46,7 +46,7 @@ class TleControllerTest extends AbstractWebTestCase
     {
         $tle = TleFixtures::create();
 
-        $response = $this->get('/api/tle/' . $tle->getId(), ['extra' => 1]);
+        $response = $this->get('/api/tle/'.$tle->getId(), ['extra' => 1]);
 
         $response = $this->toArray($response);
 

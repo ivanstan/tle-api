@@ -41,72 +41,72 @@
  */
 class Predict
 {
-    const de2ra    =  1.74532925E-2;   /* Degrees to Radians */
-    const pi       =  3.1415926535898; /* Pi */
-    const pio2     =  1.5707963267949; /* Pi/2 */
-    const x3pio2   =  4.71238898;      /* 3*Pi/2 */
-    const twopi    =  6.2831853071796; /* 2*Pi  */
-    const e6a      =  1.0E-6;
-    const tothrd   =  6.6666667E-1;    /* 2/3 */
-    const xj2      =  1.0826158E-3;    /* J2 Harmonic */
-    const xj3      = -2.53881E-6;      /* J3 Harmonic */
-    const xj4      = -1.65597E-6;      /* J4 Harmonic */
-    const xke      =  7.43669161E-2;
-    const xkmper   =  6.378135E3;      /* Earth radius km */
-    const xmnpda   =  1.44E3;          /* Minutes per day */
-    const km2mi    =  0.621371;        /* Kilometers per Mile */
-    const ae       =  1.0;
-    const ck2      =  5.413079E-4;
-    const ck4      =  6.209887E-7;
-    const __f      =  3.352779E-3;
-    const ge       =  3.986008E5;
-    const __s__    =  1.012229;
-    const qoms2t   =  1.880279E-09;
-    const secday   =  8.6400E4;        /* Seconds per day */
-    const omega_E  =  1.0027379;
-    const omega_ER =  6.3003879;
-    const zns      =  1.19459E-5;
-    const c1ss     =  2.9864797E-6;
-    const zes      =  1.675E-2;
-    const znl      =  1.5835218E-4;
-    const c1l      =  4.7968065E-7;
-    const zel      =  5.490E-2;
-    const zcosis   =  9.1744867E-1;
-    const zsinis   =  3.9785416E-1;
-    const zsings   = -9.8088458E-1;
-    const zcosgs   =  1.945905E-1;
-    const zcoshs   =  1;
-    const zsinhs   =  0;
-    const q22      =  1.7891679E-6;
-    const q31      =  2.1460748E-6;
-    const q33      =  2.2123015E-7;
-    const g22      =  5.7686396;
-    const g32      =  9.5240898E-1;
-    const g44      =  1.8014998;
-    const g52      =  1.0508330;
-    const g54      =  4.4108898;
-    const root22   =  1.7891679E-6;
-    const root32   =  3.7393792E-7;
-    const root44   =  7.3636953E-9;
-    const root52   =  1.1428639E-7;
-    const root54   =  2.1765803E-9;
-    const thdt     =  4.3752691E-3;
-    const rho      =  1.5696615E-1;
-    const mfactor  =  7.292115E-5;
-    const __sr__   =  6.96000E5;      /*Solar radius - kilometers (IAU 76)*/
-    const AU       =  1.49597870E8;   /*Astronomical unit - kilometers (IAU 76)*/
+    public const de2ra = 1.74532925E-2;   /* Degrees to Radians */
+    public const pi = 3.1415926535898; /* Pi */
+    public const pio2 = 1.5707963267949; /* Pi/2 */
+    public const x3pio2 = 4.71238898;      /* 3*Pi/2 */
+    public const twopi = 6.2831853071796; /* 2*Pi */
+    public const e6a = 1.0E-6;
+    public const tothrd = 6.6666667E-1;    /* 2/3 */
+    public const xj2 = 1.0826158E-3;    /* J2 Harmonic */
+    public const xj3 = -2.53881E-6;      /* J3 Harmonic */
+    public const xj4 = -1.65597E-6;      /* J4 Harmonic */
+    public const xke = 7.43669161E-2;
+    public const xkmper = 6.378135E3;      /* Earth radius km */
+    public const xmnpda = 1.44E3;          /* Minutes per day */
+    public const km2mi = 0.621371;        /* Kilometers per Mile */
+    public const ae = 1.0;
+    public const ck2 = 5.413079E-4;
+    public const ck4 = 6.209887E-7;
+    public const __f = 3.352779E-3;
+    public const ge = 3.986008E5;
+    public const __s__ = 1.012229;
+    public const qoms2t = 1.880279E-09;
+    public const secday = 8.6400E4;        /* Seconds per day */
+    public const omega_E = 1.0027379;
+    public const omega_ER = 6.3003879;
+    public const zns = 1.19459E-5;
+    public const c1ss = 2.9864797E-6;
+    public const zes = 1.675E-2;
+    public const znl = 1.5835218E-4;
+    public const c1l = 4.7968065E-7;
+    public const zel = 5.490E-2;
+    public const zcosis = 9.1744867E-1;
+    public const zsinis = 3.9785416E-1;
+    public const zsings = -9.8088458E-1;
+    public const zcosgs = 1.945905E-1;
+    public const zcoshs = 1;
+    public const zsinhs = 0;
+    public const q22 = 1.7891679E-6;
+    public const q31 = 2.1460748E-6;
+    public const q33 = 2.2123015E-7;
+    public const g22 = 5.7686396;
+    public const g32 = 9.5240898E-1;
+    public const g44 = 1.8014998;
+    public const g52 = 1.0508330;
+    public const g54 = 4.4108898;
+    public const root22 = 1.7891679E-6;
+    public const root32 = 3.7393792E-7;
+    public const root44 = 7.3636953E-9;
+    public const root52 = 1.1428639E-7;
+    public const root54 = 2.1765803E-9;
+    public const thdt = 4.3752691E-3;
+    public const rho = 1.5696615E-1;
+    public const mfactor = 7.292115E-5;
+    public const __sr__ = 6.96000E5;      /* Solar radius - kilometers (IAU 76) */
+    public const AU = 1.49597870E8;   /* Astronomical unit - kilometers (IAU 76) */
 
     /* visibility constants */
-    const SAT_VIS_NONE     = 0;
-    const SAT_VIS_VISIBLE  = 1;
-    const SAT_VIS_DAYLIGHT = 2;
-    const SAT_VIS_ECLIPSED = 3;
+    public const SAT_VIS_NONE = 0;
+    public const SAT_VIS_VISIBLE = 1;
+    public const SAT_VIS_DAYLIGHT = 2;
+    public const SAT_VIS_ECLIPSED = 3;
 
     /* preferences */
-    public $minEle     = 10; // Minimum elevation
-    public $timeRes    = 10; // Pass details: time resolution
+    public $minEle = 10; // Minimum elevation
+    public $timeRes = 10; // Pass details: time resolution
     public $numEntries = 20; // Pass details: number of entries
-    public $threshold  = -6; // Twilight threshold
+    public $threshold = -6; // Twilight threshold
 
     /**
      *  Predict the next pass.
@@ -118,12 +118,12 @@ class Predict
      *       by the caller, if the caller will need it later on (eg. if the caller
      *       is GtkSatList).
      *
-     * @param Predict_Sat $sat   The satellite data.
-     * @param Predict_QTH $qth   The observer data.
-     * @param int         $maxdt The maximum number of days to look ahead.
+     * @param Predict_Sat $sat   the satellite data
+     * @param Predict_QTH $qth   the observer data
+     * @param int         $maxdt the maximum number of days to look ahead
      *
-     * @return Predict_Pass Pointer instance or NULL if no pass can be
-     *         found.
+     * @return Predict_Pass pointer instance or NULL if no pass can be
+     *                      found
      */
     public function get_next_pass(Predict_Sat $sat, Predict_QTH $qth, $maxdt)
     {
@@ -135,10 +135,10 @@ class Predict
 
     /** Predict first pass after a certain time.
      *
-     *  @param Predict_Sat $sat   The satellite data.
-     *  @param Predict_QTH $qth   The observer's location data.
-     *  @param float       $start Starting time.
-     *  @param int         $maxdt The maximum number of days to look ahead (0 for no limit).
+     *  @param Predict_Sat $sat   the satellite data
+     *  @param Predict_QTH $qth   the observer's location data
+     *  @param float       $start starting time
+     *  @param int         $maxdt the maximum number of days to look ahead (0 for no limit)
      *
      *  @return Predict_Pass or NULL if there was an error.
      *
@@ -166,8 +166,8 @@ class Predict
         $iter = 0;      /* number of iterations */
         /* FIXME: watchdog */
 
-        /*copy sat_in to a working structure*/
-        $sat         = clone $sat_in;
+        /* copy sat_in to a working structure */
+        $sat = clone $sat_in;
         $sat_working = clone $sat_in;
 
         /* get time resolution; sat-cfg stores it in seconds */
@@ -182,11 +182,11 @@ class Predict
             $los = $this->find_los($sat, $qth, $t0, $maxdt); // See if a pass is ongoing
             $aos = $this->find_aos($sat, $qth, $t0, $maxdt);
             /* sat_log_log(SAT_LOG_LEVEL_MSG, "%s:%s:%d: found aos %f and los %f for t0=%f", */
-            /*          __FILE__,  */
+            /*          __FILE__, */
             /*          __FUNCTION__, */
             /*          __LINE__, */
             /*          aos, */
-            /*          los,  */
+            /*          los, */
             /*          t0); */
             if ($aos > $los) {
                 // los is from an currently happening pass, find previous aos
@@ -194,15 +194,15 @@ class Predict
             }
 
             /* aos = 0.0 means no aos */
-            if ($aos == 0.0) {
+            if (0.0 == $aos) {
                 $done = true;
-            } else if (($maxdt > 0.0) && ($aos > ($start + $maxdt)) ) {
+            } elseif (($maxdt > 0.0) && ($aos > ($start + $maxdt))) {
                 /* check whether we are within time limits;
                     maxdt = 0 mean no time limit.
                 */
                 $done = true;
             } else {
-                //los = find_los (sat, qth, aos + 0.001, maxdt); // +1.5 min later
+                // los = find_los (sat, qth, aos + 0.001, maxdt); // +1.5 min later
                 $dt = $los - $aos;
 
                 /* get time step, which will give us the max number of entries */
@@ -218,19 +218,18 @@ class Predict
                 /* create a pass_t entry; FIXME: g_try_new in 2.8 */
                 $pass = new Predict_Pass();
 
-                $pass->aos      = $aos;
-                $pass->los      = $los;
-                $pass->max_el   = 0.0;
-                $pass->aos_az   = 0.0;
-                $pass->los_az   = 0.0;
+                $pass->aos = $aos;
+                $pass->los = $los;
+                $pass->max_el = 0.0;
+                $pass->aos_az = 0.0;
+                $pass->los_az = 0.0;
                 $pass->maxel_az = 0.0;
-                $pass->vis      = '---';
-                $pass->satname  = $sat->nickname;
-                $pass->details  = array();
+                $pass->vis = '---';
+                $pass->satname = $sat->nickname;
+                $pass->details = [];
 
                 /* iterate over each time step */
                 for ($t = $pass->aos; $t <= $pass->los; $t += $step) {
-
                     /* calculate satellite data */
                     $this->predict_calc($sat, $qth, $t);
 
@@ -239,33 +238,33 @@ class Predict
                     */
                     if ($t == $pass->aos) {
                         $pass->aos_az = $sat->az;
-                        $pass->orbit  = $sat->orbit;
+                        $pass->orbit = $sat->orbit;
                     }
 
                     /* append details to sat->details */
-                    $detail             = new Predict_PassDetail();
-                    $detail->time       = $t;
-                    $detail->pos->x     = $sat->pos->x;
-                    $detail->pos->y     = $sat->pos->y;
-                    $detail->pos->z     = $sat->pos->z;
-                    $detail->pos->w     = $sat->pos->w;
-                    $detail->vel->x     = $sat->vel->x;
-                    $detail->vel->y     = $sat->vel->y;
-                    $detail->vel->z     = $sat->vel->z;
-                    $detail->vel->w     = $sat->vel->w;
-                    $detail->velo       = $sat->velo;
-                    $detail->az         = $sat->az;
-                    $detail->el         = $sat->el;
-                    $detail->range      = $sat->range;
+                    $detail = new Predict_PassDetail();
+                    $detail->time = $t;
+                    $detail->pos->x = $sat->pos->x;
+                    $detail->pos->y = $sat->pos->y;
+                    $detail->pos->z = $sat->pos->z;
+                    $detail->pos->w = $sat->pos->w;
+                    $detail->vel->x = $sat->vel->x;
+                    $detail->vel->y = $sat->vel->y;
+                    $detail->vel->z = $sat->vel->z;
+                    $detail->vel->w = $sat->vel->w;
+                    $detail->velo = $sat->velo;
+                    $detail->az = $sat->az;
+                    $detail->el = $sat->el;
+                    $detail->range = $sat->range;
                     $detail->range_rate = $sat->range_rate;
-                    $detail->lat        = $sat->ssplat;
-                    $detail->lon        = $sat->ssplon;
-                    $detail->alt        = $sat->alt;
-                    $detail->ma         = $sat->ma;
-                    $detail->phase      = $sat->phase;
-                    $detail->footprint  = $sat->footprint;
-                    $detail->orbit      = $sat->orbit;
-                    $detail->vis        = $this->get_sat_vis($sat, $qth, $t);
+                    $detail->lat = $sat->ssplat;
+                    $detail->lon = $sat->ssplon;
+                    $detail->alt = $sat->alt;
+                    $detail->ma = $sat->ma;
+                    $detail->phase = $sat->phase;
+                    $detail->footprint = $sat->footprint;
+                    $detail->orbit = $sat->orbit;
+                    $detail->vis = $this->get_sat_vis($sat, $qth, $t);
 
                     /* also store visibility "bit" */
                     switch ($detail->vis) {
@@ -287,9 +286,9 @@ class Predict
                     $pass->details[] = $detail;
 
                     // Look up apparent magnitude if this is a visible pass
-                    if ($detail->vis === self::SAT_VIS_VISIBLE) {
+                    if (self::SAT_VIS_VISIBLE === $detail->vis) {
                         $apmag = $sat->calculateApparentMagnitude($t, $qth);
-                        if ($pass->max_apparent_magnitude === null || $apmag < $pass->max_apparent_magnitude) {
+                        if (null === $pass->max_apparent_magnitude || $apmag < $pass->max_apparent_magnitude) {
                             $pass->max_apparent_magnitude = $apmag;
                         }
                     }
@@ -298,8 +297,8 @@ class Predict
                         previously stored one
                     */
                     if ($sat->el > $max_el) {
-                        $max_el         = $sat->el;
-                        $tca            = $t;
+                        $max_el = $sat->el;
+                        $tca = $t;
                         $pass->maxel_az = $sat->az;
                     }
 
@@ -312,7 +311,7 @@ class Predict
                 /* store los_az, max_el and tca */
                 $pass->los_az = $sat->az;
                 $pass->max_el = $max_el;
-                $pass->tca    = $tca;
+                $pass->tca = $tca;
 
                 /* check whether this pass is good */
                 if ($max_el >= $this->minEle) {
@@ -323,7 +322,7 @@ class Predict
                     $pass = null;
                 }
 
-                $iter++;
+                ++$iter;
             }
         }
 
@@ -333,9 +332,9 @@ class Predict
     /**
      * Calculate satellite visibility.
      *
-     * @param Predict_Sat $sat     The satellite structure.
+     * @param Predict_Sat $sat     the satellite structure
      * @param Predict_QTH $qth     The QTH
-     * @param float       $jul_utc The time at which the visibility should be calculated.
+     * @param float       $jul_utc the time at which the visibility should be calculated
      *
      * @return int The visiblity constant, 0, 1, 2, or 3 (see above)
      */
@@ -347,20 +346,20 @@ class Predict
         gdouble  eclipse_depth;
         sat_vis_t vis = SAT_VIS_NONE; */
 
-        $eclipse_depth  = 0.0;
-        $zero_vector    = new Predict_Vector();
-        $obs_geodetic   = new Predict_Geodetic();
+        $eclipse_depth = 0.0;
+        $zero_vector = new Predict_Vector();
+        $obs_geodetic = new Predict_Geodetic();
 
-        /* Solar ECI position vector  */
+        /* Solar ECI position vector */
         $solar_vector = new Predict_Vector();
 
-        /* Solar observed az and el vector  */
+        /* Solar observed az and el vector */
         $solar_set = new Predict_ObsSet();
 
         /* FIXME: could be passed as parameter */
-        $obs_geodetic->lon   = $qth->lon * self::de2ra;
-        $obs_geodetic->lat   = $qth->lat * self::de2ra;
-        $obs_geodetic->alt   = $qth->alt / 1000.0;
+        $obs_geodetic->lon = $qth->lon * self::de2ra;
+        $obs_geodetic->lat = $qth->lat * self::de2ra;
+        $obs_geodetic->alt = $qth->alt / 1000.0;
         $obs_geodetic->theta = 0;
 
         Predict_Solar::Calculate_Solar_Position($jul_utc, $solar_vector);
@@ -392,10 +391,12 @@ class Predict
     /** Find the AOS time of the next pass.
      *  @author Alexandru Csete, OZ9AEC
      *  @author John A. Magliacane, KD2BD
-     *  @param Predict_Sat $sat   The satellite data.
-     *  @param Predict_QTH $qth   The observer's location (QTH) data.
-     *  @param float       $start The julian date where calculation should start.
+     *
+     *  @param Predict_Sat $sat   the satellite data
+     *  @param Predict_QTH $qth   the observer's location (QTH) data
+     *  @param float       $start the julian date where calculation should start
      *  @param int         $maxdt The upper time limit in days (0.0 = no limit)
+     *
      *  @return The julain date of the next AOS or 0.0 if the satellite has no AOS.
      *
      * This function finds the time of AOS for the first coming pass taking place
@@ -403,13 +404,11 @@ class Predict
      * If the satellite is currently within range, the function first calls
      * find_los to get the next LOS time. Then the calculations are done using
      * the new start time.
-     *
      */
     public function find_aos(Predict_Sat $sat, Predict_QTH $qth, $start, $maxdt)
     {
         $t = $start;
         $aostime = 0.0;
-
 
         /* make sure current sat values are
             in sync with the time
@@ -417,10 +416,9 @@ class Predict
         $this->predict_calc($sat, $qth, $start);
 
         /* check whether satellite has aos */
-        if (($sat->otype == Predict_SGPSDP::ORBIT_TYPE_GEO) ||
-            ($sat->otype == Predict_SGPSDP::ORBIT_TYPE_DECAYED) ||
+        if ((Predict_SGPSDP::ORBIT_TYPE_GEO == $sat->otype) ||
+            (Predict_SGPSDP::ORBIT_TYPE_DECAYED == $sat->otype) ||
             !$this->has_aos($sat, $qth)) {
-
             return 0.0;
         }
 
@@ -438,7 +436,6 @@ class Predict
 
         /* use upper time limit */
         if ($maxdt > 0.0) {
-
             /* coarse time steps */
             while (($sat->el < -1.0) && ($t <= ($start + $maxdt))) {
                 $t -= 0.00035 * ($sat->el * (($sat->alt / 8400.0) + 0.46) - 2.0);
@@ -446,8 +443,7 @@ class Predict
             }
 
             /* fine steps */
-            while (($aostime == 0.0) && ($t <= ($start + $maxdt))) {
-
+            while ((0.0 == $aostime) && ($t <= ($start + $maxdt))) {
                 if (abs($sat->el) < 0.005) {
                     $aostime = $t;
                 } else {
@@ -460,21 +456,18 @@ class Predict
 
             /* coarse time steps */
             while ($sat->el < -1.0) {
-
                 $t -= 0.00035 * ($sat->el * (($sat->alt / 8400.0) + 0.46) - 2.0);
                 $this->predict_calc($sat, $qth, $t);
             }
 
             /* fine steps */
-            while ($aostime == 0.0) {
-
+            while (0.0 == $aostime) {
                 if (abs($sat->el) < 0.005) {
                     $aostime = $t;
                 } else {
                     $t -= $sat->el * sqrt($sat->alt) / 530000.0;
                     $this->predict_calc($sat, $qth, $t);
                 }
-
             }
         }
 
@@ -482,20 +475,19 @@ class Predict
     }
 
     /** SGP4SDP4 driver for doing AOS/LOS calculations.
-     *  @param Predict_Sat $sat The satellite data.
-     *  @param Predict_QTH $qth The QTH observer location data.
+     *  @param Predict_Sat $sat the satellite data
+     *  @param Predict_QTH $qth the QTH observer location data
      *  @param float       $t   The time for calculation (Julian Date)
-     *
      */
     public function predict_calc(Predict_Sat $sat, Predict_QTH $qth, $t)
     {
-        $obs_set      = new Predict_ObsSet();
+        $obs_set = new Predict_ObsSet();
         $sat_geodetic = new Predict_Geodetic();
         $obs_geodetic = new Predict_Geodetic();
 
-        $obs_geodetic->lon   = $qth->lon * self::de2ra;
-        $obs_geodetic->lat   = $qth->lat * self::de2ra;
-        $obs_geodetic->alt   = $qth->alt / 1000.0;
+        $obs_geodetic->lon = $qth->lon * self::de2ra;
+        $obs_geodetic->lat = $qth->lat * self::de2ra;
+        $obs_geodetic->alt = $qth->alt / 1000.0;
         $obs_geodetic->theta = 0;
 
         $sat->jul_utc = $t;
@@ -521,7 +513,7 @@ class Predict
             $sat_geodetic->lon += self::twopi;
         }
 
-        while ($sat_geodetic->lon > (self::pi)) {
+        while ($sat_geodetic->lon > self::pi) {
             $sat_geodetic->lon -= self::twopi;
         }
 
@@ -537,7 +529,7 @@ class Predict
         $sat->phase = Predict_Math::Degrees($sat->phase);
 
         /* same formulas, but the one from predict is nicer */
-        //sat->footprint = 2.0 * xkmper * acos (xkmper/sat->pos.w);
+        // sat->footprint = 2.0 * xkmper * acos (xkmper/sat->pos.w);
         $sat->footprint = 12756.33 * acos(self::xkmper / (self::xkmper + $sat->alt));
         $age = $sat->jul_utc - $sat->jul_epoch;
         $sat->orbit = floor(($sat->tle->xno * self::xmnpda / self::twopi +
@@ -548,10 +540,12 @@ class Predict
     /** Find the LOS time of the next pass.
      *  @author Alexandru Csete, OZ9AEC
      *  @author John A. Magliacane, KD2BD
-     *  @param Predict_Sat $sat The satellite data.
-     *  @param Predict_QTH $qth The QTH observer location data.
+     *
+     *  @param Predict_Sat $sat the satellite data
+     *  @param Predict_QTH $qth the QTH observer location data
      *  @param float       $start The time where calculation should start. (Julian Date)
      *  @param int         $maxdt The upper time limit in days (0.0 = no limit)
+     *
      *  @return The time (julian date) of the next LOS or 0.0 if the satellite has no LOS.
      *
      * This function finds the time of LOS for the first coming pass taking place
@@ -561,21 +555,18 @@ class Predict
      * the new start time.
      * The function has a built-in watchdog to ensure that we don't end up in
      * lengthy loops.
-     *
      */
     public function find_los(Predict_Sat $sat, Predict_QTH $qth, $start, $maxdt)
     {
         $t = $start;
         $lostime = 0.0;
 
-
         $this->predict_calc($sat, $qth, $start);
 
         /* check whether satellite has aos */
-        if (($sat->otype == Predict_SGPSDP::ORBIT_TYPE_GEO) ||
-            ($sat->otype == Predict_SGPSDP::ORBIT_TYPE_DECAYED) ||
-            !$this->has_aos ($sat, $qth)) {
-
+        if ((Predict_SGPSDP::ORBIT_TYPE_GEO == $sat->otype) ||
+            (Predict_SGPSDP::ORBIT_TYPE_DECAYED == $sat->otype) ||
+            !$this->has_aos($sat, $qth)) {
             return 0.0;
         }
 
@@ -593,7 +584,6 @@ class Predict
 
         /* use upper time limit */
         if ($maxdt > 0.0) {
-
             /* coarse steps */
             while (($sat->el >= 1.0) && ($t <= ($start + $maxdt))) {
                 $t += cos(($sat->el - 1.0) * self::de2ra) * sqrt($sat->alt) / 25000.0;
@@ -601,8 +591,7 @@ class Predict
             }
 
             /* fine steps */
-            while (($lostime == 0.0) && ($t <= ($start + $maxdt)))  {
-
+            while ((0.0 == $lostime) && ($t <= ($start + $maxdt))) {
                 $t += $sat->el * sqrt($sat->alt) / 502500.0;
                 $this->predict_calc($sat, $qth, $t);
 
@@ -611,7 +600,7 @@ class Predict
                 }
             }
         } else {
-        /* don't use upper limit */
+            /* don't use upper limit */
 
             /* coarse steps */
             while ($sat->el >= 1.0) {
@@ -620,13 +609,13 @@ class Predict
             }
 
             /* fine steps */
-            while ($lostime == 0.0) {
-
+            while (0.0 == $lostime) {
                 $t += $sat->el * sqrt($sat->alt) / 502500.0;
                 $this->predict_calc($sat, $qth, $t);
 
-                if (abs($sat->el) < 0.005)
+                if (abs($sat->el) < 0.005) {
                     $lostime = $t;
+                }
             }
         }
 
@@ -634,9 +623,10 @@ class Predict
     }
 
     /** Find AOS time of current pass.
-     *  @param Predict_Sat $sat   The satellite to find AOS for.
-     *  @param Predict_QTH $qth   The ground station.
-     *  @param float       $start Start time, prefereably now.
+     *  @param Predict_Sat $sat   the satellite to find AOS for
+     *  @param Predict_QTH $qth   the ground station
+     *  @param float       $start start time, prefereably now
+     *
      *  @return The time of the previous AOS or 0.0 if the satellite has no AOS.
      *
      * This function can be used to find the AOS time in the past of the
@@ -652,10 +642,9 @@ class Predict
         $this->predict_calc($sat, $qth, $start);
 
         /* check whether satellite has aos */
-        if (($sat->otype == Predict_SGPSDP::ORBIT_TYPE_GEO) ||
-            ($sat->otype == Predict_SGPSDP::ORBIT_TYPE_DECAYED) ||
+        if ((Predict_SGPSDP::ORBIT_TYPE_GEO == $sat->otype) ||
+            (Predict_SGPSDP::ORBIT_TYPE_DECAYED == $sat->otype) ||
             !$this->has_aos($sat, $qth)) {
-
             return 0.0;
         }
 
@@ -670,20 +659,20 @@ class Predict
     /** Determine whether satellite ever reaches AOS.
      *  @author John A. Magliacane, KD2BD
      *  @author Alexandru Csete, OZ9AEC
-     *  @param Predict_Sat $sat The satellite data.
-     *  @param Predict_QTH $qth The observer's location data
-     *  @return bool true if the satellite will reach AOS, false otherwise.
      *
+     *  @param Predict_Sat $sat the satellite data
+     *  @param Predict_QTH $qth The observer's location data
+     *
+     *  @return bool true if the satellite will reach AOS, false otherwise
      */
     public function has_aos(Predict_Sat $sat, Predict_QTH $qth)
     {
-         $retcode = false;
+        $retcode = false;
 
-         /* FIXME */
-         if ($sat->meanmo == 0.0) {
-              $retcode = false;
-         } else {
-
+        /* FIXME */
+        if (0.0 == $sat->meanmo) {
+            $retcode = false;
+        } else {
             /* xincl is already in RAD by select_ephemeris */
             $lin = $sat->tle->xincl;
             if ($lin >= self::pio2) {
@@ -693,7 +682,7 @@ class Predict
             $sma = 331.25 * exp(log(1440.0 / $sat->meanmo) * (2.0 / 3.0));
             $apogee = $sma * (1.0 + $sat->tle->eo) - self::xkmper;
 
-            if ((acos(self::xkmper / ($apogee + self::xkmper)) + ($lin)) > abs($qth->lat * self::de2ra)) {
+            if ((acos(self::xkmper / ($apogee + self::xkmper)) + $lin) > abs($qth->lat * self::de2ra)) {
                 $retcode = true;
             } else {
                 $retcode = false;
@@ -704,7 +693,6 @@ class Predict
     }
 
     /** Predict passes after a certain time.
-     *
      *
      * This function calculates num upcoming passes with AOS no earlier
      * than t = start and not later that t = (start+maxdt). The function will
@@ -722,30 +710,30 @@ class Predict
      *      Therefore, the elements are prepended whereafter the GSList is
      *      reversed
      *
+     * @param Predict_Sat $sat   The satellite data
+     * @param Predict_QTH $qth   The observer's location data
+     * @param float       $start The start julian date
+     * @param int         $maxdt The max # of days to look
+     * @param int         $num   The max # of passes to get
      *
-     * @param Predict_Sat  $sat The satellite data
-     * @param Predict_QTH  $qth The observer's location data
-     * @param float $start The start julian date
-     * @param int   $maxdt The max # of days to look
-     * @param int   $num   The max # of passes to get
      * @return array of Predict_Pass instances if found, empty array otherwise
      */
     public function get_passes(Predict_Sat $sat, Predict_QTH $qth, $start, $maxdt, $num = 0)
     {
-        $passes = array();
+        $passes = [];
 
         /* if no number has been specified
             set it to something big */
-        if ($num == 0) {
+        if (0 == $num) {
             $num = 100;
         }
 
         $t = $start;
 
-        for ($i = 0; $i < $num; $i++) {
+        for ($i = 0; $i < $num; ++$i) {
             $pass = $this->get_pass($sat, $qth, $t, $maxdt);
 
-            if ($pass != null) {
+            if (null != $pass) {
                 $passes[] = $pass;
                 $t = $pass->los + 0.014; // +20 min
 
@@ -771,70 +759,71 @@ class Predict
      * @param array $passes The passes returned from get_passes()
      *
      * @author Bill Shupp
+     *
      * @return array
      */
     public function filterVisiblePasses(array $passes)
     {
-        $filtered = array();
+        $filtered = [];
 
         foreach ($passes as $result) {
             // Dummy check
-            if ($result->vis[0] != 'V') {
+            if ('V' != $result->vis[0]) {
                 continue;
             }
 
-            $aos    = false;
+            $aos = false;
             $aos_az = false;
-            $aos    = false;
-            $tca    = false;
+            $aos = false;
+            $tca = false;
             $los_az = false;
             $max_el = 0;
 
             foreach ($result->details as $detail) {
-                if ($detail->vis != Predict::SAT_VIS_VISIBLE) {
+                if (Predict::SAT_VIS_VISIBLE != $detail->vis) {
                     continue;
                 }
                 if ($detail->el < $this->minEle) {
                     continue;
                 }
 
-                if ($aos == false) {
-                    $aos       = $detail->time;
-                    $aos_az    = $detail->az;
-                    $aos_el    = $detail->el;
-                    $tca       = $detail->time;
-                    $los       = $detail->time;
-                    $los_az    = $detail->az;
-                    $los_el    = $detail->el;
-                    $max_el    = $detail->el;
+                if (false == $aos) {
+                    $aos = $detail->time;
+                    $aos_az = $detail->az;
+                    $aos_el = $detail->el;
+                    $tca = $detail->time;
+                    $los = $detail->time;
+                    $los_az = $detail->az;
+                    $los_el = $detail->el;
+                    $max_el = $detail->el;
                     $max_el_az = $detail->el;
                     continue;
                 }
-                $los    = $detail->time;
+                $los = $detail->time;
                 $los_az = $detail->az;
                 $los_el = $detail->el;
 
                 if ($detail->el > $max_el) {
-                    $tca       = $detail->time;
-                    $max_el    = $detail->el;
+                    $tca = $detail->time;
+                    $max_el = $detail->el;
                     $max_el_az = $detail->az;
                 }
             }
 
-            if ($aos === false) {
+            if (false === $aos) {
                 // Does not reach minimum elevation, skip
                 continue;
             }
 
-            $result->visible_aos       = $aos;
-            $result->visible_aos_az    = $aos_az;
-            $result->visible_aos_el    = $aos_el;
-            $result->visible_tca       = $tca;
-            $result->visible_max_el    = $max_el;
+            $result->visible_aos = $aos;
+            $result->visible_aos_az = $aos_az;
+            $result->visible_aos_el = $aos_el;
+            $result->visible_tca = $tca;
+            $result->visible_max_el = $max_el;
             $result->visible_max_el_az = $max_el_az;
-            $result->visible_los       = $los;
-            $result->visible_los_az    = $los_az;
-            $result->visible_los_el    = $los_el;
+            $result->visible_los = $los;
+            $result->visible_los_az = $los_az;
+            $result->visible_los_el = $los_el;
 
             $filtered[] = $result;
         }
@@ -843,7 +832,7 @@ class Predict
     }
 
     /**
-     * Translates aziumuth degrees to compass direction:
+     * Translates aziumuth degrees to compass direction:.
      *
      * N (0°), NNE (22.5°), NE (45°), ENE (67.5°), E (90°), ESE (112.5°),
      * SE (135°), SSE (157.5°), S (180°), SSW (202.5°), SW (225°),

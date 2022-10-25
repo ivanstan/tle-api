@@ -8,12 +8,12 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-#[Route("/api/tle")]
+#[Route('/api/tle')]
 final class StatisticsController extends AbstractApiController
 {
     protected const INTERVAL = 6;
 
-    #[Route("/hits", name: "tle_hits")]
+    #[Route('/hits', name: 'tle_hits')]
     public function hits(
         EntityManagerInterface $em
     ): Response {
@@ -43,7 +43,7 @@ final class StatisticsController extends AbstractApiController
 
         $response = [];
         foreach ($result as $key => &$item) {
-            if ($item['hour'] === "0") {
+            if ('0' === $item['hour']) {
                 $previousKey = $key - 1;
                 if (isset($result[$previousKey])) {
                     $result[$previousKey]['hits'] = $item['hits'];
@@ -53,7 +53,7 @@ final class StatisticsController extends AbstractApiController
             }
 
             $date = new \DateTime($item['date']);
-            $date->setTime((int)$item['hour'] * self::INTERVAL, 0);
+            $date->setTime((int) $item['hour'] * self::INTERVAL, 0);
 
             $response[$date->format(\DateTimeInterface::ATOM)] = $item['hits'];
         }

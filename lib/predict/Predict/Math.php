@@ -1,6 +1,6 @@
 <?php
 /**
- * Predict_Math
+ * Predict_Math.
  *
  * Ported to PHP by Bill Shupp.  Original comments below
  */
@@ -20,9 +20,9 @@ class Predict_Math
     /* Returns sign of a float */
     public static function Sign($arg)
     {
-        if ($arg > 0 ) {
+        if ($arg > 0) {
             return 1;
-        } else if ($arg < 0 ) {
+        } elseif ($arg < 0) {
             return -1;
         } else {
             return 0;
@@ -32,10 +32,10 @@ class Predict_Math
     /* Returns the arcsine of the argument */
     public static function ArcSin($arg)
     {
-        if (abs($arg) >= 1 ) {
-            return (self::Sign($arg) * Predict::pio2);
+        if (abs($arg) >= 1) {
+            return self::Sign($arg) * Predict::pio2;
         } else {
-            return(atan($arg / sqrt(1 - $arg * $arg)));
+            return atan($arg / sqrt(1 - $arg * $arg));
         }
     }
 
@@ -87,7 +87,7 @@ class Predict_Math
     /* Returns the dot product of two vectors */
     public static function Dot(Predict_Vector $v1, Predict_Vector $v2)
     {
-        return ($v1->x * $v2->x + $v1->y * $v2->y + $v1->z * $v2->z);
+        return $v1->x * $v2->x + $v1->y * $v2->y + $v1->z * $v2->z;
     }
 
     /* Calculates the angle between vectors v1 and v2 */
@@ -95,11 +95,12 @@ class Predict_Math
     {
         $v1->w = sqrt($v1->x * $v1->x + $v1->y * $v1->y + $v1->z * $v1->z);
         $v2->w = sqrt($v2->x * $v2->x + $v2->y * $v2->y + $v2->z * $v2->z);
-        return (self::ArcCos(self::Dot($v1, $v2) / ($v1->w * $v2->w)));
+
+        return self::ArcCos(self::Dot($v1, $v2) / ($v1->w * $v2->w));
     }
 
     /* Produces cross product of v1 and v2, and returns in v3 */
-    public static function Cross(Predict_Vector $v1, Predict_Vector $v2 ,Predict_Vector $v3)
+    public static function Cross(Predict_Vector $v1, Predict_Vector $v2, Predict_Vector $v3)
     {
         $v3->x = $v1->y * $v2->z - $v1->z * $v2->y;
         $v3->y = $v1->z * $v2->x - $v1->x * $v2->z;
@@ -109,7 +110,7 @@ class Predict_Math
     }
 
     /* Normalizes a vector */
-    public static function Normalize(Predict_Vector $v )
+    public static function Normalize(Predict_Vector $v)
     {
         $v->x /= $v->w;
         $v->y /= $v->w;
@@ -119,7 +120,7 @@ class Predict_Math
     /* Four-quadrant arctan function */
     public static function AcTan($sinx, $cosx)
     {
-        if ($cosx == 0) {
+        if (0 == $cosx) {
             if ($sinx > 0) {
                 return Predict::pio2;
             } else {
@@ -141,8 +142,8 @@ class Predict_Math
     /* Returns mod 2pi of argument */
     public static function FMod2p($x)
     {
-        $ret_val  = $x;
-        $i        = (int) ($ret_val / Predict::twopi);
+        $ret_val = $x;
+        $i = (int) ($ret_val / Predict::twopi);
         $ret_val -= $i * Predict::twopi;
 
         if ($ret_val < 0) {
@@ -155,8 +156,8 @@ class Predict_Math
     /* Returns arg1 mod arg2 */
     public static function Modulus($arg1, $arg2)
     {
-        $ret_val  = $arg1;
-        $i        = (int) ($ret_val / $arg2);
+        $ret_val = $arg1;
+        $i = (int) ($ret_val / $arg2);
         $ret_val -= $i * $arg2;
 
         if ($ret_val < 0) {
@@ -172,7 +173,7 @@ class Predict_Math
         return $arg - floor($arg);
     }
 
-    /* Converts the satellite's position and velocity  */
+    /* Converts the satellite's position and velocity */
     /* vectors from normalised values to km and km/sec */
     public static function Convert_Sat_State(Predict_Vector $pos, Predict_Vector $vel)
     {
@@ -189,6 +190,6 @@ class Predict_Math
     /* Returns angle in degrees from arg in rads */
     public static function Degrees($arg)
     {
-      return $arg / Predict::de2ra;
+        return $arg / Predict::de2ra;
     }
 }

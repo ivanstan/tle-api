@@ -12,13 +12,12 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class TleRequest extends AbstractRequest
 {
-    public const EXTRA_PARAM = 'extra';
-
-    protected TleRepository $repository;
-
     use TleRequestTrait {
         validate as validateExtraParam;
     }
+    public const EXTRA_PARAM = 'extra';
+
+    protected TleRepository $repository;
 
     #[Required]
     public function setRepository(TleRepository $repository): void
@@ -44,7 +43,7 @@ class TleRequest extends AbstractRequest
         /** @var Tle $tle */
         $tle = $this->repository->findOneBy(['id' => $this->getId()]);
 
-        if ($tle === null) {
+        if (null === $tle) {
             throw new NotFoundHttpException(\sprintf('Unable to find record with id %s', $this->getId()));
         }
 

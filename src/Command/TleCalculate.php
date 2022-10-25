@@ -39,7 +39,7 @@ final class TleCalculate extends Command
 
         $tle = $input->getOption(self::OPTION_TLE);
 
-        if ($tle !== null) {
+        if (null !== $tle) {
             $builder->andWhere('tle.id = :tle');
             $builder->setParameter('tle', $tle);
         }
@@ -52,7 +52,7 @@ final class TleCalculate extends Command
 
             $tleInformation = $repository->find($tle->getId());
 
-            if ($tleInformation === null) {
+            if (null === $tleInformation) {
                 $exists = false;
                 $tleInformation = new TleInformation($tle);
             }

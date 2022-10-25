@@ -17,14 +17,14 @@ final class DocsController extends AbstractController
     {
     }
 
-    #[Route("/", name: "tle_home")]
-    #[Route('/api/tle/docs', name: "app_api_docs")]
+    #[Route('/', name: 'tle_home')]
+    #[Route('/api/tle/docs', name: 'app_api_docs')]
     public function docs(): Response
     {
-        return new Response(file_get_contents($this->getProjectDir() . '/public/index.html'));
+        return new Response(file_get_contents($this->getProjectDir().'/public/index.html'));
     }
 
-    #[Route("/api/tle.json", name: "app_api_docs_json")]
+    #[Route('/api/tle.json', name: 'app_api_docs_json')]
     public function getJson(): JsonResponse
     {
         return new JsonResponse($this->service->get('/etc/custom/tle.json'), Response::HTTP_OK, ['Access-Control-Allow-Origin' => '*']);

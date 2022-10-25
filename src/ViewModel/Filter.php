@@ -44,23 +44,16 @@ class Filter
 
     protected function validateOperator(): string
     {
-        if ($this->type === self::FILTER_TYPE_FLOAT) {
+        if (self::FILTER_TYPE_FLOAT === $this->type) {
             $operators = self::FILTER_FLOAT_OPERATORS[self::FILTER_TYPE_FLOAT];
             if (!array_key_exists($this->operator, $operators)) {
-                throw new BadRequestHttpException(
-                    \sprintf(
-                        'Operator for filter \'%s\' should be one of the following %s, \'%s\' provided',
-                        $this->filter,
-                        implode(', ', array_keys($operators)),
-                        $this->operator
-                    )
-                );
+                throw new BadRequestHttpException(\sprintf('Operator for filter \'%s\' should be one of the following %s, \'%s\' provided', $this->filter, implode(', ', array_keys($operators)), $this->operator));
             }
 
             return $operators[$this->operator];
         }
 
-        if ($this->type === self::FILTER_TYPE_ARRAY) {
+        if (self::FILTER_TYPE_ARRAY === $this->type) {
             return self::OPERATOR_EQUAL;
         }
 
@@ -69,23 +62,19 @@ class Filter
 
     protected function validateValue(mixed $value): array|null|float
     {
-        if ($this->type === self::FILTER_TYPE_FLOAT) {
-            $value = (float)$value;
+        if (self::FILTER_TYPE_FLOAT === $this->type) {
+            $value = (float) $value;
 
             if (!is_float($value)) {
-                throw new \InvalidArgumentException(
-                    \sprintf('Filter %s value should be %s', $this->filter, $this->type)
-                );
+                throw new \InvalidArgumentException(\sprintf('Filter %s value should be %s', $this->filter, $this->type));
             }
 
             return $value;
         }
 
-        if ($this->type === self::FILTER_TYPE_ARRAY) {
+        if (self::FILTER_TYPE_ARRAY === $this->type) {
             if (!is_array($value)) {
-                throw new \InvalidArgumentException(
-                    \sprintf('Filter %s value should be %s', $this->filter, $this->type)
-                );
+                throw new \InvalidArgumentException(\sprintf('Filter %s value should be %s', $this->filter, $this->type));
             }
 
             return $value;

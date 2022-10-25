@@ -53,7 +53,7 @@ class TleCollectionRequest extends CollectionRequest
      */
     public function getFilters(array $filters = self::COLLECTION_FILTERS): array
     {
-        if ($this->filters !== null) {
+        if (null !== $this->filters) {
             return $this->filters;
         }
 
@@ -62,7 +62,7 @@ class TleCollectionRequest extends CollectionRequest
         foreach ($filters as $filter => $type) {
             $values = $this->get($filter, []);
 
-            if ($type === Filter::FILTER_TYPE_ARRAY && !empty($values)) {
+            if (Filter::FILTER_TYPE_ARRAY === $type && !empty($values)) {
                 $result[] = new Filter($filter, $type, Filter::OPERATOR_EQUAL, $values);
 
                 continue;
@@ -89,7 +89,7 @@ class TleCollectionRequest extends CollectionRequest
         ];
 
         foreach ($this->getFilters() as $filter) {
-            if ($filter->filter === TleCollectionSortableFieldsEnum::SATELLITE_ID) {
+            if (TleCollectionSortableFieldsEnum::SATELLITE_ID === $filter->filter) {
                 continue;
             }
             $parameters[\sprintf('%s[%s]', $filter->filter, $filter->operator)] = $filter->value;

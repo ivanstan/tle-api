@@ -38,8 +38,9 @@
         "symfony/yaml": "6.0.*"
     },
     "require-dev": {
-        "roave/security-advisories": "dev-latest",
         "doctrine/doctrine-fixtures-bundle": "^3.1",
+        "laravel/pint": "^1.2",
+        "roave/security-advisories": "dev-latest",
         "symfony/phpunit-bridge": "^5.3"
     },
     "config": {

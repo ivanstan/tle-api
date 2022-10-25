@@ -31,7 +31,7 @@ class AbstractWebTestCase extends WebTestCase
     private function buildUrl(string $url, array $params = []): string
     {
         if (!empty($params)) {
-            $url .= '?' . http_build_query($params);
+            $url .= '?'.http_build_query($params);
         }
 
         return $url;

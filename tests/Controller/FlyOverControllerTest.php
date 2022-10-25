@@ -266,7 +266,8 @@ class FlyOverControllerTest extends AbstractWebTestCase
         );
     }
 
-    public function testLatitudeAbove90(): void {
+    public function testLatitudeAbove90(): void
+    {
         $tle = TleFixtures::create();
 
         $response = $this->get(
@@ -284,7 +285,8 @@ class FlyOverControllerTest extends AbstractWebTestCase
         self::assertEquals('Invalid latitude value', $response['response']['message']);
     }
 
-    public function testLatitudeBellow90(): void {
+    public function testLatitudeBellow90(): void
+    {
         $tle = TleFixtures::create();
 
         $response = $this->get(
@@ -302,7 +304,8 @@ class FlyOverControllerTest extends AbstractWebTestCase
         self::assertEquals('Invalid latitude value', $response['response']['message']);
     }
 
-    public function testLongitudeAbove180(): void {
+    public function testLongitudeAbove180(): void
+    {
         $tle = TleFixtures::create();
 
         $response = $this->get(
@@ -320,7 +323,8 @@ class FlyOverControllerTest extends AbstractWebTestCase
         self::assertEquals('Invalid longitude value', $response['response']['message']);
     }
 
-    public function testLongitudeBellow180(): void {
+    public function testLongitudeBellow180(): void
+    {
         $tle = TleFixtures::create();
 
         $response = $this->get(

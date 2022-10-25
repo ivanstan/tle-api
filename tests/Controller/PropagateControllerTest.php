@@ -24,7 +24,7 @@ class PropagateControllerTest extends AbstractWebTestCase
         $tle = TleFixtures::create();
 
         $response = $this->get(
-            '/api/tle/' . $tle->getId() . '/propagate',
+            '/api/tle/'.$tle->getId().'/propagate',
             [
                 'date' => '2021-04-26T17:49:45+02:00',
             ]
@@ -69,7 +69,7 @@ class PropagateControllerTest extends AbstractWebTestCase
         $tle = TleFixtures::createDeep();
 
         $response = $this->get(
-            '/api/tle/' . $tle->getId() . '/propagate',
+            '/api/tle/'.$tle->getId().'/propagate',
             [
                 'date' => '2021-04-26T17:49:45+02:00',
             ]

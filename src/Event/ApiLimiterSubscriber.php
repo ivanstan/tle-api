@@ -47,8 +47,8 @@ class ApiLimiterSubscriber implements EventSubscriberInterface
         if ($event->getRequest()->headers->has('referer')) {
             $refererHost = parse_url($event->getRequest()->headers->get('referer'), PHP_URL_HOST);
         }
-        
-        if (!FeatureFlag::API_RATE_LIMITER || $refererHost === Route::PRODUCTION_HOST || !Route::inArray($event->getRequest(), self::ROUTES)) {
+
+        if (!FeatureFlag::API_RATE_LIMITER || Route::PRODUCTION_HOST === $refererHost || !Route::inArray($event->getRequest(), self::ROUTES)) {
             return;
         }
 

@@ -21,7 +21,7 @@ final class FlyOverController extends AbstractApiController
     ) {
     }
 
-    #[Route("/api/tle/{id}/flyover", name: "tle_flyover", requirements: ["id" => "\d+"])]
+    #[Route('/api/tle/{id}/flyover', name: 'tle_flyover', requirements: ['id' => "\d+"])]
     public function flyover(
         FlyOverRequest $request
     ): JsonResponse {
@@ -81,7 +81,7 @@ final class FlyOverController extends AbstractApiController
         );
     }
 
-    #[Route("/api/tle/{id}/flyover/{passId}", name: "tle_flyover_details", requirements: ["id" => "\d+", "passId" => "\d+"])]
+    #[Route('/api/tle/{id}/flyover/{passId}', name: 'tle_flyover_details', requirements: ['id' => "\d+", 'passId' => "\d+"])]
     public function flyoverDetails(
         int $passId,
         FlyOverRequest $request,
@@ -97,9 +97,9 @@ final class FlyOverController extends AbstractApiController
 
         $results = $this->service->getPasses($date, $request->filterVisible());
 
-        $pass = $results[$passId-1] ?? null;
+        $pass = $results[$passId - 1] ?? null;
 
-        if ($pass === null) {
+        if (null === $pass) {
             throw new NotFoundHttpException('Unable to find requested flyover details');
         }
 
@@ -128,5 +128,4 @@ final class FlyOverController extends AbstractApiController
             ]
         );
     }
-
 }

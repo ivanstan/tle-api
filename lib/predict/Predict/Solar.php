@@ -45,7 +45,7 @@ class Predict_Solar
     /* Calculates stellite's eclipse status and depth */
     public static function Sat_Eclipsed(Predict_Vector $pos, Predict_Vector $sol, &$depth)
     {
-        $Rho   = new Predict_Vector();
+        $Rho = new Predict_Vector();
         $earth = new Predict_Vector();
 
         /* Determine partial eclipse */
@@ -58,7 +58,7 @@ class Predict_Solar
 
         if ($sd_earth < $sd_sun) {
             return 0;
-        } else if ($depth >= 0) {
+        } elseif ($depth >= 0) {
             return 1;
         } else {
             return 0;
@@ -66,7 +66,7 @@ class Predict_Solar
     }
 
     /**
-     * Finds the current location of the sun based on the observer location
+     * Finds the current location of the sun based on the observer location.
      *
      * @param Predict_QTH $qth    The observer location
      * @param int         $daynum The daynum or null to use the current daynum
@@ -75,19 +75,19 @@ class Predict_Solar
      */
     public static function FindSun(Predict_QTH $qth, $daynum = null)
     {
-        if ($daynum === null) {
+        if (null === $daynum) {
             $daynum = Predict_Time::get_current_daynum();
         }
 
         $obs_geodetic = new Predict_Geodetic();
-        $obs_geodetic->lon   = $qth->lon * Predict::de2ra;
-        $obs_geodetic->lat   = $qth->lat * Predict::de2ra;
-        $obs_geodetic->alt   = $qth->alt / 1000.0;
+        $obs_geodetic->lon = $qth->lon * Predict::de2ra;
+        $obs_geodetic->lat = $qth->lat * Predict::de2ra;
+        $obs_geodetic->alt = $qth->alt / 1000.0;
         $obs_geodetic->theta = 0;
 
         $solar_vector = new Predict_Vector();
-        $zero_vector  = new Predict_Vector();
-        $solar_set    = new Predict_ObsSet();
+        $zero_vector = new Predict_Vector();
+        $solar_set = new Predict_ObsSet();
 
         self::Calculate_Solar_Position($daynum, $solar_vector);
         Predict_SGPObs::Calculate_Obs(

@@ -10,9 +10,9 @@
  */
 class Predict_PassDetail
 {
-    public $time;   /*!< time in "jul_utc" */
-    public $pos;    /*!< Raw unprocessed position at time */
-    public $vel;    /*!< Raw unprocessed velocity at time */
+    public $time;   /* !< time in "jul_utc" */
+    public $pos;    /* !< Raw unprocessed position at time */
+    public $vel;    /* !< Raw unprocessed velocity at time */
     public $velo;
     public $az;
     public $el;

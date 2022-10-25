@@ -1,10 +1,10 @@
 <?php
 /**
- * Ported to PHP from sgp4sdp4.h by Bill Shupp
+ * Ported to PHP from sgp4sdp4.h by Bill Shupp.
  */
 
 /**
- * static data for SGP4 and SDP4
+ * static data for SGP4 and SDP4.
  */
 class Predict_SGSDPStatic
 {

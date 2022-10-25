@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Ported to PHP from gpredict by Bill Shupp
+ * Ported to PHP from gpredict by Bill Shupp.
  */
 
 /**
@@ -10,60 +10,60 @@
 class Predict_Sat
 {
     // Fifth root of a hundred, used for magnitude calculation
-    const POGSONS_RATIO = 2.5118864315096;
+    public const POGSONS_RATIO = 2.5118864315096;
 
-    public $name     = null;
+    public $name = null;
     public $nickname = null;
-    public $website  = null;
+    public $website = null;
 
-    public $tle      = null;   /*!< Keplerian elements */
-    public $flags    = 0;      /*!< Flags for algo ctrl */
-    public $sgps     = null;
-    public $dps      = null;
+    public $tle = null;   /* !< Keplerian elements */
+    public $flags = 0;      /* !< Flags for algo ctrl */
+    public $sgps = null;
+    public $dps = null;
     public $deep_arg = null;
-    public $pos      = null;   /*!< Raw position and range */
-    public $vel      = null;   /*!< Raw velocity */
+    public $pos = null;   /* !< Raw position and range */
+    public $vel = null;   /* !< Raw velocity */
 
     /*** FIXME: REMOVE */
-    public $bearing = null;   /*!< Az, El, range and vel */
-    public $astro   = null;   /*!< Ra and Decl */
+    public $bearing = null;   /* !< Az, El, range and vel */
+    public $astro = null;   /* !< Ra and Decl */
     /*** END */
 
     /* time keeping fields */
     public $jul_epoch = null;
-    public $jul_utc   = null;
-    public $tsince    = null;
-    public $aos       = null;    /*!< Next AOS. */
-    public $los       = null;    /*!< Next LOS */
+    public $jul_utc = null;
+    public $tsince = null;
+    public $aos = null;    /* !< Next AOS. */
+    public $los = null;    /* !< Next LOS */
 
-    public $az         = null;   /*!< Azimuth [deg] */
-    public $el         = null;   /*!< Elevation [deg] */
-    public $range      = null;   /*!< Range [km] */
-    public $range_rate = null;   /*!< Range Rate [km/sec] */
-    public $ra         = null;   /*!< Right Ascension [deg] */
-    public $dec        = null;   /*!< Declination [deg] */
-    public $ssplat     = null;   /*!< SSP latitude [deg] */
-    public $ssplon     = null;   /*!< SSP longitude [deg] */
-    public $alt        = null;   /*!< altitude [km] */
-    public $velo       = null;   /*!< velocity [km/s] */
-    public $ma         = null;   /*!< mean anomaly */
-    public $footprint  = null;   /*!< footprint */
-    public $phase      = null;   /*!< orbit phase */
-    public $meanmo     = null;   /*!< mean motion kept in rev/day */
-    public $orbit      = null;   /*!< orbit number */
-    public $otype      = null;   /*!< orbit type. */
+    public $az = null;   /* !< Azimuth [deg] */
+    public $el = null;   /* !< Elevation [deg] */
+    public $range = null;   /* !< Range [km] */
+    public $range_rate = null;   /* !< Range Rate [km/sec] */
+    public $ra = null;   /* !< Right Ascension [deg] */
+    public $dec = null;   /* !< Declination [deg] */
+    public $ssplat = null;   /* !< SSP latitude [deg] */
+    public $ssplon = null;   /* !< SSP longitude [deg] */
+    public $alt = null;   /* !< altitude [km] */
+    public $velo = null;   /* !< velocity [km/s] */
+    public $ma = null;   /* !< mean anomaly */
+    public $footprint = null;   /* !< footprint */
+    public $phase = null;   /* !< orbit phase */
+    public $meanmo = null;   /* !< mean motion kept in rev/day */
+    public $orbit = null;   /* !< orbit number */
+    public $otype = null;   /* !< orbit type. */
 
     public function __construct(Predict_TLE $tle)
     {
-        $headerParts    = explode(' ', $tle->header);
-        $this->name     = $headerParts[0];
+        $headerParts = explode(' ', $tle->header);
+        $this->name = $headerParts[0];
         $this->nickname = $this->name;
-        $this->tle      = $tle;
-        $this->pos      = new Predict_Vector();
-        $this->vel      = new Predict_Vector();
-        $this->sgps     = new Predict_SGSDPStatic();
+        $this->tle = $tle;
+        $this->pos = new Predict_Vector();
+        $this->vel = new Predict_Vector();
+        $this->sgps = new Predict_SGSDPStatic();
         $this->deep_arg = new Predict_DeepArg();
-        $this->dps      = new Predict_DeepStatic();
+        $this->dps = new Predict_DeepStatic();
 
         $this->select_ephemeris();
         $this->sat_data_init_sat($this);
@@ -71,23 +71,23 @@ class Predict_Sat
 
     /* Selects the apropriate ephemeris type to be used */
     /* for predictions according to the data in the TLE */
-    /* It also processes values in the tle set so that  */
-    /* they are apropriate for the sgp4/sdp4 routines   */
+    /* It also processes values in the tle set so that */
+    /* they are apropriate for the sgp4/sdp4 routines */
     public function select_ephemeris()
     {
         /* Preprocess tle set */
         $this->tle->xnodeo *= Predict::de2ra;
         $this->tle->omegao *= Predict::de2ra;
-        $this->tle->xmo    *= Predict::de2ra;
-        $this->tle->xincl  *= Predict::de2ra;
+        $this->tle->xmo *= Predict::de2ra;
+        $this->tle->xincl *= Predict::de2ra;
         $temp = Predict::twopi / Predict::xmnpda / Predict::xmnpda;
 
         /* store mean motion before conversion */
-        $this->meanmo       = $this->tle->xno;
-        $this->tle->xno     = $this->tle->xno * $temp * Predict::xmnpda;
+        $this->meanmo = $this->tle->xno;
+        $this->tle->xno = $this->tle->xno * $temp * Predict::xmnpda;
         $this->tle->xndt2o *= $temp;
-        $this->tle->xndd6o  = $this->tle->xndd6o * $temp / Predict::xmnpda;
-        $this->tle->bstar  /= Predict::ae;
+        $this->tle->xndd6o = $this->tle->xndd6o * $temp / Predict::xmnpda;
+        $this->tle->bstar /= Predict::ae;
 
         /* Period > 225 minutes is deep space */
         $dd1 = Predict::xke / $this->tle->xno;
@@ -111,7 +111,7 @@ class Predict_Sat
     }
 
     /** Initialise satellite data.
-     *  @param sat The satellite to initialise.
+     *  @param sat the satellite to initialise
      *  @param qth Optional QTH info, use (0,0) if NULL.
      *
      * This function calculates the satellite data at t = 0, ie. epoch time
@@ -128,13 +128,12 @@ class Predict_Sat
         $sat->jul_epoch = $jul_utc;
 
         /* initialise observer location */
-        if ($qth != null) {
+        if (null != $qth) {
             $obs_geodetic->lon = $qth->lon * Predict::de2ra;
             $obs_geodetic->lat = $qth->lat * Predict::de2ra;
             $obs_geodetic->alt = $qth->alt / 1000.0;
             $obs_geodetic->theta = 0;
-        }
-        else {
+        } else {
             $obs_geodetic->lon = 0.0;
             $obs_geodetic->lat = 0.0;
             $obs_geodetic->alt = 0.0;
@@ -175,7 +174,7 @@ class Predict_Sat
         $sat->alt = $sat_geodetic->alt;
         $sat->ma = Predict_Math::Degrees($sat->phase);
         $sat->ma *= 256.0 / 360.0;
-        $sat->footprint = 2.0 * Predict::xkmper * acos (Predict::xkmper/$sat->pos->w);
+        $sat->footprint = 2.0 * Predict::xkmper * acos(Predict::xkmper / $sat->pos->w);
         $age = 0.0;
         $sat->orbit = floor(($sat->tle->xno * Predict::xmnpda / Predict::twopi +
                                    $age * $sat->tle->bstar * Predict::ae) * $age +
@@ -187,24 +186,25 @@ class Predict_Sat
 
     public function get_orbit_type(Predict_Sat $sat)
     {
-         $orbit = Predict_SGPSDP::ORBIT_TYPE_UNKNOWN;
+        $orbit = Predict_SGPSDP::ORBIT_TYPE_UNKNOWN;
 
-         if ($this->geostationary($sat)) {
-              $orbit = Predict_SGPSDP::ORBIT_TYPE_GEO;
-         } else if ($this->decayed($sat)) {
-              $orbit = Predict_SGPSDP::ORBIT_TYPE_DECAYED;
-         } else {
-              $orbit = Predict_SGPSDP::ORBIT_TYPE_UNKNOWN;
-         }
+        if ($this->geostationary($sat)) {
+            $orbit = Predict_SGPSDP::ORBIT_TYPE_GEO;
+        } elseif ($this->decayed($sat)) {
+            $orbit = Predict_SGPSDP::ORBIT_TYPE_DECAYED;
+        } else {
+            $orbit = Predict_SGPSDP::ORBIT_TYPE_UNKNOWN;
+        }
 
-         return $orbit;
+        return $orbit;
     }
-
 
     /** Determinte whether satellite is in geostationary orbit.
      *  @author John A. Magliacane, KD2BD
-     *  @param sat Pointer to satellite data.
-     *  @return TRUE if the satellite appears to be in geostationary orbit,
+     *
+     *  @param sat pointer to satellite data
+     *
+     *  @return true if the satellite appears to be in geostationary orbit,
      *          FALSE otherwise.
      *
      * A satellite is in geostationary orbit if
@@ -215,25 +215,26 @@ class Predict_Sat
      */
     public function geostationary(Predict_Sat $sat)
     {
-         if (abs($sat->meanmo - 1.0027) < 0.0002) {
-              return true;
-         } else {
-              return false;
+        if (abs($sat->meanmo - 1.0027) < 0.0002) {
+            return true;
+        } else {
+            return false;
         }
     }
-
 
     /** Determine whether satellite has decayed.
      *  @author John A. Magliacane, KD2BD
      *  @author Alexandru Csete, OZ9AEC
-     *  @param sat Pointer to satellite data.
-     *  @return TRUE if the satellite appears to have decayed, FALSE otherwise.
+     *
+     *  @param sat pointer to satellite data
+     *
+     *  @return true if the satellite appears to have decayed, FALSE otherwise
+     *
      *  @bug Modified version of the predict code but it is not tested.
      *
      * A satellite is decayed if
      *
      *    satepoch + ((16.666666 - sat.meanmo) / (10.0*fabs(sat.drag))) < "now"
-     *
      */
     public function decayed(Predict_Sat $sat)
     {
@@ -245,9 +246,9 @@ class Predict_Sat
         ***/
         if ($sat->jul_epoch + ((16.666666 - $sat->meanmo) /
                                (10.0 * abs($sat->tle->xndt2o / (Predict::twopi / Predict::xmnpda / Predict::xmnpda)))) < $sat->jul_utc) {
-              return true;
+            return true;
         } else {
-              return false;
+            return false;
         }
     }
 
@@ -264,13 +265,13 @@ class Predict_Sat
     {
         // Recorded intrinsic magnitudes and their respective
         // illumination and distance from heavens-above.com
-        static $intrinsicMagnitudes = array(
-            '25544' => array(
-                'mag'      => -1.3,
-                'illum'    => .5,
+        static $intrinsicMagnitudes = [
+            '25544' => [
+                'mag' => -1.3,
+                'illum' => .5,
                 'distance' => 1000,
-            )
-        );
+            ],
+        ];
 
         // Return null if we don't have a record of the intrinsic mag
         if (!isset($intrinsicMagnitudes[$this->tle->catnr])) {
@@ -280,15 +281,15 @@ class Predict_Sat
 
         // Convert the observer's geodetic info to radians and km so
         // we can compare vectors
-        $observerGeo      = new Predict_Geodetic();
+        $observerGeo = new Predict_Geodetic();
         $observerGeo->lat = Predict_Math::Radians($qth->lat);
         $observerGeo->lon = Predict_Math::Radians($qth->lon);
         $observerGeo->alt = $qth->alt * 1000;
 
         // Now determine the sun and observer positions
-        $observerPos      = new Predict_Vector();
-        $observerVel      = new Predict_Vector();
-        $solarVector      = new Predict_Vector();
+        $observerPos = new Predict_Vector();
+        $observerVel = new Predict_Vector();
+        $solarVector = new Predict_Vector();
         Predict_Solar::Calculate_Solar_Position($time, $solarVector);
         Predict_SGPObs::Calculate_User_PosVel($time, $observerGeo, $observerPos, $observerVel);
 
@@ -296,11 +297,11 @@ class Predict_Sat
         $observerSatPos = new Predict_Vector();
         Predict_Math::Vec_Sub($this->pos, $observerPos, $observerSatPos);
         $phaseAngle = Predict_Math::Degrees(Predict_Math::Angle($solarVector, $observerSatPos));
-        $illum      = $phaseAngle / 180;
+        $illum = $phaseAngle / 180;
 
-        $illuminationChange            = $illum / $imag['illum'];
-        $inverseSquareOfDistanceChange = pow(($imag['distance'] / $this->range), 2);
-        $changeInMagnitude             = log(
+        $illuminationChange = $illum / $imag['illum'];
+        $inverseSquareOfDistanceChange = pow($imag['distance'] / $this->range, 2);
+        $changeInMagnitude = log(
             $illuminationChange * $inverseSquareOfDistanceChange,
             self::POGSONS_RATIO
         );
