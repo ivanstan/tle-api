@@ -109,7 +109,9 @@
             "@auto-scripts"
         ],
         "test": "XDEBUG_MODE=coverage php bin/phpunit --coverage-text --coverage-html ./coverage",
-        "deploy": "dep deploy"
+        "deploy": "dep deploy",
+        "ssh": "ssh -p2233 -t glutenfr@ivanstanojevic.me \"cd ~/projects/tle.ivanstanojevic.me/current; bash\"",
+        "ssh-mysql": "ssh -v glutenfr@ivanstanojevic.me -p 2233 -L 3306:127.0.0.1:3306 -N"
     },
     "conflict": {
         "symfony/symfony": "*"
