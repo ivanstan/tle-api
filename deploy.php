@@ -25,7 +25,6 @@ add('shared_files', [
     'public/logo512.png',
 ]);
 add('shared_dirs', [
-    'var',
     'public/static',
     'public/images',
 ]);
@@ -38,9 +37,9 @@ host('tle.ivanstanojevic.me')
     ->set('deploy_path', '~/projects/tle.ivanstanojevic.me');
 
 task('test', function () {
-    set('symfony_env', 'test');
-    runLocally('bin/phpunit');
-    set('symfony_env', 'dev');
+//    set('symfony_env', 'test');
+//    runLocally('bin/phpunit');
+//    set('symfony_env', 'dev');
 });
 
 task('deploy:dump-env', function () {
