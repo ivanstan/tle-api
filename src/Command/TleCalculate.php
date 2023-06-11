@@ -4,6 +4,9 @@ namespace App\Command;
 
 use App\Entity\Tle;
 use App\Entity\TleInformation;
+use App\Entity\TleStat;
+use App\Repository\TleInformationRepository;
+use App\Repository\TleStatRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Ivanstan\Tle\Specification\GeostationaryOrbitTleSpecification;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -20,7 +23,7 @@ final class TleCalculate extends Command
     protected const BATCH_SIZE = 20;
     protected const OPTION_TLE = 'tle';
 
-    public function __construct(protected EntityManagerInterface $entityManager)
+    public function __construct(protected EntityManagerInterface $entityManager, protected TleStatRepository $statRepository, protected TleInformationRepository $infoRepository)
     {
         parent::__construct();
     }
@@ -78,6 +81,16 @@ final class TleCalculate extends Command
 
         $this->entityManager->flush();
 
+        $this->calculateStats();
+
         return Command::SUCCESS;
+    }
+
+    protected function calculateStats(): void
+    {
+        $this->statRepository->update(TleStat::MAX_E, $this->infoRepository->getMaxEccentricity());
+        $this->statRepository->update(TleStat::MAX_I, $this->infoRepository->getMaxInclination());
+        $this->statRepository->update(TleStat::MAX_P, $this->infoRepository->getMaxPeriod());
+        $this->statRepository->update(TleStat::MIN_P, $this->infoRepository->getMinPeriod());
     }
 }

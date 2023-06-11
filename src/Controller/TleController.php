@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Enum\TleCollectionSortableFieldsEnum;
 use App\Repository\TleRepository;
+use App\Repository\TleStatRepository;
 use App\Request\TleCollectionRequest;
 use App\Request\TleRequest;
 use Ivanstan\SymfonySupport\Services\QueryBuilderPaginator;
@@ -14,15 +15,16 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 #[Route('/api/tle')]
 final class TleController extends AbstractApiController
 {
-    public function __construct(protected TleRepository $repository)
+    public function __construct(protected TleRepository $repository, protected TleStatRepository $statRepository)
     {
     }
 
     #[Route('/{id}', name: 'tle_record', requirements: ['id' => "\d+"])]
     public function record(
-        TleRequest $request,
+        TleRequest          $request,
         NormalizerInterface $normalizer,
-    ): JsonResponse {
+    ): JsonResponse
+    {
         return $this->response(
             [
                 '@context' => self::HYDRA_CONTEXT,
@@ -34,8 +36,9 @@ final class TleController extends AbstractApiController
     #[Route('/', name: 'tle_collection')]
     public function collection(
         TleCollectionRequest $request,
-        NormalizerInterface $normalizer
-    ): JsonResponse {
+        NormalizerInterface  $normalizer
+    ): JsonResponse
+    {
         $builder = $this->repository->collection(
             $request->getSearch(),
             $request->getSort(TleCollectionSortableFieldsEnum::POPULARITY),
@@ -50,5 +53,15 @@ final class TleController extends AbstractApiController
         $response['parameters'] = $request->getParameters();
 
         return $this->response($response);
+    }
+
+    #[Route('/stats', name: 'tle_stats')]
+    public function stats(NormalizerInterface $normalizer): JsonResponse
+    {
+        return $this->response(
+            [
+                ...$normalizer->normalize($this->statRepository->get()),
+            ]
+        );
     }
 }
