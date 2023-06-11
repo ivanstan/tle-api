@@ -65,6 +65,13 @@ final class TleCalculate extends Command
             $tleInformation->inclination = $tleModel->getInclination();
             $tleInformation->eccentricity = $tleModel->eccentricity();
             $tleInformation->period = $tleModel->period();
+
+            if ($tleModel->meanMotion() > 0) {
+                $tleInformation->period = $tleModel->period();
+            } else {
+                $output->writeln(sprintf('Satellite %d has mean motion problem', $tle->getId()));
+            }
+
             $tleInformation->geostationary = (new GeostationaryOrbitTleSpecification())->isSatisfiedBy($tleModel);
             $tleInformation->raan = $tleModel->raan();
             $tleInformation->semiMajorAxis = $tleModel->semiMajorAxis();
@@ -81,7 +88,7 @@ final class TleCalculate extends Command
 
         $this->entityManager->flush();
 
-        $this->calculateStats();
+
 
         return Command::SUCCESS;
     }
