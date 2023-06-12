@@ -60,7 +60,7 @@ final class TleController extends AbstractApiController
     {
         return $this->response(
             [
-                ...$normalizer->normalize($this->statRepository->get()),
+                ...$normalizer->normalize($this->statRepository->get(), null, [TleRequest::EXTRA_PARAM => true]),
             ]
         );
     }
