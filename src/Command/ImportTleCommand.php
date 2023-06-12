@@ -9,6 +9,7 @@ use GuzzleHttp\Client;
 use Ivanstan\SymfonySupport\Traits\FileSystemAwareTrait;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Ivanstan\Tle\Model\TleFile;
+use Ivanstan\Tle\Service\Validator;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -61,6 +62,8 @@ final class ImportTleCommand extends Command
             $progressBar->start();
         }
 
+        $validator = new Validator();
+
         foreach ($sources as $uri) {
             /* @noinspection DisconnectedForeachInstructionInspection */
             if (isset($progressBar)) {
@@ -91,6 +94,10 @@ final class ImportTleCommand extends Command
             $update = [];
 
             foreach ($file->parse() as $tle) {
+                if (!$validator->validate($tle)) {
+                    continue;
+                }
+
                 if (null === $tle) {
                     continue;
                 }
