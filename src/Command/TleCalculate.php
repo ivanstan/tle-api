@@ -88,7 +88,7 @@ final class TleCalculate extends Command
 
         $this->entityManager->flush();
 
-
+        $this->calculateStats();
 
         return Command::SUCCESS;
     }
