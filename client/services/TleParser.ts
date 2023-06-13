@@ -1,9 +1,5 @@
-import { Tle } from "tle-client"
-
-export enum LineNumber {
-  LINE1 = 1,
-  LINE2 = 2,
-}
+import {Tle} from "./Tle";
+import {LineNumber} from "./LineNumber";
 
 export class TleParser extends Tle {
 

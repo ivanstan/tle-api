@@ -1,8 +1,9 @@
 import React from "react"
-import { LineNumber, TleParser } from "../services/TleParser"
+import { TleParser } from "../services/TleParser"
 import { If } from 'react-if'
 import { CopyButton } from "./CopyButton"
 import { TleElementDetails } from "./TleElementDetails"
+import {LineNumber} from "../services/LineNumber";
 
 enum TleElements {
   // Line1 elements

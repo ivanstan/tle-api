@@ -1,21 +1,18 @@
-import { makeObservable, observable } from "mobx"
-import { promisedComputed } from "computed-async-mobx"
-import TleApi from "../services/TleApi"
-import Observer from "./Observer"
+import { makeAutoObservable } from "mobx";
+import { promisedComputed } from "computed-async-mobx";
+import TleApi from "../services/TleApi";
+import Observer from "./Observer";
 
 export class FlyOverStore {
+  tle: any;
+
+  flyovers = promisedComputed({}, async () => {
+    return await TleApi.flyOver(this.tle, Observer.position);
+  });
 
   constructor() {
-    makeObservable(this)
+    makeAutoObservable(this); // Use makeAutoObservable instead of makeObservable
   }
-
-  @observable
-  public tle: any
-
-  public flyovers = promisedComputed({}, async () => {
-    return await TleApi.flyOver(this.tle, Observer.position)
-  })
-
 }
 
-export default new FlyOverStore()
+export default new FlyOverStore();

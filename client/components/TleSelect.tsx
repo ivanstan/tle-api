@@ -2,8 +2,7 @@ import React, { ChangeEvent } from "react"
 import TextField from "@material-ui/core/TextField"
 import CircularProgress from "@material-ui/core/CircularProgress"
 import Autocomplete from "@material-ui/lab/Autocomplete"
-import { Tle, TleProvider } from "tle-client"
-
+import {TleProvider} from "../services/TleProvider";
 export interface TleSelectPropsInterface {
   value: Tle | null
   onChange: Function

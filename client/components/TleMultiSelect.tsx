@@ -6,7 +6,7 @@ import { Checkbox, Chip } from "@material-ui/core";
 import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
 import CheckBoxIcon from '@material-ui/icons/CheckBox';
 import { If } from "react-if";
-import { Tle, TleProvider } from "tle-client/index";
+import {TleProvider} from "../services/TleProvider";
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small"/>;
 const checkedIcon = <CheckBoxIcon fontSize="small"/>;

@@ -1,5 +1,4 @@
 import { toAtom } from "../util/date"
-import { Tle } from "tle-client"
 import * as satellite from "satellite.js"
 import { TleParser } from "./TleParser"
 import { LatLng } from "../model/LatLng"
@@ -19,7 +18,7 @@ export class TleApi {
     return result
   }
 
-  static groundTracks(tle: Tle, date: Date) {
+  static groundTracks(tle: any, date: Date) {
     const satrec = satellite.twoline2satrec(tle.line1, tle.line2)
 
     const period = (new TleParser(tle)).getPeriod()
@@ -50,7 +49,7 @@ export class TleApi {
     return result
   }
 
-  flyOver = async (tle: Tle | number, position: LatLng) => {
+  flyOver = async (tle: any | number, position: LatLng) => {
     let id = tle
     if (typeof tle === "object") {
       id = tle.satelliteId

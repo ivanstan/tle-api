@@ -1,6 +1,5 @@
 import React from "react"
 import { TleSelect } from "../components/TleSelect"
-import { Tle } from "tle-client"
 import { TleBrowser } from "../components/TleBrowser"
 import { TlePopularProvider } from "../services/TlePopularProvider"
 import { Button, Link, Typography, withStyles } from "@material-ui/core"
@@ -10,7 +9,6 @@ import Satellite from "../services/Satellite"
 import { If } from "react-if"
 import { SatellitePosition } from "../components/SatellitePosition"
 import AbstractTlePage, { AbstractTlePageStateInterface } from "./AbstractTlePage"
-import RoomIcon from "@material-ui/icons/Room";
 
 const styles: any = (theme: any) => ({
   button: {
@@ -109,7 +107,7 @@ class Home extends AbstractTlePage<any, HomeStateInterface> {
     this.updateTle(tle)
   }
 
-  protected updateTle = (tle: Tle|null) => {
+  protected updateTle = (tle: any|null) => {
     if (!tle) {
       return
     }

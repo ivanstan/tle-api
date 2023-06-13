@@ -1,11 +1,10 @@
 import * as satellite from 'satellite.js'
-import { Tle } from "tle-client"
 import { toAtom } from "../util/date"
 import { TleApi } from "./TleApi"
 
 export class Satellite {
 
-  public sgp4 = (tle: Tle, date: Date) => {
+  public sgp4 = (tle: any, date: Date) => {
     const satrec = satellite.twoline2satrec(tle.line1, tle.line2)
 
     const positionAndVelocity = satellite.propagate(satrec, date)
