@@ -1,7 +1,6 @@
 import React from 'react';
 import { DataGrid, GridColDef } from '@material-ui/data-grid';
 import { Drawer, IconButton, InputAdornment, MenuItem, Select, TextField, Tooltip } from '@material-ui/core';
-import { TleProvider } from 'tle-client';
 import { If } from 'react-if';
 import { TleBrowser } from '../components/TleBrowser';
 import styled from 'styled-components';
@@ -9,6 +8,7 @@ import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import SearchIcon from '@material-ui/icons/Search';
 import { SatellitePosition } from '../components/SatellitePosition';
 import TleApi from '../services/TleApi';
+import {TleProvider} from "../services/TleProvider";
 
 const Toolbar = styled.div`
   padding: 10px 0

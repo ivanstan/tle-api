@@ -1,9 +1,8 @@
 import React from "react"
-import { Tle } from "tle-client"
 import { CopyButton } from "./CopyButton"
 
 interface TleDisplayPropsInterface {
-  data: Tle
+  data: any
 }
 
 export class TleDisplay extends React.Component<TleDisplayPropsInterface, any> {
