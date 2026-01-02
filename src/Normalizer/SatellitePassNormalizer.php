@@ -3,18 +3,14 @@
 namespace App\Normalizer;
 
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class SatellitePassNormalizer implements NormalizerInterface
 {
-    public function __construct(protected ObjectNormalizer $normalizer)
-    {
-    }
 
     /**
      * @param \Predict_Pass $object
      */
-    public function normalize($object, string $format = null, array $context = []): array
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         $timezone = $context['timezone'] ?? 'UTC';
         $details = $context['details'] ?? false;
@@ -56,8 +52,13 @@ class SatellitePassNormalizer implements NormalizerInterface
         return $result;
     }
 
-    public function supportsNormalization($data, string $format = null): bool
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof \Predict_Pass;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [\Predict_Pass::class => true];
     }
 }

@@ -16,6 +16,10 @@ framework:
     #fragments: true
     php_errors:
         log: true
+    property_info:
+        with_constructor_extractor: true
+    serializer:
+        enabled: true
 
 when@test:
     framework:

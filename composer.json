@@ -16,7 +16,7 @@
         "doctrine/doctrine-bundle": "^2.13",
         "doctrine/doctrine-migrations-bundle": "^3.4",
         "doctrine/orm": "^3.3",
-        "ivanstan/symfony-support": "dev-master",
+        "ivanstan/symfony-support": "^1.0",
         "ivanstan/tle-php": "^2.0",
         "sentry/sentry-symfony": "^5.1",
         "symfony/apache-pack": "^1.0",

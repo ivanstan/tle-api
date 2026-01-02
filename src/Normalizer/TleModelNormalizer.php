@@ -18,7 +18,7 @@ class TleModelNormalizer implements NormalizerInterface
     /**
      * @param Tle $object
      */
-    public function normalize($object, ?string $format = null, array $context = []): array
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         $id = $this->router->generate('tle_record', ['id' => $object->getId()], UrlGeneratorInterface::ABSOLUTE_URL);
 
@@ -53,8 +53,13 @@ class TleModelNormalizer implements NormalizerInterface
         return $normalized;
     }
 
-    public function supportsNormalization($data, string $format = null): bool
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof Tle;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [Tle::class => true];
     }
 }
