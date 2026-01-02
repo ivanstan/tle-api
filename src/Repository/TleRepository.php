@@ -87,4 +87,24 @@ class TleRepository extends EntityRepository
             TleCollectionSortableFieldsEnum::RAAN => 'info.raan',
         };
     }
+
+    /**
+     * Get popular satellites based on request count in the last 7 days
+     * 
+     * @return Tle[]
+     */
+    public function getPopular(int $limit = 12): array
+    {
+        $before = (new \DateTime())->sub(new \DateInterval('P7D'));
+
+        $builder = $this->createQueryBuilder('tle');
+        $builder->select('tle, COUNT(r.id) as HIDDEN requestCount');
+        $builder->leftJoin(Request::class, 'r', Expr\Join::WITH, 'r.tle = tle.id AND r.createdAt > :date');
+        $builder->setParameter('date', $before);
+        $builder->groupBy('tle.id');
+        $builder->orderBy('requestCount', 'DESC');
+        $builder->setMaxResults($limit);
+
+        return $builder->getQuery()->getResult();
+    }
 }
