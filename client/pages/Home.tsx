@@ -2,49 +2,13 @@ import React from "react"
 import { TleSelect } from "../components/TleSelect"
 import { TleBrowser } from "../components/TleBrowser"
 import { TlePopularProvider } from "../services/TlePopularProvider"
-import { Button, Link, Typography, withStyles } from "@material-ui/core"
+import { Link } from "@material-ui/core"
 import styled from "styled-components"
 import { device } from "../util/responsive"
-import Satellite from "../services/Satellite"
-import { If } from "react-if"
-import { SatellitePosition } from "../components/SatellitePosition"
 import AbstractTlePage, { AbstractTlePageStateInterface } from "./AbstractTlePage"
-
-const styles: any = (theme: any) => ({
-  button: {
-    height: 95, // setting height/width is optional
-  },
-  label: {
-    // Aligns the content of the button vertically.
-    flexDirection: 'column'
-  },
-  icon: {
-    color: '#5ba473',
-    fontSize: '62px !important',
-    padding: 2,
-    marginBottom: theme.spacing.unit
-  }
-})
-
-const CustomButton = (props: any) => {
-  const { classes, onClick } = props;
-
-  return <Button
-    onClick={onClick}
-    classes={{ root: classes.button, label: classes.label }}
-    // variant="raised"
-    color="primary"
-    disableRipple={true}
-  >
-    {props.children}
-  </Button>
-}
-
-const WrappedCustomButton = withStyles(styles)(CustomButton)
 
 interface HomeStateInterface extends AbstractTlePageStateInterface {
   popular: any[]
-  propagation: any,
 }
 
 const PopularWrapper = styled.div`
@@ -83,7 +47,6 @@ class Home extends AbstractTlePage<any, HomeStateInterface> {
   }
 
   readonly state: HomeStateInterface = {
-    propagation: null,
     data: null,
     popular: [],
   }
@@ -113,7 +76,6 @@ class Home extends AbstractTlePage<any, HomeStateInterface> {
     }
 
     this.setState({
-      propagation: Satellite.sgp4(tle, new Date()),
       data: tle
     })
     window.scroll({
@@ -123,10 +85,7 @@ class Home extends AbstractTlePage<any, HomeStateInterface> {
   }
 
   public render() {
-    const { data, popular, propagation } = this.state
-    const { history } = this.props
-
-    const classes: any = this.props;
+    const { data, popular } = this.state
 
     return (
       <div className="container" id="home-page">
@@ -164,25 +123,9 @@ class Home extends AbstractTlePage<any, HomeStateInterface> {
             {data?.name && <div className="slide">
               <h2>{data.name}</h2>
 
-              <div className={'d-flex justify-content-center'}>
-                {/*<WrappedCustomButton onClick={()=> {history.push(`/map?id[]=${data.satelliteId}`)}}>*/}
-                {/*  <RoomIcon className={classes.icon}/>*/}
-                {/*  <Typography>Map</Typography>*/}
-                {/*</WrappedCustomButton>*/}
-
-                <WrappedCustomButton onClick={()=> {history.push(`/tle/${data.satelliteId}/flyover`)}}>
-                  <img src={'images/satellite.svg'} alt={''}/>
-                  <Typography>Flyover</Typography>
-                </WrappedCustomButton>
-              </div>
-
               <p className="pb-1">Latest two line element data for selected satellite</p>
 
               <TleBrowser data={data}/>
-
-              <If condition={propagation !== null}>
-                <SatellitePosition satelliteId={data.satelliteId} propagation={propagation}/>
-              </If>
 
             </div>}
           </div>
@@ -192,4 +135,4 @@ class Home extends AbstractTlePage<any, HomeStateInterface> {
   }
 }
 
-export default withStyles(styles)(Home)
+export default Home
