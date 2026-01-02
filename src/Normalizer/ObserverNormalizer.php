@@ -15,6 +15,7 @@ class ObserverNormalizer implements NormalizerInterface
             'latitude' => $object->latitude,
             'longitude' => $object->longitude,
             'altitude' => $object->altitude,
+            'timezone' => $object->getTimezone(),
             'date' => $object->date->format(\DateTimeInterface::ATOM),
         ];
     }

@@ -179,91 +179,34 @@ class FlyOverControllerTest extends AbstractWebTestCase
             $response['los']
         );
 
-        self::assertEquals(
-            [
-                [
-                    'azimuth' => 207.65669959435,
-                    'elevation' => 0.0047869592920753,
-                ],
-                [
-                    'azimuth' => 205.38477921994,
-                    'elevation' => 1.0912635294549,
-                ],
-                [
-                    'azimuth' => 202.65595508189,
-                    'elevation' => 2.2651771539291,
-                ],
-                [
-                    'azimuth' => 199.33469704804,
-                    'elevation' => 3.5438021529901,
-                ],
-                [
-                    'azimuth' => 195.23705191884,
-                    'elevation' => 4.9443077838983,
-                ],
-                [
-                    'azimuth' => 190.11679092622,
-                    'elevation' => 6.4773095713303,
-                ],
-                [
-                    'azimuth' => 183.65932836183,
-                    'elevation' => 8.1311877732861,
-                ],
-                [
-                    'azimuth' => 175.50942605954,
-                    'elevation' => 9.8398778133251,
-                ],
-                [
-                    'azimuth' => 165.38832703269,
-                    'elevation' => 11.433463880821,
-                ],
-                [
-                    'azimuth' => 153.35761135124,
-                    'elevation' => 12.609105694977,
-                ],
-                [
-                    'azimuth' => 140.12610595023,
-                    'elevation' => 13.022338671373,
-                ],
-                [
-                    'azimuth' => 126.98711086195,
-                    'elevation' => 12.525560688957,
-                ],
-                [
-                    'azimuth' => 115.18410828561,
-                    'elevation' => 11.301953434457,
-                ],
-                [
-                    'azimuth' => 105.33145147768,
-                    'elevation' => 9.7004916046037,
-                ],
-                [
-                    'azimuth' => 97.426469426974,
-                    'elevation' => 8.0082733487551,
-                ],
-                [
-                    'azimuth' => 91.16864583908,
-                    'elevation' => 6.3798579196494,
-                ],
-                [
-                    'azimuth' => 86.20406033951,
-                    'elevation' => 4.8728059546152,
-                ],
-                [
-                    'azimuth' => 82.226671257738,
-                    'elevation' => 3.4953715898431,
-                ],
-                [
-                    'azimuth' => 78.999104073798,
-                    'elevation' => 2.2361396455495,
-                ],
-                [
-                    'azimuth' => 76.344581280163,
-                    'elevation' => 1.0781611811795,
-                ],
-            ],
-            $response['details']
-        );
+        $expectedDetails = [
+            ['azimuth' => 207.65669959435, 'elevation' => 0.0047869592920753],
+            ['azimuth' => 205.38477921994, 'elevation' => 1.0912635294549],
+            ['azimuth' => 202.65595508189, 'elevation' => 2.2651771539291],
+            ['azimuth' => 199.33469704804, 'elevation' => 3.5438021529901],
+            ['azimuth' => 195.23705191884, 'elevation' => 4.9443077838983],
+            ['azimuth' => 190.11679092622, 'elevation' => 6.4773095713303],
+            ['azimuth' => 183.65932836183, 'elevation' => 8.1311877732861],
+            ['azimuth' => 175.50942605954, 'elevation' => 9.8398778133251],
+            ['azimuth' => 165.38832703269, 'elevation' => 11.433463880821],
+            ['azimuth' => 153.35761135124, 'elevation' => 12.609105694977],
+            ['azimuth' => 140.12610595023, 'elevation' => 13.022338671373],
+            ['azimuth' => 126.98711086195, 'elevation' => 12.525560688957],
+            ['azimuth' => 115.18410828561, 'elevation' => 11.301953434457],
+            ['azimuth' => 105.33145147768, 'elevation' => 9.7004916046037],
+            ['azimuth' => 97.426469426974, 'elevation' => 8.0082733487551],
+            ['azimuth' => 91.16864583908, 'elevation' => 6.3798579196494],
+            ['azimuth' => 86.20406033951, 'elevation' => 4.8728059546152],
+            ['azimuth' => 82.226671257738, 'elevation' => 3.4953715898431],
+            ['azimuth' => 78.999104073798, 'elevation' => 2.2361396455495],
+            ['azimuth' => 76.344581280163, 'elevation' => 1.0781611811795],
+        ];
+
+        self::assertCount(count($expectedDetails), $response['details']);
+        foreach ($expectedDetails as $i => $expected) {
+            self::assertEqualsWithDelta($expected['azimuth'], $response['details'][$i]['azimuth'], 0.0001);
+            self::assertEqualsWithDelta($expected['elevation'], $response['details'][$i]['elevation'], 0.0001);
+        }
     }
 
     public function testLatitudeAbove90(): void

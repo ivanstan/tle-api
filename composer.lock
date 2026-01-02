@@ -1508,16 +1508,16 @@
         },
         {
             "name": "ivanstan/symfony-support",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ivanstan/symfony-support.git",
-                "reference": "155e4ffa38576cd6566ea2690b38a70e23d65cb6"
+                "reference": "040eeded396d0c6253515905b3a73606765db142"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ivanstan/symfony-support/zipball/155e4ffa38576cd6566ea2690b38a70e23d65cb6",
-                "reference": "155e4ffa38576cd6566ea2690b38a70e23d65cb6",
+                "url": "https://api.github.com/repos/ivanstan/symfony-support/zipball/040eeded396d0c6253515905b3a73606765db142",
+                "reference": "040eeded396d0c6253515905b3a73606765db142",
                 "shasum": ""
             },
             "require": {
@@ -1550,9 +1550,9 @@
             "description": "Symfony support API toolkit",
             "support": {
                 "issues": "https://github.com/ivanstan/symfony-support/issues",
-                "source": "https://github.com/ivanstan/symfony-support/tree/1.0.3"
+                "source": "https://github.com/ivanstan/symfony-support/tree/1.0.4"
             },
-            "time": "2026-01-02T18:36:38+00:00"
+            "time": "2026-01-02T19:03:16+00:00"
         },
         {
             "name": "ivanstan/tle-php",
