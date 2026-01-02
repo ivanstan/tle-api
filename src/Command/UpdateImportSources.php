@@ -28,7 +28,6 @@ final class UpdateImportSources extends Command
 
     private const BASE_URLS = [
         'https://celestrak.org/',
-        'https://celestrak.com/',
     ];
 
     private const MAX_DEPTH = 5;
@@ -76,6 +75,8 @@ final class UpdateImportSources extends Command
     private Validator $validator;
     private int $validatedCount = 0;
     private int $invalidCount = 0;
+    private const MAX_RETRIES = 3;
+    private const RETRY_DELAY_MS = 1000;
 
     protected function configure(): void
     {
@@ -91,10 +92,21 @@ final class UpdateImportSources extends Command
 
         $this->existingSources = file_exists($sourceFile) ? Yaml::parseFile($sourceFile) : [];
         $this->client = new Client([
-            'timeout' => 30,
-            'connect_timeout' => 10,
+            'timeout' => 60,
+            'connect_timeout' => 30,
+            'read_timeout' => 60,
             'headers' => [
-                'User-Agent' => 'TLE-API-Crawler/1.0',
+                'User-Agent' => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                'Accept' => 'text/html,application/xhtml+xml,application/xml;q=0.9,text/plain;q=0.8,*/*;q=0.7',
+                'Accept-Language' => 'en-US,en;q=0.9',
+            ],
+            'verify' => true,
+            'http_errors' => false,
+            'curl' => [
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             ],
         ]);
         $this->validator = new Validator();
@@ -185,7 +197,13 @@ final class UpdateImportSources extends Command
         $this->io->writeln(\sprintf('[Depth %d] Crawling: %s', $depth, $url), OutputInterface::VERBOSITY_VERBOSE);
 
         try {
-            $response = $this->client->request('GET', $url);
+            $response = $this->fetchWithRetry($url);
+            
+            if ($response === null || $response->getStatusCode() !== 200) {
+                $this->io->writeln(\sprintf('  Failed to fetch %s (status: %s)', $url, $response?->getStatusCode() ?? 'null'), OutputInterface::VERBOSITY_VERBOSE);
+                return;
+            }
+            
             $contentType = $response->getHeaderLine('Content-Type');
             $body = $response->getBody()->getContents();
 
@@ -207,7 +225,7 @@ final class UpdateImportSources extends Command
                 $this->extractAndFollowLinks($body, $url, $depth, $maxDepth);
             }
         } catch (GuzzleException $e) {
-            $this->io->writeln(\sprintf('  Error fetching %s: %s', $url, $e->getMessage()), OutputInterface::VERBOSITY_VERBOSE);
+            $this->io->writeln(\sprintf('  Error fetching %s: %s', $url, $e->getMessage()));
         } catch (\Exception $e) {
             $this->io->writeln(\sprintf('  Error processing %s: %s', $url, $e->getMessage()), OutputInterface::VERBOSITY_VERBOSE);
         }
@@ -255,7 +273,13 @@ final class UpdateImportSources extends Command
         $this->visitedUrls[$url] = true;
 
         try {
-            $response = $this->client->request('GET', $url);
+            $response = $this->fetchWithRetry($url);
+            
+            if ($response === null || $response->getStatusCode() !== 200) {
+                $this->io->writeln(\sprintf('  Failed to fetch TLE from %s', $url), OutputInterface::VERBOSITY_VERBOSE);
+                return;
+            }
+            
             $body = $response->getBody()->getContents();
 
             if ($this->validateTleContent($body, $url)) {
@@ -446,9 +470,9 @@ final class UpdateImportSources extends Command
     private function isHealthy(string $url): bool
     {
         try {
-            $response = $this->client->request('GET', $url, ['timeout' => 15]);
+            $response = $this->fetchWithRetry($url);
 
-            if ($response->getStatusCode() !== 200) {
+            if ($response === null || $response->getStatusCode() !== 200) {
                 return false;
             }
 
@@ -457,6 +481,44 @@ final class UpdateImportSources extends Command
         } catch (\Exception) {
             return false;
         }
+    }
+
+    private function fetchWithRetry(string $url, array $options = []): ?\Psr\Http\Message\ResponseInterface
+    {
+        $lastException = null;
+
+        for ($attempt = 1; $attempt <= self::MAX_RETRIES; $attempt++) {
+            try {
+                $response = $this->client->request('GET', $url, $options);
+                
+                // Check for successful response
+                if ($response->getStatusCode() >= 200 && $response->getStatusCode() < 400) {
+                    return $response;
+                }
+                
+                // For 4xx/5xx errors, don't retry
+                if ($response->getStatusCode() >= 400) {
+                    return $response;
+                }
+            } catch (GuzzleException $e) {
+                $lastException = $e;
+                $this->io->writeln(
+                    \sprintf('  Attempt %d/%d failed for %s: %s', $attempt, self::MAX_RETRIES, $url, $e->getMessage()),
+                    OutputInterface::VERBOSITY_VERY_VERBOSE
+                );
+                
+                if ($attempt < self::MAX_RETRIES) {
+                    // Wait before retrying with exponential backoff
+                    usleep(self::RETRY_DELAY_MS * 1000 * $attempt);
+                }
+            }
+        }
+
+        if ($lastException) {
+            throw $lastException;
+        }
+
+        return null;
     }
 
     private function filterHealthySources(array $sources): array
