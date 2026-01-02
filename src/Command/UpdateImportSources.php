@@ -6,179 +6,471 @@ namespace App\Command;
 
 use DOMElement;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Ivanstan\SymfonySupport\Traits\FileSystemAwareTrait;
+use Ivanstan\Tle\Model\TleFile;
+use Ivanstan\Tle\Service\Validator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\Yaml\Yaml;
 
 #[AsCommand(
-    name: 'tle:source', description: 'Update TLE sources'
+    name: 'tle:source', description: 'Recursively crawl CelesTrak and update TLE sources'
 )]
 final class UpdateImportSources extends Command
 {
     use FileSystemAwareTrait;
 
-    private const CATALOG = [
-        'https://celestrak.com/NORAD/elements/',
-        'https://celestrak.com/NORAD/elements/supplemental/',
+    private const BASE_URLS = [
+        'https://celestrak.org/',
+        'https://celestrak.com/',
     ];
 
-    private const IGNORED = [
-        'https://celestrak.com/NORAD/elements/supplemental/starlink-V1.0-20.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/starlink.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/planet.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/oneweb.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/gps.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/glonass.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/meteosat.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/intelsat.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/ses.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/telesat.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/iss.rms.txt',
-        'https://nasa-public-data.s3.amazonaws.com/iss-coords/current/ISS_OEM/ISS.OEM_J2K_EPH.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/cpf.rms.txt',
-        'https://celestrak.com/NORAD/elements/supplemental/testcase/gps_2007_12_31_1300.txt',
-        'http://www.ngs.noaa.gov/orbits/sp3c.txt',
-        'https://celestrak.com/GPS/almanac/SEM/2007/almanac.sem.week0436.319488.txt',
-        'https://celestrak.com/GPS/almanac/SEM/almanac.sem.txt',
+    private const MAX_DEPTH = 5;
+
+    private const IGNORED_PATHS = [
+        '/GPS/almanac/',
+        '/software/',
+        '/publications/',
+        '/columns/',
+        '/events/',
+        '/satcat/',
+        '/SpaceData/',
+        '/brief-history.php',
+        '/webmaster.php',
+        '/NORAD/documentation/',
+        '/NORAD/archives/',
+    ];
+
+    private const IGNORED_EXTENSIONS = [
+        'rms',
+        'sem',
+        'yuma',
+        'sp3',
+        'oem',
+        'csv',
+        'json',
+        'xml',
+        'pdf',
+        'zip',
+        'gz',
+        'png',
+        'jpg',
+        'jpeg',
+        'gif',
+        'ico',
+        'css',
+        'js',
     ];
 
     private SymfonyStyle $io;
-    private array $sources = [];
+    private array $existingSources = [];
+    private array $visitedUrls = [];
+    private array $discoveredTleSources = [];
+    private Client $client;
+    private Validator $validator;
+    private int $validatedCount = 0;
+    private int $invalidCount = 0;
+
+    protected function configure(): void
+    {
+        $this->addOption('max-depth', 'd', InputOption::VALUE_OPTIONAL, 'Maximum crawl depth', self::MAX_DEPTH);
+    }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->io = new SymfonyStyle($input, $output);
+        $maxDepth = (int) $input->getOption('max-depth');
 
-        $sourceFile = $this->getProjectDir().ImportTleCommand::SOURCE;
+        $sourceFile = $this->getProjectDir() . ImportTleCommand::SOURCE;
 
-        $this->sources = Yaml::parseFile($sourceFile);
+        $this->existingSources = file_exists($sourceFile) ? Yaml::parseFile($sourceFile) : [];
+        $this->client = new Client([
+            'timeout' => 30,
+            'connect_timeout' => 10,
+            'headers' => [
+                'User-Agent' => 'TLE-API-Crawler/1.0',
+            ],
+        ]);
+        $this->validator = new Validator();
+
+        $this->io->title('CelesTrak TLE Source Crawler');
+        $this->io->writeln(\sprintf('Starting recursive crawl (max depth: %d)', $maxDepth));
+        $this->io->writeln('');
 
         // Check existing sources and remove unhealthy ones
-        $healthySources = $this->filterHealthySources($this->sources);
-        $removedSources = array_diff($this->sources, $healthySources);
+        $this->io->section('Checking existing sources...');
+        $healthySources = $this->filterHealthySources($this->existingSources);
+        $removedSources = array_diff($this->existingSources, $healthySources);
 
-        // Get new sources
-        $newSources = $this->getSources();
-        $diff = array_diff($newSources, $healthySources);
-
-        $hasChanges = !empty($diff) || !empty($removedSources);
-
-        if (!$hasChanges) {
-            $this->io->success('No changes to tle sources');
-            return Command::SUCCESS;
+        // Crawl CelesTrak recursively from both domains
+        $this->io->section('Crawling CelesTrak for TLE sources...');
+        foreach (self::BASE_URLS as $baseUrl) {
+            $this->io->writeln(\sprintf('Starting from: %s', $baseUrl));
+            $this->crawlRecursively($baseUrl, 0, $maxDepth);
         }
+
+        // Merge discovered sources with healthy existing ones (no duplicates)
+        $allSources = array_unique(array_merge($healthySources, $this->discoveredTleSources));
+        sort($allSources);
+
+        $newSources = array_diff($this->discoveredTleSources, $this->existingSources);
+
+        $this->io->writeln('');
+        $this->io->section('Summary');
+
+        // Report statistics
+        $this->io->writeln(\sprintf('URLs visited: %d', \count($this->visitedUrls)));
+        $this->io->writeln(\sprintf('TLE files validated: %d', $this->validatedCount));
+        $this->io->writeln(\sprintf('Invalid/non-TLE files skipped: %d', $this->invalidCount));
+        $this->io->writeln('');
 
         // Report removed sources
         if (!empty($removedSources)) {
-            $this->io->writeln('');
-            $this->io->writeln(\sprintf('Following tle sources were removed from %s due to errors or not found:', $sourceFile));
-            $this->io->writeln('');
+            $this->io->warning(\sprintf('%d sources were removed due to errors:', \count($removedSources)));
             foreach ($removedSources as $url) {
-                $this->io->writeln($url);
+                $this->io->writeln('  - ' . $url);
             }
-            $this->io->writeln('');
         }
 
         // Report new sources
-        if (!empty($diff)) {
-            $this->io->writeln('');
-            $this->io->writeln(\sprintf('Following new tle sources found and written to %s', $sourceFile));
-            $this->io->writeln('');
-            foreach ($diff as $url) {
-                $this->io->writeln($url);
+        if (!empty($newSources)) {
+            $this->io->success(\sprintf('%d new TLE sources discovered:', \count($newSources)));
+            foreach ($newSources as $url) {
+                $this->io->writeln('  + ' . $url);
             }
-            $this->io->writeln('');
         }
 
-        $sources = array_merge($healthySources, $diff);
-        sort($sources);
+        if (empty($newSources) && empty($removedSources)) {
+            $this->io->success('No changes to TLE sources');
+            return Command::SUCCESS;
+        }
 
-        $yaml = Yaml::dump($sources);
-
+        // Write updated sources
+        $yaml = Yaml::dump($allSources);
         file_put_contents($sourceFile, $yaml);
+
+        $this->io->success(\sprintf('Updated %s with %d sources', $sourceFile, \count($allSources)));
 
         return Command::SUCCESS;
     }
 
-    protected function getSources(): array
+    private function crawlRecursively(string $url, int $depth, int $maxDepth): void
     {
-        $result = [];
+        // Normalize URL
+        $url = $this->normalizeUrl($url);
 
-        foreach (self::CATALOG as $catalog) {
-            $response = (new Client())->request('GET', $catalog);
+        // Skip if already visited or exceeds max depth
+        if (isset($this->visitedUrls[$url]) || $depth > $maxDepth) {
+            return;
+        }
 
-            $crawler = new Crawler($response->getBody()->getContents());
+        // Only crawl celestrak URLs
+        if (!$this->isCelestrakUrl($url)) {
+            return;
+        }
 
-            /** @var DOMElement $anchor */
-            foreach ($crawler->filter('a') as $anchor) {
-                $href = $anchor->getAttribute('href');
-                $path = parse_url($href, PHP_URL_PATH);
+        // Skip ignored paths
+        if ($this->isIgnoredPath($url)) {
+            return;
+        }
 
-                if (null === $path) {
-                    continue;
+        $this->visitedUrls[$url] = true;
+
+        $this->io->writeln(\sprintf('[Depth %d] Crawling: %s', $depth, $url), OutputInterface::VERBOSITY_VERBOSE);
+
+        try {
+            $response = $this->client->request('GET', $url);
+            $contentType = $response->getHeaderLine('Content-Type');
+            $body = $response->getBody()->getContents();
+
+            // First, check if this URL looks like it could be a TLE endpoint
+            if ($this->isPotentialTleEndpoint($url, $contentType)) {
+                if ($this->validateTleContent($body, $url)) {
+                    $this->discoveredTleSources[] = $url;
+                    $this->validatedCount++;
+                    $this->io->writeln(\sprintf('  ✓ Valid TLE source: %s', $url));
+                    return;
+                } else {
+                    $this->invalidCount++;
+                    $this->io->writeln(\sprintf('  ✗ Not a valid TLE source: %s', $url), OutputInterface::VERBOSITY_VERBOSE);
                 }
+            }
 
-                $extension = pathinfo($path, PATHINFO_EXTENSION);
+            // If it's HTML, extract and follow links
+            if (str_contains($contentType, 'text/html')) {
+                $this->extractAndFollowLinks($body, $url, $depth, $maxDepth);
+            }
+        } catch (GuzzleException $e) {
+            $this->io->writeln(\sprintf('  Error fetching %s: %s', $url, $e->getMessage()), OutputInterface::VERBOSITY_VERBOSE);
+        } catch (\Exception $e) {
+            $this->io->writeln(\sprintf('  Error processing %s: %s', $url, $e->getMessage()), OutputInterface::VERBOSITY_VERBOSE);
+        }
+    }
 
-                if ('txt' === $extension) {
-                    if (null === parse_url($href, PHP_URL_HOST)) {
-                        /* @noinspection PhpArrayKeyDoesNotMatchArrayShapeInspection */
-                        if ('/' === $path[0]) {
-                            $scheme = parse_url($catalog, PHP_URL_SCHEME);
-                            $host = parse_url($catalog, PHP_URL_HOST);
-                            $href = $scheme.'://'.$host.$href;
-                        } else {
-                            $href = $catalog.trim($href, '/');
-                        }
-                    }
+    private function extractAndFollowLinks(string $html, string $baseUrl, int $depth, int $maxDepth): void
+    {
+        $crawler = new Crawler($html);
 
-                    if (!$this->isIgnored($href)) {
-                        $this->io->writeln(\sprintf('Verifying url: %s', $href));
-                        if ($this->isHealthy($href)) {
-                            $result[] = $href;
-                        }
-                    }
+        /** @var DOMElement $anchor */
+        foreach ($crawler->filter('a') as $anchor) {
+            $href = $anchor->getAttribute('href');
+
+            if (empty($href) || str_starts_with($href, '#') || str_starts_with($href, 'javascript:') || str_starts_with($href, 'mailto:')) {
+                continue;
+            }
+
+            $absoluteUrl = $this->resolveUrl($href, $baseUrl);
+
+            if ($absoluteUrl) {
+                // Check if this looks like a TLE endpoint based on URL pattern
+                if ($this->isTleUrlPattern($absoluteUrl)) {
+                    // Directly try to validate as TLE
+                    $this->tryValidateTleUrl($absoluteUrl);
+                } else {
+                    // Continue crawling
+                    $this->crawlRecursively($absoluteUrl, $depth + 1, $maxDepth);
                 }
             }
         }
-
-        return $result;
     }
 
-    protected function isIgnored(string $url): bool
+    private function tryValidateTleUrl(string $url): void
     {
-        return in_array($url, self::IGNORED, false) || in_array($this->sources, self::IGNORED, false);
+        $url = $this->normalizeUrl($url);
+
+        if (isset($this->visitedUrls[$url])) {
+            return;
+        }
+
+        if (!$this->isCelestrakUrl($url)) {
+            return;
+        }
+
+        $this->visitedUrls[$url] = true;
+
+        try {
+            $response = $this->client->request('GET', $url);
+            $body = $response->getBody()->getContents();
+
+            if ($this->validateTleContent($body, $url)) {
+                $this->discoveredTleSources[] = $url;
+                $this->validatedCount++;
+                $this->io->writeln(\sprintf('  ✓ Valid TLE source: %s', $url));
+            } else {
+                $this->invalidCount++;
+                $this->io->writeln(\sprintf('  ✗ Not a valid TLE source: %s', $url), OutputInterface::VERBOSITY_VERBOSE);
+            }
+        } catch (\Exception $e) {
+            $this->io->writeln(\sprintf('  Error validating %s: %s', $url, $e->getMessage()), OutputInterface::VERBOSITY_VERBOSE);
+        }
     }
 
-    protected function isHealthy(string $url): bool
+    private function isTleUrlPattern(string $url): bool
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?? '';
+        $query = parse_url($url, PHP_URL_QUERY) ?? '';
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+
+        // .txt files are potential TLE sources
+        if ($extension === 'txt') {
+            return true;
+        }
+
+        // URLs with FORMAT=tle or FORMAT=TLE query parameter
+        if (preg_match('/FORMAT=tle/i', $query)) {
+            return true;
+        }
+
+        // gp.php endpoints with GROUP parameter
+        if (str_contains($path, 'gp.php') && str_contains($query, 'GROUP=')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function resolveUrl(string $href, string $baseUrl): ?string
+    {
+        // Already absolute URL
+        if (str_starts_with($href, 'http://') || str_starts_with($href, 'https://')) {
+            return $href;
+        }
+
+        $parsed = parse_url($baseUrl);
+        $scheme = $parsed['scheme'] ?? 'https';
+        $host = $parsed['host'] ?? '';
+
+        if (empty($host)) {
+            return null;
+        }
+
+        // Absolute path
+        if (str_starts_with($href, '/')) {
+            return $scheme . '://' . $host . $href;
+        }
+
+        // Relative path
+        $basePath = $parsed['path'] ?? '/';
+        if (!str_ends_with($basePath, '/')) {
+            $basePath = dirname($basePath) . '/';
+        }
+
+        return $scheme . '://' . $host . $basePath . $href;
+    }
+
+    private function normalizeUrl(string $url): string
+    {
+        // Remove fragments
+        $url = preg_replace('/#.*$/', '', $url);
+
+        // Parse the URL
+        $parsed = parse_url($url);
+        
+        // Rebuild without trailing slash on path (except for root)
+        $scheme = $parsed['scheme'] ?? 'https';
+        $host = $parsed['host'] ?? '';
+        $path = $parsed['path'] ?? '/';
+        $query = $parsed['query'] ?? '';
+        
+        // Remove trailing slash from path (except root)
+        if ($path !== '/' && str_ends_with($path, '/')) {
+            $path = rtrim($path, '/');
+        }
+        
+        $normalized = $scheme . '://' . $host . $path;
+        if (!empty($query)) {
+            $normalized .= '?' . $query;
+        }
+
+        return $normalized;
+    }
+
+    private function isCelestrakUrl(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        return in_array($host, ['celestrak.com', 'www.celestrak.com', 'celestrak.org', 'www.celestrak.org'], true);
+    }
+
+    private function isIgnoredPath(string $url): bool
+    {
+        $path = parse_url($url, PHP_URL_PATH) ?? '';
+
+        foreach (self::IGNORED_PATHS as $ignoredPath) {
+            if (str_starts_with($path, $ignoredPath)) {
+                return true;
+            }
+        }
+
+        // Check for ignored file extensions
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if (in_array($extension, self::IGNORED_EXTENSIONS, true)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    private function isPotentialTleEndpoint(string $url, string $contentType): bool
+    {
+        // Must return text content
+        if (!str_contains($contentType, 'text/plain') && 
+            !str_contains($contentType, 'application/octet-stream') &&
+            !str_contains($contentType, 'text/html')) {
+            // Some servers might not set proper content type, so we'll check anyway for known patterns
+        }
+
+        return $this->isTleUrlPattern($url);
+    }
+
+    private function validateTleContent(string $content, string $url): bool
+    {
+        $content = trim($content);
+        
+        if (empty($content)) {
+            return false;
+        }
+
+        // Quick sanity check: TLE lines start with "1 " and "2 "
+        // and are typically 69 characters long
+        if (!preg_match('/^1 /m', $content) || !preg_match('/^2 /m', $content)) {
+            return false;
+        }
+
+        try {
+            $file = new TleFile($content);
+            $tles = $file->parse();
+
+            if (empty($tles)) {
+                return false;
+            }
+
+            // Validate at least a few TLEs to confirm this is a valid TLE file
+            $validCount = 0;
+            $totalChecked = 0;
+            $maxCheck = min(5, \count($tles)); // Check up to 5 TLEs
+
+            foreach ($tles as $tle) {
+                if ($tle === null) {
+                    continue;
+                }
+
+                $totalChecked++;
+
+                try {
+                    if ($this->validator->validate($tle)) {
+                        $validCount++;
+                    }
+                } catch (\Exception) {
+                    // Invalid TLE
+                }
+
+                if ($totalChecked >= $maxCheck) {
+                    break;
+                }
+            }
+
+            // Consider valid if at least 1 TLE validated successfully
+            return $validCount > 0;
+        } catch (\Exception $e) {
+            $this->io->writeln(\sprintf('  Validation error for %s: %s', $url, $e->getMessage()), OutputInterface::VERBOSITY_VERY_VERBOSE);
+            return false;
+        }
+    }
+
+    private function isHealthy(string $url): bool
     {
         try {
-            $response = (new Client())->request('GET', $url);
+            $response = $this->client->request('GET', $url, ['timeout' => 15]);
 
-            return 200 === $response->getStatusCode();
+            if ($response->getStatusCode() !== 200) {
+                return false;
+            }
+
+            // Also validate TLE content
+            return $this->validateTleContent($response->getBody()->getContents(), $url);
         } catch (\Exception) {
             return false;
         }
     }
 
-    /**
-     * Filter sources to keep only healthy ones
-     */
-    protected function filterHealthySources(array $sources): array
+    private function filterHealthySources(array $sources): array
     {
         $healthySources = [];
 
         foreach ($sources as $url) {
-            $this->io->writeln(\sprintf('Checking existing source: %s', $url));
+            $this->io->write(\sprintf('  Checking: %s ... ', $url));
+
             if ($this->isHealthy($url)) {
                 $healthySources[] = $url;
+                $this->io->writeln('<info>OK</info>');
             } else {
-                $this->io->writeln(\sprintf('Source is unhealthy and will be removed: %s', $url));
+                $this->io->writeln('<error>FAILED</error>');
             }
         }
 
