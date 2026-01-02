@@ -24,7 +24,7 @@ add('shared_files', [
     'public/logo512.png',
 ]);
 add('shared_dirs', [
-    'public/static',
+    'public/assets',
     'public/images',
 ]);
 add('writable_dirs', ['var']);
