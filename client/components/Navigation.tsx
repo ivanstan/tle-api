@@ -13,11 +13,80 @@ import styled from 'styled-components'
 import { DonateButton } from './DonateButton'
 
 const Menu = styled.div`
-  background: #0b3d91;
+  background: rgba(10, 14, 26, 0.98);
+  backdrop-filter: blur(20px);
   display: flex;
   flex-direction: column;
-  align-items: baseline;
-  padding: 15px;
+  align-items: stretch;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+`
+
+const NavButton = styled(Button)`
+  && {
+    color: rgba(255, 255, 255, 0.7);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 8px 16px;
+    border-radius: 8px;
+    text-transform: none;
+    transition: all 0.2s ease;
+
+    &:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+`
+
+const LogoButton = styled(Button)`
+  && {
+    padding: 4px 12px;
+    border-radius: 8px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+`
+
+const LogoText = styled(Typography)`
+  && {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    
+    span {
+      color: #4aa564;
+    }
+  }
+`
+
+const StyledAppBar = styled(AppBar)`
+  && {
+    background: rgba(10, 14, 26, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: none;
+  }
+`
+
+const Spacer = styled.div`
+  flex-grow: 1;
+`
+
+const MenuButton = styled(IconButton)`
+  && {
+    color: rgba(255, 255, 255, 0.8);
+    margin-right: 8px;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
 `
 
 const Navigation = () => {
@@ -29,44 +98,43 @@ const Navigation = () => {
 
   const menu = (
     <>
-      <Button href={'#/'} sx={{ color: '#f1f1f1' }}>
+      <NavButton href={'#/'}>
         Index
-      </Button>
-      <Button href={'#/browse'} sx={{ color: '#f1f1f1' }}>
+      </NavButton>
+      <NavButton href={'#/browse'}>
         Browse
-      </Button>
-      <Button href={'#docs'} sx={{ color: '#f1f1f1' }}>
+      </NavButton>
+      <NavButton href={'#docs'}>
         Documentation
-      </Button>
-      <Button href={'#health'} sx={{ color: '#f1f1f1' }}>
+      </NavButton>
+      <NavButton href={'#health'}>
         Health
-      </Button>
+      </NavButton>
     </>
   )
 
   return (
     <HideOnScroll>
-      <AppBar position="static" elevation={0}>
+      <StyledAppBar position="static" elevation={0}>
         <Toolbar>
-          <IconButton
+          <MenuButton
             edge="start"
-            color="inherit"
             aria-label="open drawer"
             onClick={toggleMenu}
             className={'d-block d-md-none'}
           >
             <MenuIcon />
-          </IconButton>
+          </MenuButton>
 
-          <Button href={'#/'}>
-            <Typography variant="h6" sx={{ color: '#f1f1f1' }}>
-              TLE API
-            </Typography>
-          </Button>
+          <LogoButton href={'#/'}>
+            <LogoText variant="h6">
+              <span>TLE</span> API
+            </LogoText>
+          </LogoButton>
 
           <div className={'d-none d-md-block'}>{menu}</div>
 
-          <div style={{ flexGrow: 1 }}></div>
+          <Spacer />
 
           <DonateButton />
         </Toolbar>
@@ -74,7 +142,7 @@ const Navigation = () => {
         <Drawer variant="persistent" anchor="top" open={open}>
           <Menu onClick={toggleMenu}>{menu}</Menu>
         </Drawer>
-      </AppBar>
+      </StyledAppBar>
     </HideOnScroll>
   )
 }
