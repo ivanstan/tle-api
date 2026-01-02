@@ -58,26 +58,44 @@ final class UpdateImportSources extends Command
 
         $this->sources = Yaml::parseFile($sourceFile);
 
+        // Check existing sources and remove unhealthy ones
+        $healthySources = $this->filterHealthySources($this->sources);
+        $removedSources = array_diff($this->sources, $healthySources);
+
+        // Get new sources
         $newSources = $this->getSources();
+        $diff = array_diff($newSources, $healthySources);
 
-        $diff = array_diff($newSources, $this->sources);
+        $hasChanges = !empty($diff) || !empty($removedSources);
 
-        if (empty($diff)) {
-            $this->io->success('No new tle sources found');
-
+        if (!$hasChanges) {
+            $this->io->success('No changes to tle sources');
             return Command::SUCCESS;
         }
 
-        $this->io->writeln('');
-        $this->io->writeln(\sprintf('Following new tle sources found and written to %s', $sourceFile));
-        $this->io->writeln('');
-        foreach ($diff as $url) {
-            $this->io->writeln($url);
+        // Report removed sources
+        if (!empty($removedSources)) {
+            $this->io->writeln('');
+            $this->io->writeln(\sprintf('Following tle sources were removed from %s due to errors or not found:', $sourceFile));
+            $this->io->writeln('');
+            foreach ($removedSources as $url) {
+                $this->io->writeln($url);
+            }
+            $this->io->writeln('');
         }
 
-        $this->io->writeln('');
+        // Report new sources
+        if (!empty($diff)) {
+            $this->io->writeln('');
+            $this->io->writeln(\sprintf('Following new tle sources found and written to %s', $sourceFile));
+            $this->io->writeln('');
+            foreach ($diff as $url) {
+                $this->io->writeln($url);
+            }
+            $this->io->writeln('');
+        }
 
-        $sources = array_merge($this->sources, $diff);
+        $sources = array_merge($healthySources, $diff);
         sort($sources);
 
         $yaml = Yaml::dump($sources);
@@ -146,5 +164,24 @@ final class UpdateImportSources extends Command
         } catch (\Exception) {
             return false;
         }
+    }
+
+    /**
+     * Filter sources to keep only healthy ones
+     */
+    protected function filterHealthySources(array $sources): array
+    {
+        $healthySources = [];
+
+        foreach ($sources as $url) {
+            $this->io->writeln(\sprintf('Checking existing source: %s', $url));
+            if ($this->isHealthy($url)) {
+                $healthySources[] = $url;
+            } else {
+                $this->io->writeln(\sprintf('Source is unhealthy and will be removed: %s', $url));
+            }
+        }
+
+        return $healthySources;
     }
 }
