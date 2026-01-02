@@ -1,76 +1,52 @@
-import React, { ChangeEvent } from "react"
-import TextField from "@material-ui/core/TextField"
-import CircularProgress from "@material-ui/core/CircularProgress"
-import Autocomplete from "@material-ui/lab/Autocomplete"
-import { Checkbox, Chip } from "@material-ui/core";
-import CheckBoxOutlineBlankIcon from '@material-ui/icons/CheckBoxOutlineBlank';
-import CheckBoxIcon from '@material-ui/icons/CheckBox';
-import { If } from "react-if";
-import {TleProvider} from "../services/TleProvider";
+import { useState, ChangeEvent } from 'react'
+import TextField from '@mui/material/TextField'
+import CircularProgress from '@mui/material/CircularProgress'
+import Autocomplete from '@mui/material/Autocomplete'
+import { Checkbox, Chip } from '@mui/material'
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
+import CheckBoxIcon from '@mui/icons-material/CheckBox'
+import { If } from 'react-if'
+import { TleProvider } from '../services/TleProvider'
 
-const icon = <CheckBoxOutlineBlankIcon fontSize="small"/>;
-const checkedIcon = <CheckBoxIcon fontSize="small"/>;
+const icon = <CheckBoxOutlineBlankIcon fontSize="small" />
+const checkedIcon = <CheckBoxIcon fontSize="small" />
 
-export interface TleSelectPropsInterface {
+interface TleMultiSelectProps {
   value: Tle[] | null
-  onChange: Function
+  onChange: (value: Tle[]) => void
 }
 
-export class TleMultiSelect extends React.Component<any, any> {
+const provider = new TleProvider()
 
-  private provider: TleProvider
+export const TleMultiSelect = ({ value, onChange }: TleMultiSelectProps) => {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [options, setOptions] = useState<Tle[]>([])
+  const [inputValue, setInputValue] = useState('')
 
-  public readonly state = {
-    open: false,
-    loading: false,
-    options: [],
-    value: null,
-    inputValue: null,
-  }
-
-  constructor(props: any) {
-    super(props)
-
-    this.state.value = props.value
-    this.state.inputValue = props.value?.name
-
-    this.provider = new TleProvider()
-  }
-
-  static getDerivedStateFromProps(props: TleSelectPropsInterface, state: any) {
-
-    if (props.value === null) {
-      return null
-    }
-
-    return {
-      value: props.value,
+  const query = async (searchValue: string = '') => {
+    try {
+      const data = await provider.search(searchValue)
+      setOptions(data)
+      setLoading(false)
+    } catch {
+      setOptions([])
+      setLoading(false)
     }
   }
 
-  public async query(inputValue: string = '') {
-    this.provider.search(inputValue)
-      .then((data: Tle[]) => {
-        this.setState({ options: data, loading: false })
-      })
-      .catch(() => this.setState({ options: [], loading: false }))
-  }
+  const width = window.innerWidth < 500 ? 'auto' : 400
 
-  render() {
-    const { open, options, value, inputValue, loading } = this.state
-    const { onChange } = this.props
-
-    let width = (window.innerWidth < 500) ? 'auto' : 400
-
-    // @ts-ignore
-    return (
-      <Autocomplete
-        size='small'
-        multiple
-        value={value || undefined}
-        disableCloseOnSelect
-        renderOption={(option, { selected }) => (
-          <React.Fragment>
+  return (
+    <Autocomplete
+      size="small"
+      multiple
+      value={value || []}
+      disableCloseOnSelect
+      renderOption={(props, option, { selected }) => {
+        const { key, ...restProps } = props
+        return (
+          <li key={key} {...restProps}>
             <Checkbox
               icon={icon}
               checkedIcon={checkedIcon}
@@ -78,72 +54,71 @@ export class TleMultiSelect extends React.Component<any, any> {
               checked={selected}
             />
             {option.name}
-          </React.Fragment>
-        )}
-        onChange={(event, newValue: any) => {
-          this.setState({ value: newValue })
+          </li>
+        )
+      }}
+      onChange={(_event, newValue) => {
+        onChange(newValue)
+      }}
+      sx={{ width, margin: 'auto' }}
+      open={open}
+      onOpen={() => {
+        if (options.length === 0) {
+          query()
+        }
+        setOpen(true)
+      }}
+      onClose={() => {
+        setOpen(false)
+      }}
+      isOptionEqualToValue={(option, val) => option.name === val.name}
+      getOptionLabel={(option) => option.name || '-'}
+      options={options}
+      loading={loading}
+      noOptionsText={'No results found'}
+      renderTags={(tagValue, getTagProps) => {
+        const newValue = [...tagValue]
+        const render = newValue.slice(0, 2)
+        const left = newValue.splice(2, tagValue.length)
 
-          if (onChange !== null && typeof onChange === 'function') {
-            onChange(newValue)
-          }
-        }}
-        style={{ width: width, margin: 'auto' }}
-        open={open}
-        onOpen={() => {
-          if (options.length === 0) {
-            this.query()
-          }
-          this.setState({ open: true })
-        }}
-        onClose={() => {
-          this.setState({ open: false })
-        }}
-        getOptionSelected={(option: any, value) => option.name === value.name}
-        getOptionLabel={(option: any) => option.name || '-'}
-        options={options}
-        loading={loading}
-        noOptionsText={"No results found"}
-        renderTags={(value, getTagProps) => {
-          const newValue = [...value];
-
-          let render = newValue.slice(0, 2);
-          let left = newValue.splice(2, value.length)
-
-          return <>
-            {render.map((option, index) => (
-              <Chip
-                label={option.name}
-                {...getTagProps({ index })}
-              />
-            ))}
-            <If condition={value.length >= 2 && left.length > 0}>
-              <Chip
-                label={'+' + left.length}
-              />
+        return (
+          <>
+            {render.map((option, index) => {
+              const { key, ...tagProps } = getTagProps({ index })
+              return <Chip key={key} label={option.name} {...tagProps} />
+            })}
+            <If condition={tagValue.length >= 2 && left.length > 0}>
+              <Chip label={'+' + left.length} />
             </If>
           </>
-        }}
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            value={inputValue}
-            onChange={(event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-              this.setState({ inputValue: event.target.value, loading: true }, () => this.query(event.target.value))
-            }}
-            label="Search satellites"
-            variant="standard"
-            InputProps={{
+        )
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          value={inputValue}
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+            setInputValue(event.target.value)
+            setLoading(true)
+            query(event.target.value)
+          }}
+          label="Search satellites"
+          variant="standard"
+          slotProps={{
+            input: {
               ...params.InputProps,
               endAdornment: (
-                <React.Fragment>
-                  {loading ? <CircularProgress color="inherit" size={20}/> : null}
+                <>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
                   {params.InputProps.endAdornment}
-                </React.Fragment>
+                </>
               ),
-            }}
-          />
-        )}
-      />
-    );
-  }
+            },
+          }}
+        />
+      )}
+    />
+  )
 }

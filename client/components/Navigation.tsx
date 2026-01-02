@@ -1,105 +1,82 @@
-import React from 'react'
+import { useState } from 'react'
 import { HideOnScroll } from './HideOnScroll'
-import { AppBar, Button, Drawer, IconButton, Toolbar, Typography, withStyles } from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu'
+import {
+  AppBar,
+  Button,
+  Drawer,
+  IconButton,
+  Toolbar,
+  Typography,
+} from '@mui/material'
+import MenuIcon from '@mui/icons-material/Menu'
 import styled from 'styled-components'
-import { DonateButton } from "./DonateButton"
+import { DonateButton } from './DonateButton'
 
 const Menu = styled.div`
-  background: #0b3d91
-  display: flex
-  flex-direction: column
-  align-items: baseline
-  padding: 15px
+  background: #0b3d91;
+  display: flex;
+  flex-direction: column;
+  align-items: baseline;
+  padding: 15px;
 `
 
-const styles = (theme: any) => ({
-  label: {
-    color: '#f1f1f1',
-  },
-});
+const Navigation = () => {
+  const [open, setOpen] = useState(false)
 
-class Navigation extends React.Component<any, any> {
-
-  public readonly state = {
-    open: false,
+  const toggleMenu = () => {
+    setOpen(!open)
   }
 
-  toggleMenu = () => {
-    this.setState({
-      open: !this.state.open
-    })
-  }
+  const menu = (
+    <>
+      <Button href={'#/'} sx={{ color: '#f1f1f1' }}>
+        Index
+      </Button>
+      <Button href={'#/browse'} sx={{ color: '#f1f1f1' }}>
+        Browse
+      </Button>
+      <Button href={'#docs'} sx={{ color: '#f1f1f1' }}>
+        Documentation
+      </Button>
+      <Button href={'#health'} sx={{ color: '#f1f1f1' }}>
+        Health
+      </Button>
+    </>
+  )
 
-  render() {
-    const { classes } = this.props
-
-    const menu = (
-      <>
-        <Button href={'#/'}>
-          Index
-        </Button>
-        <Button href={'#/browse'}>
-          Browse
-        </Button>
-        <Button href={'#docs'}>
-          Documentation
-        </Button>
-        <Button href={'#health'}>
-          Health
-        </Button>
-      </>
-    )
-
-    return (
-      <HideOnScroll {...this.props}>
-
-        <AppBar position='static' elevation={0}>
-
-          <Toolbar>
-            <IconButton
-              edge='start'
-              color='inherit'
-              aria-label='open drawer'
-              onClick={this.toggleMenu}
-              className={'d-block d-md-none'}
-            >
-              <MenuIcon />
-            </IconButton>
-
-            <Button href={'#/'}>
-              <Typography variant='h6'>
-                TLE API
-              </Typography>
-            </Button>
-
-            <div className={'d-none d-md-block'}>
-              {menu}
-            </div>
-
-            <div style={{flexGrow: 1}}>
-
-            </div>
-
-            <DonateButton/>
-
-          </Toolbar>
-
-          <Drawer
-            variant='persistent'
-            anchor='top'
-            open={this.state.open}
+  return (
+    <HideOnScroll>
+      <AppBar position="static" elevation={0}>
+        <Toolbar>
+          <IconButton
+            edge="start"
+            color="inherit"
+            aria-label="open drawer"
+            onClick={toggleMenu}
+            className={'d-block d-md-none'}
           >
-            <Menu onClick={this.toggleMenu}>
-              {menu}
-            </Menu>
-          </Drawer>
+            <MenuIcon />
+          </IconButton>
 
-        </AppBar>
+          <Button href={'#/'}>
+            <Typography variant="h6" sx={{ color: '#f1f1f1' }}>
+              TLE API
+            </Typography>
+          </Button>
 
-      </HideOnScroll>
-    )
-  }
+          <div className={'d-none d-md-block'}>{menu}</div>
+
+          <div style={{ flexGrow: 1 }}></div>
+
+          <DonateButton />
+        </Toolbar>
+
+        <Drawer variant="persistent" anchor="top" open={open}>
+          <Menu onClick={toggleMenu}>{menu}</Menu>
+        </Drawer>
+      </AppBar>
+    </HideOnScroll>
+  )
 }
 
-export default withStyles(styles)(Navigation)
+export default Navigation

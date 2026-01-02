@@ -1,105 +1,86 @@
-import React, { ChangeEvent } from "react"
-import TextField from "@material-ui/core/TextField"
-import CircularProgress from "@material-ui/core/CircularProgress"
-import Autocomplete from "@material-ui/lab/Autocomplete"
-import {TleProvider} from "../services/TleProvider";
-export interface TleSelectPropsInterface {
+import { useState, ChangeEvent } from 'react'
+import TextField from '@mui/material/TextField'
+import CircularProgress from '@mui/material/CircularProgress'
+import Autocomplete from '@mui/material/Autocomplete'
+import { TleProvider } from '../services/TleProvider'
+
+interface TleSelectProps {
   value: Tle | null
-  onChange: Function
+  onChange: (value: Tle | null) => void
 }
 
-export class TleSelect extends React.Component<any, any> {
+const provider = new TleProvider()
 
-  private provider: TleProvider
+export const TleSelect = ({ value, onChange }: TleSelectProps) => {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [options, setOptions] = useState<Tle[]>([])
+  const [inputValue, setInputValue] = useState(value?.name || '')
 
-  public readonly state = {
-    open: false,
-    loading: false,
-    options: [],
-    value: null,
-    inputValue: null,
-  }
-
-  constructor(props: any) {
-    super(props)
-
-    this.state.value = props.value
-    this.state.inputValue = props.value?.name
-
-    this.provider = new TleProvider()
-  }
-
-  static getDerivedStateFromProps(props: TleSelectPropsInterface, state: any) {
-
-    if (props.value === null) {
-      return null
-    }
-
-    return {
-      value: props.value,
-      inputValue: props.value.name,
+  const query = async (searchValue: string = '') => {
+    try {
+      const data = await provider.search(searchValue)
+      setOptions(data)
+      setLoading(false)
+    } catch {
+      setOptions([])
+      setLoading(false)
     }
   }
 
-  public async query(inputValue: string = '') {
-    this.provider.search(inputValue)
-      .then((data: Tle[]) => {
-        this.setState({ options: data, loading: false })
-      })
-      .catch(() => this.setState({ options: [], loading: false }))
-  }
+  const width = window.innerWidth < 500 ? 'auto' : 400
 
-  render() {
-    const { open, options, value, inputValue, loading } = this.state
-    const { onChange } = this.props
-
-    let width = (window.innerWidth < 500) ? 'auto' : 400
-
-    return <Autocomplete
+  return (
+    <Autocomplete
       value={value}
-      onChange={(event, newValue: any) => {
-        this.setState({ value: newValue })
-
-        if (onChange !== null && typeof onChange === 'function') {
-          onChange(newValue)
-        }
+      onChange={(_event, newValue) => {
+        onChange(newValue)
       }}
-      style={{ width: width, margin: 'auto' }}
+      inputValue={inputValue}
+      onInputChange={(_event, newInputValue) => {
+        setInputValue(newInputValue)
+      }}
+      sx={{ width, margin: 'auto' }}
       open={open}
       onOpen={() => {
         if (options.length === 0) {
-          this.query()
+          query()
         }
-        this.setState({ open: true })
+        setOpen(true)
       }}
       onClose={() => {
-        this.setState({ open: false })
+        setOpen(false)
       }}
-      getOptionSelected={(option: any, value) => option.name === value.name}
-      getOptionLabel={(option: any) => option.name || '-'}
+      isOptionEqualToValue={(option, val) => option.name === val.name}
+      getOptionLabel={(option) => option.name || '-'}
       options={options}
       loading={loading}
-      noOptionsText={"No results found"}
+      noOptionsText={'No results found'}
       renderInput={(params) => (
         <TextField
           {...params}
-          value={inputValue}
-          onChange={(event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
-            this.setState({ inputValue: event.target.value, loading: true }, () => this.query(event.target.value))
+          onChange={(event: ChangeEvent<HTMLInputElement>) => {
+            setInputValue(event.target.value)
+            setLoading(true)
+            query(event.target.value)
           }}
           label="Search satellites"
           variant="standard"
-          InputProps={{
-            ...params.InputProps,
-            endAdornment: (
-              <React.Fragment>
-                {loading ? <CircularProgress color="inherit" size={20}/> : null}
-                {params.InputProps.endAdornment}
-              </React.Fragment>
-            ),
+          slotProps={{
+            input: {
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? (
+                    <CircularProgress color="inherit" size={20} />
+                  ) : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            },
           }}
         />
       )}
     />
-  }
+  )
 }

@@ -38,6 +38,7 @@
         "symfony/yaml": "6.3.*"
     },
     "require-dev": {
+        "deployer/deployer": "^7.5",
         "doctrine/doctrine-fixtures-bundle": "^3.1",
         "laravel/pint": "^1.2",
         "roave/security-advisories": "dev-latest",
@@ -110,7 +111,7 @@
             "@auto-scripts"
         ],
         "test": "XDEBUG_MODE=coverage php bin/phpunit --coverage-text --coverage-html ./coverage",
-        "deploy": "dep deploy",
+        "deploy": "vendor/bin/dep deploy",
         "ssh": "ssh -p2233 -t glutenfr@ivanstanojevic.me \"cd ~/projects/tle.ivanstanojevic.me/current; bash\"",
         "ssh-mysql": "ssh -v glutenfr@ivanstanojevic.me -p 2233 -L 3306:127.0.0.1:3306 -N"
     },

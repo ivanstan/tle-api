@@ -1,33 +1,39 @@
-import React from 'react';
-import { DataGrid, GridColDef } from '@material-ui/data-grid';
-import { Drawer, IconButton, InputAdornment, MenuItem, Select, TextField } from '@material-ui/core';
-import { If } from 'react-if';
-import { TleBrowser } from '../components/TleBrowser';
-import styled from 'styled-components';
-import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
-import SearchIcon from '@material-ui/icons/Search';
-import {TleProvider} from "../services/TleProvider";
+import { useState, useEffect, useCallback } from 'react'
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridRowSelectionModel } from '@mui/x-data-grid'
+import {
+  Drawer,
+  IconButton,
+  InputAdornment,
+  MenuItem,
+  Select,
+  TextField,
+  SelectChangeEvent,
+} from '@mui/material'
+import { If } from 'react-if'
+import { TleBrowser } from '../components/TleBrowser'
+import styled from 'styled-components'
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
+import SearchIcon from '@mui/icons-material/Search'
+import { TleProvider } from '../services/TleProvider'
 
 const Toolbar = styled.div`
-  padding: 10px 0
-`;
+  padding: 10px 0;
+`
 
 const DrawerHeader = styled.div`
-  padding: 20px
-`;
+  padding: 20px;
+`
 
-export const RETROGRADE = 'retrograde';
+export const RETROGRADE = 'retrograde'
 export const POSIGRADE = 'posigrade'
 
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
   const m = Math.floor((seconds % 3600) / 60)
   const s = Math.round(seconds % 60)
-  return [
-    h,
-    m > 9 ? m : (h ? '0' + m : m || '0'),
-    s > 9 ? s : '0' + s
-  ].filter(Boolean).join(':')
+  return [h, m > 9 ? m : h ? '0' + m : m || '0', s > 9 ? s : '0' + s]
+    .filter(Boolean)
+    .join(':')
 }
 
 const columns: GridColDef[] = [
@@ -41,278 +47,240 @@ const columns: GridColDef[] = [
   {
     field: 'inclination',
     headerName: 'Inclination',
-    type: 'float',
     width: 250,
     sortable: true,
     disableColumnMenu: true,
     filterable: true,
-    valueGetter: (params) => {
-      const value = params.row.extra?.inclination
+    valueGetter: (_value, row) => {
+      const value = row.extra?.inclination
       return value != null ? value.toFixed(2) + '°' : '-'
-    }
+    },
   },
   {
     field: 'eccentricity',
     headerName: 'Eccentricity',
-    type: 'float',
     width: 250,
-    valueGetter: (params) => {
-      return params.row.extra?.eccentricity ?? '-'
+    valueGetter: (_value, row) => {
+      return row.extra?.eccentricity ?? '-'
     },
     disableColumnMenu: true,
-    sortable: true
+    sortable: true,
   },
   {
     field: 'semi_major_axis',
     headerName: 'Semi Major Axis',
-    type: 'float',
     width: 250,
-    valueGetter: (params) => {
-      const value = params.row.extra?.semi_major_axis
+    valueGetter: (_value, row) => {
+      const value = row.extra?.semi_major_axis
       return value != null ? (parseFloat(value) / 1000).toFixed(2) : '-'
     },
     disableColumnMenu: true,
-    sortable: true
+    sortable: true,
   },
   {
     field: 'period',
     headerName: 'Period',
     type: 'string',
     width: 250,
-    valueGetter: (params) => {
-      const value = params.row.extra?.period
+    valueGetter: (_value, row) => {
+      const value = row.extra?.period
       return value != null ? formatTime(value) : '-'
     },
     disableColumnMenu: true,
-    sortable: true
+    sortable: true,
   },
   {
     field: 'raan',
     headerName: 'RAAN',
     type: 'string',
     width: 250,
-    valueGetter: (params) => {
-      const value = params.row.extra?.raan
+    valueGetter: (_value, row) => {
+      const value = row.extra?.raan
       return value != null ? value.toFixed(2) + '°' : '-'
     },
     disableColumnMenu: true,
-    sortable: true
+    sortable: true,
   },
-
 ]
 
 const TleBrowserWrapper = styled.div`
-  padding: 20px
+  padding: 20px;
 `
 
-export class Browse extends React.Component<any, any> {
+const URL = 'https://tle.ivanstanojevic.me'
 
-  private static URL: string = "https://tle.ivanstanojevic.me"
+const provider = new TleProvider()
 
-  private provider: TleProvider
+export const Browse = () => {
+  const [data, setData] = useState<Tle[]>([])
+  const [total, setTotal] = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [parameters, setParameters] = useState<Record<string, string | number>>({ extra: 1 })
+  const [orbitValue, setOrbitValue] = useState('-')
+  const [open, setOpen] = useState(false)
+  const [current, setCurrent] = useState<Tle | null>(null)
+  const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
+    pageSize: 20,
+    page: 0,
+  })
 
-  constructor(props: any) {
-    super(props)
-
-    this.provider = new TleProvider()
-  }
-
-  public readonly state: any = {
-    data: [],
-    total: 0,
-    loading: true,
-    parameters: {
-      extra: 1,
-    },
-    orbitValue: '-',
-    open: false,
-    current: null
-  }
-
-  componentDidMount() {
-    this.collection()
-  }
-
-  public async collection(): Promise<any[]> {
-
-    this.setState({
-      loading: true,
+  const collection = useCallback(async () => {
+    setLoading(true)
+    const url = URL + '/api/tle'
+    const searchParams = new URLSearchParams()
+    Object.entries(parameters).forEach(([key, value]) => {
+      searchParams.set(key, String(value))
     })
 
-    let url: string = Browse.URL + '/api/tle'
+    const response = await fetch(url + '?' + searchParams.toString())
+    const result = await response.json()
 
-    const response = await fetch(url + '?' + new URLSearchParams(this.state.parameters).toString())
-    const data: any = await response.json()
+    setData(result.member || [])
+    setTotal(result.totalItems || 0)
+    setLoading(false)
+  }, [parameters])
 
-    const result: any[] = []
+  useEffect(() => {
+    collection()
+  }, [collection])
 
-    if (result.hasOwnProperty('member')) {
-      return result
-    }
-
-    this.setState({
-      data: data.member,
-      total: data.totalItems,
-      loading: false,
-    })
-
-    return data.member
+  const handlePaginationModelChange = (model: GridPaginationModel) => {
+    setPaginationModel(model)
+    setParameters((prev) => ({
+      ...prev,
+      'page-size': model.pageSize,
+      page: model.page + 1,
+    }))
   }
 
-  handlePageChange = (event: any) => {
-    let parameters: any = this.state.parameters
+  const handleSortModelChange = (sortModel: GridSortModel) => {
+    if (!sortModel[0]) return
 
-    parameters['page-size'] = event.pageSize
-
-    if (event.page > 0) {
-      parameters['page'] = event.page
-    }
-
-    this.setState({ parameters: parameters }, this.collection)
+    setParameters((prev) => ({
+      ...prev,
+      sort: sortModel[0].field,
+      'sort-dir': sortModel[0].sort || 'asc',
+    }))
   }
 
-  handleSortModelChange = (event: any) => {
-    let parameters: any = this.state.parameters
-
-    if (!event.sortModel.hasOwnProperty(0)) {
-      return
-    }
-
-    parameters['sort'] = event.sortModel[0].field
-    parameters['sort-dir'] = event.sortModel[0].sort
-
-    this.setState({ parameters: parameters }, this.collection)
-  }
-
-  handleModelSelectChange = (event: any) => {
-    this.provider.get(event.selectionModel[0]).then((current) =>  {
-      this.setState({
-        current: current
+  const handleRowSelectionModelChange = (selectionModel: GridRowSelectionModel) => {
+    if (selectionModel.length > 0) {
+      provider.get(selectionModel[0] as number).then((tle) => {
+        setCurrent(tle)
       })
-    })
-
-    this.setState({
-      open: true,
-    })
+      setOpen(true)
+    }
   }
 
-  toggleDrawer = () => {
-    this.setState({
-      open: !this.state.open
-    })
+  const toggleDrawer = () => {
+    setOpen(!open)
   }
 
-  handleSearchChange = (event: any) => {
-    let value = event.target.value.trim()
-
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value.trim()
     if (value !== '') {
-      let parameters: any = this.state.parameters
-
-      parameters['search'] = value
-
-      this.setState({ parameters: parameters }, this.collection)
+      setParameters((prev) => ({
+        ...prev,
+        search: value,
+      }))
     }
   }
 
-  handleInclinationFilter = (event: any): void => {
-    let value = event.target.value.trim()
+  const handleInclinationFilter = (event: SelectChangeEvent) => {
+    const value = event.target.value
 
-    let parameters: any = this.state.parameters
+    setParameters((prev) => {
+      const newParams = { ...prev }
 
-    if (value === RETROGRADE) {
-      parameters['inclination[gt]'] = 90
-      delete parameters['inclination[lt]']
-    }
+      if (value === RETROGRADE) {
+        newParams['inclination[gt]'] = 90
+        delete newParams['inclination[lt]']
+      } else if (value === POSIGRADE) {
+        newParams['inclination[lt]'] = 90
+        delete newParams['inclination[gt]']
+      } else {
+        delete newParams['inclination[lt]']
+        delete newParams['inclination[gt]']
+      }
 
-    if (value === POSIGRADE) {
-      parameters['inclination[lt]'] = 90
-      delete parameters['inclination[gt]']
-    }
+      return newParams
+    })
 
-    if (value === '') {
-      delete parameters['inclination[lt]']
-      delete parameters['inclination[gt]']
-    }
-
-    this.setState({
-      orbitValue: value,
-      parameters: parameters
-    }, this.collection)
+    setOrbitValue(value)
   }
 
-  render() {
-    const { orbitValue } = this.state
-
-    return (
-      <div style={{ height: 'calc(100% - 144px)', padding: 5 }}>
-        <Toolbar>
-          <TextField
-            label="Search..."
-            variant="filled"
-            onChange={this.handleSearchChange}
-            style={{ width: 245 }}
-            InputProps={{
+  return (
+    <div style={{ height: 'calc(100% - 144px)', padding: 5 }}>
+      <Toolbar>
+        <TextField
+          label="Search..."
+          variant="filled"
+          onChange={handleSearchChange}
+          style={{ width: 245 }}
+          slotProps={{
+            input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon/>
+                  <SearchIcon />
                 </InputAdornment>
               ),
-            }}
-          />
-
-          <Select style={{ width: 245, marginLeft: 10 }} variant="filled" onChange={this.handleInclinationFilter} value={orbitValue}>
-            <MenuItem value={'-'}>
-              -
-            </MenuItem>
-            <MenuItem value={RETROGRADE}>
-              Retrograde
-            </MenuItem>
-            <MenuItem value={POSIGRADE}>
-              Posigrade
-            </MenuItem>
-          </Select>
-        </Toolbar>
-
-        <DataGrid
-          pagination rows={this.state.data}
-          loading={this.state.loading}
-          columns={columns}
-          pageSize={20}
-          getRowId={(row) => row.satelliteId}
-          rowHeight={52}
-          rowCount={this.state.total}
-          columnBuffer={8}
-          density={"standard"}
-          onPageChange={this.handlePageChange}
-          onSortModelChange={this.handleSortModelChange}
-          paginationMode={'server'}
-          disableColumnMenu={false}
-          onSelectionModelChange={this.handleModelSelectChange}
-          sortingMode={'server'}
-          sortingOrder={['desc', 'asc']}
-          disableColumnSelector={true}
+            },
+          }}
         />
 
-        <Drawer
-          variant="persistent"
-          anchor={'right'}
-          open={this.state.open}
-          onClose={this.toggleDrawer}
-          BackdropProps={{ invisible: true }}
+        <Select
+          style={{ width: 245, marginLeft: 10 }}
+          variant="filled"
+          onChange={handleInclinationFilter}
+          value={orbitValue}
         >
-          <DrawerHeader>
-            <IconButton onClick={this.toggleDrawer}>
-              <ArrowForwardIosIcon/>
-            </IconButton>
-          </DrawerHeader>
+          <MenuItem value={'-'}>-</MenuItem>
+          <MenuItem value={RETROGRADE}>Retrograde</MenuItem>
+          <MenuItem value={POSIGRADE}>Posigrade</MenuItem>
+        </Select>
+      </Toolbar>
 
-          <If condition={this.state.current}>
-            <TleBrowserWrapper>
-              <TleBrowser data={this.state.current}/>
-            </TleBrowserWrapper>
-          </If>
-        </Drawer>
-      </div>
-    )
-  }
+      <DataGrid
+        rows={data}
+        loading={loading}
+        columns={columns}
+        paginationModel={paginationModel}
+        onPaginationModelChange={handlePaginationModelChange}
+        getRowId={(row) => row.satelliteId}
+        rowHeight={52}
+        rowCount={total}
+        density={'standard'}
+        onSortModelChange={handleSortModelChange}
+        paginationMode={'server'}
+        disableColumnMenu={false}
+        onRowSelectionModelChange={handleRowSelectionModelChange}
+        sortingMode={'server'}
+        sortingOrder={['desc', 'asc']}
+        disableColumnSelector={true}
+        pageSizeOptions={[20, 50, 100]}
+      />
+
+      <Drawer
+        variant="persistent"
+        anchor={'right'}
+        open={open}
+        onClose={toggleDrawer}
+        slotProps={{
+          backdrop: { invisible: true },
+        }}
+      >
+        <DrawerHeader>
+          <IconButton onClick={toggleDrawer}>
+            <ArrowForwardIosIcon />
+          </IconButton>
+        </DrawerHeader>
+
+        <If condition={current !== null}>
+          <TleBrowserWrapper>
+            <TleBrowser data={current} />
+          </TleBrowserWrapper>
+        </If>
+      </Drawer>
+    </div>
+  )
 }

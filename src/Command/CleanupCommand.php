@@ -20,9 +20,15 @@ final class CleanupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $this->repository->removeBefore(
-            (new \DateTime())->sub(new \DateInterval('P2M'))
-        );
+        $cutoffDate = (new \DateTime())->sub(new \DateInterval('P2M'));
+        $deleted = $this->repository->removeBefore($cutoffDate);
+
+        $output->writeln(sprintf(
+            '[%s] Cleanup completed: removed %d request records older than %s',
+            date('Y-m-d H:i:s'),
+            $deleted,
+            $cutoffDate->format('Y-m-d H:i:s')
+        ));
 
         return Command::SUCCESS;
     }

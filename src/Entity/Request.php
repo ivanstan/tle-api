@@ -2,7 +2,6 @@
 
 namespace App\Entity;
 
-use App\Field\IdField;
 use App\Repository\RequestRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Ivanstan\SymfonySupport\Services\DateTimeService;
@@ -11,12 +10,15 @@ use Ivanstan\SymfonySupport\Services\DateTimeService;
 #[ORM\HasLifecycleCallbacks]
 class Request
 {
-    use IdField;
-
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column(name: 'id', type: 'integer')]
     private int $id;
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
 
     #[ORM\ManyToOne(targetEntity: Tle::class)]
     #[ORM\JoinColumn(name: 'tle_id', referencedColumnName: 'id', nullable: false)]
