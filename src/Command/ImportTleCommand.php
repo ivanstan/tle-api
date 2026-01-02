@@ -88,32 +88,40 @@ final class ImportTleCommand extends Command
                 continue;
             }
 
-            $file = new TleFile($response->getBody());
+            try {
+                $file = new TleFile($response->getBody());
 
-            $insert = [];
-            $update = [];
+                $insert = [];
+                $update = [];
 
-            foreach ($file->parse() as $tle) {
-                if (!$validator->validate($tle)) {
-                    continue;
+                foreach ($file->parse() as $tle) {
+                    if (!$validator->validate($tle)) {
+                        continue;
+                    }
+
+                    if (null === $tle) {
+                        continue;
+                    }
+
+                    if (\array_key_exists($tle->getId(), $this->satellites)) {
+                        $update[$tle->getId()] = $tle;
+                    } else {
+                        $insert[$tle->getId()] = $tle;
+                    }
                 }
 
-                if (null === $tle) {
-                    continue;
-                }
+                $totalInsert += \count($insert);
+                $totalUpdate += \count($update);
 
-                if (\array_key_exists($tle->getId(), $this->satellites)) {
-                    $update[$tle->getId()] = $tle;
-                } else {
-                    $insert[$tle->getId()] = $tle;
-                }
+                $this->flush($insert, true);
+                $this->flush($update);
+            } catch (\Exception $exception) {
+                $message = \sprintf('Error processing file from "%s": %s', $uri, $exception->getMessage());
+
+                $this->logger->error($message);
+                $output->writeln($message);
+                continue;
             }
-
-            $totalInsert += \count($insert);
-            $totalUpdate += \count($update);
-
-            $this->flush($insert, true);
-            $this->flush($update);
         }
 
         if (isset($progressBar)) {
