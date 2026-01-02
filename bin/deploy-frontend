@@ -13,7 +13,7 @@ PORT=2233
 mkdir -p build
 
 # Custom commands
-yarn build prod
+yarn build
 
 # Sync
 rsync -arvz -e "ssh -p ${PORT}" --rsync-path=~/bin/rsync --progress --delete ./build ${USER}@${HOST}:${DEPLOY_PATH}

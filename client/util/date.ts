@@ -1,9 +1,7 @@
-import { DateTime } from "luxon";
-import { Duration } from "luxon/src/duration";
+import { DateTime, Duration } from "luxon";
 
 export const toAtom = (date: Date): string => {
-  // @ts-ignore
-  const luxon: any = new DateTime.fromJSDate(date);
+  const luxon = DateTime.fromJSDate(date);
   let format = luxon.toFormat('yyyy-MM-dd');
   format += 'T' + luxon.toFormat('TTZZ');
 
@@ -13,7 +11,7 @@ export const toAtom = (date: Date): string => {
 export const fromAtom = (date: string|null): DateTime => {
 
   if (!date) {
-    return new DateTime();
+    return DateTime.now();
   }
 
   return DateTime.fromFormat(date, "yyyy-MM-dd'T'HH:mm:ssZZ")
