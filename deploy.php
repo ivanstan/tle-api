@@ -12,7 +12,7 @@ set('http_user', 'glutenfr');
 set('writable_mode', 'chmod');
 set('default_selector', 'stage=production');
 set('bin/composer', '~/bin/composer.phar');
-set('composer_options', '{{composer_action}} --verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader');
+set('composer_options', '--verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader');
 add('shared_files', [
     '.env',
     'public/robots.txt',
@@ -49,17 +49,7 @@ task('deploy:executable', function () {
     run('chmod +x {{release_path}}/bin/console');
 });
 
-task(
-    'deploy',
-    [
-        'deploy:prepare',
-        'deploy:vendors',
-        'deploy:executable',
-        'deploy:cache:clear',
-        'deploy:dump-env',
-        'database:migrate',
-        'deploy:publish',
-    ]
-);
-
+// Hook custom tasks into the Symfony recipe's deploy workflow
 before('deploy', 'test');
+after('deploy:vendors', 'deploy:executable');
+after('deploy:cache:clear', 'deploy:dump-env');
