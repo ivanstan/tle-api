@@ -1,13 +1,11 @@
 import React from 'react';
 import { DataGrid, GridColDef } from '@material-ui/data-grid';
-import { Drawer, IconButton, InputAdornment, MenuItem, Select, TextField, Tooltip } from '@material-ui/core';
+import { Drawer, IconButton, InputAdornment, MenuItem, Select, TextField } from '@material-ui/core';
 import { If } from 'react-if';
 import { TleBrowser } from '../components/TleBrowser';
 import styled from 'styled-components';
 import ArrowForwardIosIcon from '@material-ui/icons/ArrowForwardIos';
 import SearchIcon from '@material-ui/icons/Search';
-import { SatellitePosition } from '../components/SatellitePosition';
-import TleApi from '../services/TleApi';
 import {TleProvider} from "../services/TleProvider";
 
 const Toolbar = styled.div`
@@ -34,24 +32,6 @@ const formatTime = (seconds: number) => {
 
 const columns: GridColDef[] = [
   {
-    field: 'actions',
-    headerName: 'Actions',
-    type: 'string',
-    width: 100,
-    disableColumnMenu: true,
-    disableClickEventBubbling: true,
-    sortable: false,
-    renderCell: (params) => {
-      return (
-        <Tooltip title={'Flyover'} placement='right'>
-          <a href={`#/tle/${params.row.satelliteId}/flyover`}>
-            <img width={25} height={25} src={'images/satellite.svg'} alt={'Flyover'} />
-          </a>
-        </Tooltip>
-      )
-    }
-  },
-  {
     field: 'name',
     headerName: 'Name',
     type: 'string',
@@ -67,7 +47,8 @@ const columns: GridColDef[] = [
     disableColumnMenu: true,
     filterable: true,
     valueGetter: (params) => {
-      return params.row.extra.inclination.toFixed(2) + '°'
+      const value = params.row.extra?.inclination
+      return value != null ? value.toFixed(2) + '°' : '-'
     }
   },
   {
@@ -76,7 +57,7 @@ const columns: GridColDef[] = [
     type: 'float',
     width: 250,
     valueGetter: (params) => {
-      return params.row.extra.eccentricity
+      return params.row.extra?.eccentricity ?? '-'
     },
     disableColumnMenu: true,
     sortable: true
@@ -87,7 +68,8 @@ const columns: GridColDef[] = [
     type: 'float',
     width: 250,
     valueGetter: (params) => {
-      return (parseFloat(params.row.extra.semi_major_axis) / 1000).toFixed(2)
+      const value = params.row.extra?.semi_major_axis
+      return value != null ? (parseFloat(value) / 1000).toFixed(2) : '-'
     },
     disableColumnMenu: true,
     sortable: true
@@ -98,7 +80,8 @@ const columns: GridColDef[] = [
     type: 'string',
     width: 250,
     valueGetter: (params) => {
-      return formatTime(params.row.extra.period)
+      const value = params.row.extra?.period
+      return value != null ? formatTime(value) : '-'
     },
     disableColumnMenu: true,
     sortable: true
@@ -109,7 +92,8 @@ const columns: GridColDef[] = [
     type: 'string',
     width: 250,
     valueGetter: (params) => {
-      return params.row.extra.raan.toFixed(2) + '°'
+      const value = params.row.extra?.raan
+      return value != null ? value.toFixed(2) + '°' : '-'
     },
     disableColumnMenu: true,
     sortable: true
@@ -142,8 +126,7 @@ export class Browse extends React.Component<any, any> {
     },
     orbitValue: '-',
     open: false,
-    current: null,
-    propagation: null
+    current: null
   }
 
   componentDidMount() {
@@ -202,16 +185,8 @@ export class Browse extends React.Component<any, any> {
   }
 
   handleModelSelectChange = (event: any) => {
-    this.provider.get(event.selectionModel[0]).then(async (current) =>  {
-      const date = new Date()
-
-      let propagation = null
-      if (current) {
-        propagation = await TleApi.predict(current.satelliteId, date)
-      }
-
+    this.provider.get(event.selectionModel[0]).then((current) =>  {
       this.setState({
-        propagation: propagation,
         current: current
       })
     })
@@ -334,7 +309,6 @@ export class Browse extends React.Component<any, any> {
           <If condition={this.state.current}>
             <TleBrowserWrapper>
               <TleBrowser data={this.state.current}/>
-              <SatellitePosition satelliteId={this.state.current?.satelliteId} propagation={this.state.propagation}/>
             </TleBrowserWrapper>
           </If>
         </Drawer>
