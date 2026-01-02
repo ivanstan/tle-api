@@ -1,37 +1,33 @@
-import React from "react"
-import { CopyToClipboard } from "react-copy-to-clipboard"
-import { ClickAwayListener, IconButton, Tooltip } from "@material-ui/core"
+import { useState } from 'react'
+import { CopyToClipboard } from 'react-copy-to-clipboard'
+import { ClickAwayListener, IconButton, Tooltip } from '@mui/material'
 
-export class CopyButton extends React.Component<any, any> {
+interface CopyButtonProps {
+  value: string
+}
 
-  readonly state = {
-    open: false
-  }
+export const CopyButton = ({ value }: CopyButtonProps) => {
+  const [open, setOpen] = useState(false)
 
-  render() {
-    const { open } = this.state
-    const { value } = this.props
-
-    return (
-      <ClickAwayListener onClickAway={() => this.setState({ open: false })}>
-          <Tooltip
-            PopperProps={{
-              disablePortal: true,
-            }}
-            onClose={() => this.setState({ open: false })}
-            open={open}
-            disableFocusListener
-            disableHoverListener
-            disableTouchListener
-            title="Copied"
-          >
-            <CopyToClipboard text={value} onCopy={() => this.setState({ open: true })}>
-              <IconButton>
-                <i className="fas fa-paste"/>
-              </IconButton>
-            </CopyToClipboard>
-          </Tooltip>
-      </ClickAwayListener>
-    )
-  }
+  return (
+    <ClickAwayListener onClickAway={() => setOpen(false)}>
+      <Tooltip
+        PopperProps={{
+          disablePortal: true,
+        }}
+        onClose={() => setOpen(false)}
+        open={open}
+        disableFocusListener
+        disableHoverListener
+        disableTouchListener
+        title="Copied"
+      >
+        <CopyToClipboard text={value} onCopy={() => setOpen(true)}>
+          <IconButton>
+            <i className="fas fa-paste" />
+          </IconButton>
+        </CopyToClipboard>
+      </Tooltip>
+    </ClickAwayListener>
+  )
 }

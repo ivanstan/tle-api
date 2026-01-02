@@ -7,11 +7,10 @@ namespace Deployer;
 require 'recipe/symfony.php';
 
 set('repository', 'https://github.com/ivanstan/tle-api');
-set('git_tty', true);
 set('bin_dir', 'bin');
 set('http_user', 'glutenfr');
 set('writable_mode', 'chmod');
-set('default_stage', 'production');
+set('default_selector', 'stage=production');
 set('bin/composer', '~/bin/composer.phar');
 set('composer_options', '{{composer_action}} --verbose --prefer-dist --no-progress --no-interaction --optimize-autoloader');
 add('shared_files', [
@@ -31,9 +30,9 @@ add('shared_dirs', [
 add('writable_dirs', ['var']);
 
 host('tle.ivanstanojevic.me')
-    ->user('glutenfr')
-    ->port(2233)
-    ->stage('production')
+    ->setRemoteUser('glutenfr')
+    ->setPort(2233)
+    ->setLabels(['stage' => 'production'])
     ->set('deploy_path', '~/projects/tle.ivanstanojevic.me');
 
 task('test', function () {
@@ -53,27 +52,14 @@ task('deploy:executable', function () {
 task(
     'deploy',
     [
-        'deploy:info',
         'deploy:prepare',
-        'deploy:lock',
-        'deploy:release',
-        'deploy:update_code',
-        'deploy:clear_paths',
-        'deploy:create_cache_dir',
-        'deploy:shared',
-        'deploy:assets',
-        'deploy:writable',
         'deploy:vendors',
         'deploy:executable',
         'deploy:cache:clear',
-        'deploy:cache:warmup',
         'deploy:dump-env',
         'database:migrate',
-        'deploy:symlink',
-        'deploy:unlock',
-        'cleanup',
+        'deploy:publish',
     ]
 );
 
 before('deploy', 'test');
-after('deploy:failed', 'deploy:unlock');

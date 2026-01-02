@@ -13,7 +13,7 @@ class RequestRepository extends ServiceEntityRepository
         parent::__construct($registry, Request::class);
     }
 
-    public function removeBefore(\DateTime $dateTime): void
+    public function removeBefore(\DateTime $dateTime): int
     {
         $builder = $this->_em->createQueryBuilder();
 
@@ -22,6 +22,6 @@ class RequestRepository extends ServiceEntityRepository
             ->where('r.createdAt < :date')
             ->setParameter('date', $dateTime);
 
-        $builder->getQuery()->execute();
+        return $builder->getQuery()->execute();
     }
 }
