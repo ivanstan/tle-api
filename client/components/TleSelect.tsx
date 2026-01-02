@@ -128,6 +128,14 @@ export const TleSelect = ({ value, onChange }: TleSelectProps) => {
       options={options}
       loading={loading}
       noOptionsText={'No satellites found'}
+      renderOption={(props, option) => {
+        const tle = option as Tle
+        return (
+          <li {...props} key={tle.satelliteId}>
+            {tle.name}
+          </li>
+        )
+      }}
       renderInput={(params) => (
         <TextField
           {...params}
