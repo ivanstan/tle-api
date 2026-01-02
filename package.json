@@ -9,13 +9,14 @@
   "scripts": {
     "dev": "vite",
     "start": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build --mode production",
     "preview": "vite preview",
     "test": "vitest",
     "deploy": "sh bin/deploy-frontend"
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",
+    "luxon": "^3.5.0",
     "@emotion/styled": "^11.13.5",
     "@mui/icons-material": "^6.3.0",
     "@mui/material": "^6.3.0",
@@ -38,6 +39,7 @@
     "tle-client": "ivanstan/tle.js"
   },
   "devDependencies": {
+    "@types/luxon": "^3.4.2",
     "@types/node": "^22.10.5",
     "@types/react": "^18.3.17",
     "@types/react-copy-to-clipboard": "^5.0.7",

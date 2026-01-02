@@ -3,6 +3,7 @@ import { LineNumber } from "./LineNumber"
 export class Tle {
     public satelliteId: number
     public name: string
+    public date: string
     public line1: string
     public line2: string
     public raw: any
@@ -11,6 +12,7 @@ export class Tle {
         this.raw = tleModel
         this.satelliteId = tleModel.satelliteId
         this.name = tleModel.name
+        this.date = tleModel.date
         this.line1 = tleModel.line1
         this.line2 = tleModel.line2
     }

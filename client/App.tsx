@@ -35,7 +35,7 @@ if (isProduction()) {
 
 function App() {
   return (
-    <Sentry.ErrorBoundary fallback={'An error has occurred'}>
+    <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <Router>

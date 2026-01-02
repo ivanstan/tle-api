@@ -6,6 +6,9 @@ interface CopyButtonProps {
   value: string
 }
 
+// Workaround for React 18 type incompatibility with react-copy-to-clipboard
+const CopyToClipboardCompat = CopyToClipboard as any
+
 export const CopyButton = ({ value }: CopyButtonProps) => {
   const [open, setOpen] = useState(false)
 
@@ -22,11 +25,11 @@ export const CopyButton = ({ value }: CopyButtonProps) => {
         disableTouchListener
         title="Copied"
       >
-        <CopyToClipboard text={value} onCopy={() => setOpen(true)}>
+        <CopyToClipboardCompat text={value} onCopy={() => setOpen(true)}>
           <IconButton>
             <i className="fas fa-paste" />
           </IconButton>
-        </CopyToClipboard>
+        </CopyToClipboardCompat>
       </Tooltip>
     </ClickAwayListener>
   )
