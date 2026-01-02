@@ -16,12 +16,27 @@ import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import SearchIcon from '@mui/icons-material/Search'
 import { TleProvider } from '../services/TleProvider'
 
+const PageWrapper = styled.div`
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(135deg, #0a0e1a 0%, #0f1628 40%, #162033 100%);
+  padding: 20px;
+`
+
 const Toolbar = styled.div`
-  padding: 10px 0;
+  padding: 10px 0 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+`
+
+const DrawerContent = styled.div`
+  background: #0f1628;
+  height: 100%;
 `
 
 const DrawerHeader = styled.div`
   padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 `
 
 export const RETROGRADE = 'retrograde'
@@ -110,6 +125,151 @@ const TleBrowserWrapper = styled.div`
 const URL = 'https://tle.ivanstanojevic.me'
 
 const provider = new TleProvider()
+
+// DataGrid dark theme with zebra rows
+const dataGridStyles = {
+  border: '1px solid rgba(255, 255, 255, 0.08)',
+  borderRadius: '12px',
+  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+  
+  '& .MuiDataGrid-columnHeaders': {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+  },
+  
+  '& .MuiDataGrid-columnHeaderTitle': {
+    fontFamily: '"JetBrains Mono", monospace',
+    fontWeight: 600,
+    fontSize: '0.8rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    color: 'rgba(255, 255, 255, 0.8)',
+  },
+  
+  '& .MuiDataGrid-cell': {
+    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+    fontFamily: '"IBM Plex Sans", sans-serif',
+    color: 'rgba(255, 255, 255, 0.85)',
+  },
+  
+  // Zebra striping - alternating row colors
+  '& .MuiDataGrid-row:nth-of-type(odd)': {
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  
+  '& .MuiDataGrid-row:nth-of-type(even)': {
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+  },
+  
+  '& .MuiDataGrid-row:hover': {
+    backgroundColor: 'rgba(74, 165, 100, 0.1)',
+  },
+  
+  '& .MuiDataGrid-row.Mui-selected': {
+    backgroundColor: 'rgba(74, 165, 100, 0.15)',
+    '&:hover': {
+      backgroundColor: 'rgba(74, 165, 100, 0.2)',
+    },
+  },
+  
+  '& .MuiDataGrid-footerContainer': {
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.02)',
+  },
+  
+  '& .MuiTablePagination-root': {
+    color: 'rgba(255, 255, 255, 0.7)',
+  },
+  
+  '& .MuiTablePagination-selectIcon': {
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  
+  '& .MuiIconButton-root': {
+    color: 'rgba(255, 255, 255, 0.6)',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    },
+    '&.Mui-disabled': {
+      color: 'rgba(255, 255, 255, 0.2)',
+    },
+  },
+  
+  '& .MuiDataGrid-sortIcon': {
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  
+  '& .MuiDataGrid-overlay': {
+    backgroundColor: 'rgba(10, 14, 26, 0.8)',
+  },
+  
+  '& .MuiCircularProgress-root': {
+    color: '#4aa564',
+  },
+  
+  '& .MuiDataGrid-columnSeparator': {
+    color: 'rgba(255, 255, 255, 0.1)',
+  },
+}
+
+// TextField styles for dark theme
+const textFieldStyles = {
+  width: 260,
+  '& .MuiFilledInput-root': {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '8px',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    },
+    '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+      borderColor: 'rgba(74, 165, 100, 0.5)',
+    },
+    '&:before, &:after': {
+      display: 'none',
+    },
+  },
+  '& .MuiFilledInput-input': {
+    color: '#ffffff',
+    fontFamily: '"IBM Plex Sans", sans-serif',
+  },
+  '& .MuiInputLabel-root': {
+    color: 'rgba(255, 255, 255, 0.5)',
+    '&.Mui-focused': {
+      color: '#4aa564',
+    },
+  },
+  '& .MuiInputAdornment-root': {
+    color: 'rgba(255, 255, 255, 0.4)',
+  },
+}
+
+// Select styles for dark theme
+const selectStyles = {
+  width: 200,
+  '& .MuiFilledInput-root': {
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: '8px',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    '&:hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.07)',
+    },
+    '&.Mui-focused': {
+      backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    },
+    '&:before, &:after': {
+      display: 'none',
+    },
+  },
+  '& .MuiSelect-select': {
+    color: '#ffffff',
+    fontFamily: '"IBM Plex Sans", sans-serif',
+  },
+  '& .MuiSelect-icon': {
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+}
 
 export const Browse = () => {
   const [data, setData] = useState<Tle[]>([])
@@ -210,13 +370,13 @@ export const Browse = () => {
   }
 
   return (
-    <div style={{ height: 'calc(100% - 144px)', padding: 5 }}>
+    <PageWrapper>
       <Toolbar>
         <TextField
-          label="Search..."
+          label="Search satellites..."
           variant="filled"
           onChange={handleSearchChange}
-          style={{ width: 245 }}
+          sx={textFieldStyles}
           slotProps={{
             input: {
               startAdornment: (
@@ -229,36 +389,39 @@ export const Browse = () => {
         />
 
         <Select
-          style={{ width: 245, marginLeft: 10 }}
           variant="filled"
           onChange={handleInclinationFilter}
           value={orbitValue}
+          sx={selectStyles}
         >
-          <MenuItem value={'-'}>-</MenuItem>
+          <MenuItem value={'-'}>All orbits</MenuItem>
           <MenuItem value={RETROGRADE}>Retrograde</MenuItem>
           <MenuItem value={POSIGRADE}>Posigrade</MenuItem>
         </Select>
       </Toolbar>
 
-      <DataGrid
-        rows={data}
-        loading={loading}
-        columns={columns}
-        paginationModel={paginationModel}
-        onPaginationModelChange={handlePaginationModelChange}
-        getRowId={(row) => row.satelliteId}
-        rowHeight={52}
-        rowCount={total}
-        density={'standard'}
-        onSortModelChange={handleSortModelChange}
-        paginationMode={'server'}
-        disableColumnMenu={false}
-        onRowSelectionModelChange={handleRowSelectionModelChange}
-        sortingMode={'server'}
-        sortingOrder={['desc', 'asc']}
-        disableColumnSelector={true}
-        pageSizeOptions={[20, 50, 100]}
-      />
+      <div style={{ height: 'calc(100vh - 200px)', minHeight: 400 }}>
+        <DataGrid
+          rows={data}
+          loading={loading}
+          columns={columns}
+          paginationModel={paginationModel}
+          onPaginationModelChange={handlePaginationModelChange}
+          getRowId={(row) => row.satelliteId}
+          rowHeight={48}
+          rowCount={total}
+          density={'standard'}
+          onSortModelChange={handleSortModelChange}
+          paginationMode={'server'}
+          disableColumnMenu={false}
+          onRowSelectionModelChange={handleRowSelectionModelChange}
+          sortingMode={'server'}
+          sortingOrder={['desc', 'asc']}
+          disableColumnSelector={true}
+          pageSizeOptions={[20, 50, 100]}
+          sx={dataGridStyles}
+        />
+      </div>
 
       <Drawer
         variant="persistent"
@@ -268,19 +431,27 @@ export const Browse = () => {
         slotProps={{
           backdrop: { invisible: true },
         }}
+        PaperProps={{
+          sx: {
+            backgroundColor: '#0f1628',
+            borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
+          },
+        }}
       >
-        <DrawerHeader>
-          <IconButton onClick={toggleDrawer}>
-            <ArrowForwardIosIcon />
-          </IconButton>
-        </DrawerHeader>
+        <DrawerContent>
+          <DrawerHeader>
+            <IconButton onClick={toggleDrawer} sx={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              <ArrowForwardIosIcon />
+            </IconButton>
+          </DrawerHeader>
 
-        <If condition={current !== null}>
-          <TleBrowserWrapper>
-            <TleBrowser data={current} />
-          </TleBrowserWrapper>
-        </If>
+          <If condition={current !== null}>
+            <TleBrowserWrapper>
+              <TleBrowser data={current} />
+            </TleBrowserWrapper>
+          </If>
+        </DrawerContent>
       </Drawer>
-    </div>
+    </PageWrapper>
   )
 }
