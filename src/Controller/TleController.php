@@ -64,4 +64,17 @@ final class TleController extends AbstractApiController
             ]
         );
     }
+
+    #[Route('/popular', name: 'tle_popular')]
+    public function popular(NormalizerInterface $normalizer): JsonResponse
+    {
+        $popular = $this->repository->getPopular(12);
+
+        return $this->response(
+            [
+                '@context' => self::HYDRA_CONTEXT,
+                'member' => $normalizer->normalize($popular),
+            ]
+        );
+    }
 }
