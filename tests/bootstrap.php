@@ -47,6 +47,8 @@ if ('test' === $_SERVER['APP_ENV']) {
         ),
         new ConsoleOutput()
     );
+
+    $kernel->shutdown();
 }
 
 $_SERVER += $_ENV;

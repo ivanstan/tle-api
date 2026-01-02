@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Migrations;
 
+use Doctrine\DBAL\Platforms\AbstractMySQLPlatform;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
@@ -12,10 +13,15 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20210322151101 extends AbstractMigration
 {
+    public function isTransactional(): bool
+    {
+        return false;
+    }
+
     public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->abortIf('mysql' !== $this->connection->getDatabasePlatform()->getName(), 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('CREATE TABLE request (id INT AUTO_INCREMENT NOT NULL, tle_id INT NOT NULL, updated_at DATETIME NOT NULL, ip VARCHAR(255) NOT NULL, INDEX IDX_3B978F9FE84B6F2B (tle_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8mb4 COLLATE `utf8mb4_unicode_ci` ENGINE = InnoDB');
         $this->addSql('ALTER TABLE request ADD CONSTRAINT FK_3B978F9FE84B6F2B FOREIGN KEY (tle_id) REFERENCES tle (id)');
@@ -24,7 +30,7 @@ final class Version20210322151101 extends AbstractMigration
     public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
-        $this->abortIf('mysql' !== $this->connection->getDatabasePlatform()->getName(), 'Migration can only be executed safely on \'mysql\'.');
+        $this->abortIf(!$this->connection->getDatabasePlatform() instanceof AbstractMySQLPlatform, 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql('DROP TABLE request');
     }
