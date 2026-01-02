@@ -4,29 +4,28 @@ namespace App\Normalizer;
 
 use App\ViewModel\Observer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class ObserverNormalizer implements NormalizerInterface
 {
-    public function __construct(protected ObjectNormalizer $normalizer)
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
-    }
-
-    /**
-     * @param Observer $object
-     *
-     * @throws \Symfony\Component\Serializer\Exception\ExceptionInterface
-     */
-    public function normalize($object, string $format = null, array $context = []): array
-    {
+        /** @var Observer $object */
         return [
             '@type' => 'Observer',
-            ...$this->normalizer->normalize($object),
+            'latitude' => $object->latitude,
+            'longitude' => $object->longitude,
+            'altitude' => $object->altitude,
+            'date' => $object->date->format(\DateTimeInterface::ATOM),
         ];
     }
 
-    public function supportsNormalization($data, string $format = null): bool
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof Observer;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        return [Observer::class => true];
     }
 }
