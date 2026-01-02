@@ -16,7 +16,7 @@ mkdir -p build
 yarn build
 
 # Sync
-rsync -arvz -e "ssh -p ${PORT}" --rsync-path=~/bin/rsync --progress --delete ./build ${USER}@${HOST}:${DEPLOY_PATH}
+rsync -arvz -e "ssh -p ${PORT}" --rsync-path=~/bin/rsync --progress --delete ./build/ ${USER}@${HOST}:${DEPLOY_PATH}
 
 # Run ./post-deploy on remote
 ssh ${USER}@${HOST} -p${PORT} 'bash -s' < ./bin/post-deploy ${DEPLOY_PATH}
