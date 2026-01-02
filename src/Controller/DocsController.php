@@ -21,7 +21,13 @@ final class DocsController extends AbstractController
     #[Route('/api/tle/docs', name: 'app_api_docs')]
     public function docs(): Response
     {
-        return new Response(file_get_contents($this->getProjectDir().'/public/index.html'));
+        $indexPath = $this->getProjectDir().'/public/index.html';
+
+        if (!file_exists($indexPath)) {
+            return new Response('Documentation not available', Response::HTTP_NOT_FOUND);
+        }
+
+        return new Response(file_get_contents($indexPath));
     }
 
     #[Route('/api/tle.json', name: 'app_api_docs_json')]

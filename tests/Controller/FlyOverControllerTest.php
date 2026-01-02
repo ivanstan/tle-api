@@ -124,9 +124,7 @@ class FlyOverControllerTest extends AbstractWebTestCase
         return $response;
     }
 
-    /**
-     * @depends testFlyOverForSatellite
-     */
+    #[\PHPUnit\Framework\Attributes\Depends('testFlyOverForSatellite')]
     public function testFlyOverDetails(array $data): void
     {
         $response = $this->get($data['member'][0]['@id']);
