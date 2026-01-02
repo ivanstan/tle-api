@@ -9,7 +9,7 @@ import {
   TextField,
   SelectChangeEvent,
 } from '@mui/material'
-import { If } from 'react-if'
+import { When } from 'react-if'
 import { TleBrowser } from '../components/TleBrowser'
 import styled from 'styled-components'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
@@ -445,11 +445,11 @@ export const Browse = () => {
             </IconButton>
           </DrawerHeader>
 
-          <If condition={current !== null}>
+          <When condition={current !== null}>
             <TleBrowserWrapper>
               <TleBrowser data={current} />
             </TleBrowserWrapper>
-          </If>
+          </When>
         </DrawerContent>
       </Drawer>
     </PageWrapper>

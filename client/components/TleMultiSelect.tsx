@@ -5,7 +5,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import { Checkbox, Chip } from '@mui/material'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
-import { If } from 'react-if'
+import { When } from 'react-if'
 import { TleProvider } from '../services/TleProvider'
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />
@@ -87,9 +87,9 @@ export const TleMultiSelect = ({ value, onChange }: TleMultiSelectProps) => {
               const { key, ...tagProps } = getTagProps({ index })
               return <Chip key={key} label={option.name} {...tagProps} />
             })}
-            <If condition={tagValue.length >= 2 && left.length > 0}>
+            <When condition={tagValue.length >= 2 && left.length > 0}>
               <Chip label={'+' + left.length} />
-            </If>
+            </When>
           </>
         )
       }}
