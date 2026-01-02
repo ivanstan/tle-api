@@ -16,24 +16,28 @@ export const Docs = () => {
         theme: {
           colors: {
             tonalOffset: 0.2,
-            primary: { main: '#d4a556' },
+            primary: { main: '#e8b866' },
             success: { main: '#6cbf84' },
             warning: { main: '#e8a550' },
             error: { main: '#e05858' },
             text: {
-              primary: '#1a1a2e',
-              secondary: '#4a4a68',
+              primary: '#f0f0f5',
+              secondary: '#b8b8c8',
             },
             http: {
-              get: '#3498db',
-              post: '#6cbf84',
-              put: '#e8a550',
-              delete: '#e05858',
-              patch: '#9b6dd4',
+              get: '#5dade2',
+              post: '#7dcea0',
+              put: '#f0b866',
+              delete: '#ec7063',
+              patch: '#bb8fce',
             },
             responses: {
-              success: { color: '#2c5e3f', backgroundColor: 'rgba(108, 191, 132, 0.12)' },
-              error: { color: '#8b2d2d', backgroundColor: 'rgba(224, 88, 88, 0.1)' },
+              success: { color: '#7dcea0', backgroundColor: 'rgba(108, 191, 132, 0.15)' },
+              error: { color: '#ec7063', backgroundColor: 'rgba(224, 88, 88, 0.12)' },
+            },
+            border: {
+              dark: 'rgba(255, 255, 255, 0.12)',
+              light: 'rgba(255, 255, 255, 0.06)',
             },
           },
           typography: {
@@ -46,24 +50,31 @@ export const Docs = () => {
             code: {
               fontSize: '13px',
               fontFamily: '"JetBrains Mono", "Fira Code", monospace',
-              backgroundColor: 'rgba(0, 0, 0, 0.04)',
-              color: '#c75a5a',
+              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+              color: '#f0b866',
+            },
+            links: {
+              color: '#e8b866',
+              hover: '#f5d090',
             },
           },
           sidebar: {
-            backgroundColor: '#fafbfc',
-            textColor: '#4a4a68',
-            activeTextColor: '#d4a556',
+            backgroundColor: '#141822',
+            textColor: '#a0a0b8',
+            activeTextColor: '#e8b866',
+            arrow: {
+              color: '#a0a0b8',
+            },
             groupItems: {
               textTransform: 'uppercase',
             },
           },
           rightPanel: {
-            backgroundColor: '#1e2433',
-            textColor: '#e8e8ed',
+            backgroundColor: '#1a1f2c',
+            textColor: '#e8e8f0',
           },
           codeBlock: {
-            backgroundColor: '#161a24',
+            backgroundColor: '#12161e',
           },
         },
       }}

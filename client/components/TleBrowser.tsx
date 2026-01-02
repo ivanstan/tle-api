@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { TleParser } from '../services/TleParser'
-import { If } from 'react-if'
+import { When } from 'react-if'
 import { CopyButton } from './CopyButton'
 import { TleElementDetails } from './TleElementDetails'
 import { LineNumber } from '../services/LineNumber'
@@ -254,89 +254,89 @@ export const TleBrowser = ({ data: tleData }: TleBrowserProps) => {
       </div>
 
       <div className="details">
-        <If condition={active === TleElements.name}>
+        <When condition={active === TleElements.name}>
           <TleElementDetails color={color} title={'Satellite name'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.lineNumber1 || active === TleElements.lineNumber2}>
+        <When condition={active === TleElements.lineNumber1 || active === TleElements.lineNumber2}>
           <TleElementDetails color={color} title={'Line number'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.satelliteId1 || active === TleElements.satelliteId2}>
+        <When condition={active === TleElements.satelliteId1 || active === TleElements.satelliteId2}>
           <TleElementDetails color={color} title={'Satellite number'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.checkSum1 || active === TleElements.checksum2}>
+        <When condition={active === TleElements.checkSum1 || active === TleElements.checksum2}>
           <TleElementDetails color={color} title={'Checksum'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.classification}>
+        <When condition={active === TleElements.classification}>
           <TleElementDetails color={color} title={'Classification'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.launchYear}>
+        <When condition={active === TleElements.launchYear}>
           <TleElementDetails color={color} title={'Launch year'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.launchOfYear}>
+        <When condition={active === TleElements.launchOfYear}>
           <TleElementDetails color={color} title={'Launch number of year'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.launchPiece}>
+        <When condition={active === TleElements.launchPiece}>
           <TleElementDetails color={color} title={'Launch piece'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.epochYear || active === TleElements.epochDay}>
+        <When condition={active === TleElements.epochYear || active === TleElements.epochDay}>
           <TleElementDetails color={color} title={'Epoch'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.firstDerivative}>
+        <When condition={active === TleElements.firstDerivative}>
           <TleElementDetails color={color} title={'First time derivative of mean motion'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.secondDerivative}>
+        <When condition={active === TleElements.secondDerivative}>
           <TleElementDetails color={color} title={'Second time derivative of mean motion'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.dragTerm}>
+        <When condition={active === TleElements.dragTerm}>
           <TleElementDetails color={color} title={'BSTAR Drag term'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.ephemerisType}>
+        <When condition={active === TleElements.ephemerisType}>
           <TleElementDetails color={color} title={'Ephemeris type'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.elementNumber}>
+        <When condition={active === TleElements.elementNumber}>
           <TleElementDetails color={color} title={'Element number'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.inclination}>
+        <When condition={active === TleElements.inclination}>
           <TleElementDetails color={color} title={'Inclination'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.raan}>
+        <When condition={active === TleElements.raan}>
           <TleElementDetails color={color} title={'Right ascension of the ascending node'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.eccentricity}>
+        <When condition={active === TleElements.eccentricity}>
           <TleElementDetails color={color} title={'Eccentricity'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.argumentOfPerigee}>
+        <When condition={active === TleElements.argumentOfPerigee}>
           <TleElementDetails color={color} title={'Argument of perigee'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.meanAnomaly}>
+        <When condition={active === TleElements.meanAnomaly}>
           <TleElementDetails color={color} title={'Mean anomaly'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.meanMotion}>
+        <When condition={active === TleElements.meanMotion}>
           <TleElementDetails color={color} title={'Mean motion'} />
-        </If>
+        </When>
 
-        <If condition={active === TleElements.revolutionNumber}>
+        <When condition={active === TleElements.revolutionNumber}>
           <TleElementDetails color={color} title={'Revolution number'} />
-        </If>
+        </When>
       </div>
     </>
   )
