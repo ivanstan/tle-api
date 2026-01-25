@@ -257,7 +257,7 @@ const PopularGrid = styled.div`
   animation: ${fadeInUp} 0.8s ease-out 0.5s both;
 `
 
-const SatelliteCard = styled.a<{ $delay: number }>`
+const SatelliteCard = styled.div<{ $delay: number }>`
   display: flex;
   align-items: center;
   gap: 12px;
@@ -268,6 +268,7 @@ const SatelliteCard = styled.a<{ $delay: number }>`
   text-decoration: none;
   transition: all 0.3s ease;
   animation: ${fadeInUp} 0.6s ease-out ${props => 0.5 + props.$delay * 0.05}s both;
+  cursor: pointer;
 
   &:hover {
     background: rgba(74, 165, 100, 0.1);
@@ -449,8 +450,11 @@ const Home = () => {
           {popular.map((item, index) => (
             <SatelliteCard
               key={item.satelliteId}
-              href={'#/tle/' + item.satelliteId}
               $delay={index}
+              onClick={() => {
+                navigate('/tle/' + item.satelliteId)
+                updateTle(item)
+              }}
             >
               <SatelliteName>{item.name}</SatelliteName>
             </SatelliteCard>
