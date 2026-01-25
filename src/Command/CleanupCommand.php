@@ -20,7 +20,9 @@ final class CleanupCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cutoffDate = (new \DateTime())->sub(new \DateInterval('P2M'));
+        $cutoffDate = (new \DateTimeImmutable('now', new \DateTimeZone('UTC')))
+                          ->sub(new \DateInterval('P7D'));
+
         $deleted = $this->repository->removeBefore($cutoffDate);
 
         $output->writeln(sprintf(
