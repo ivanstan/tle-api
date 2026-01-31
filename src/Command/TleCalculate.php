@@ -53,6 +53,38 @@ final class TleCalculate extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        // Initialize statistics
+        $stats = [
+            'total' => 0,
+            'created' => 0,
+            'updated' => 0,
+            'errors' => 0,
+            'meanMotionProblems' => 0,
+        ];
+
+        // Initialize all specifications once (reuse them for all TLEs)
+        $specifications = [
+            'geostationaryOrbit' => new GeostationaryOrbitTleSpecification(),
+            'geosynchronousOrbit' => new GeosynchronousOrbitTleSpecification(),
+            'circularOrbit' => new CircularOrbitTleSpecification(),
+            'ellipticalOrbit' => new EllipticalOrbitTleSpecification(),
+            'lowEarthOrbit' => new LowEarthOrbitTleSpecification(),
+            'mediumEarthOrbit' => new MediumEarthOrbitTleSpecification(),
+            'highEarthOrbit' => new HighEarthOrbitTleSpecification(),
+            'polarOrbit' => new PolarOrbitTleSpecification(),
+            'sunSynchronousOrbit' => new SunSynchronousOrbitTleSpecification(),
+            'molniyaOrbit' => new MolniyaOrbitTleSpecification(),
+            'tundraOrbit' => new TundraOrbitTleSpecification(),
+            'criticalInclinationOrbit' => new CriticalInclinationOrbitTleSpecification(),
+            'posigradeOrbit' => new PosigradeOrbitTleSpecification(),
+            'retrogradeOrbit' => new RetrogradeOrbitTleSpecification(),
+            'decayingOrbit' => new DecayingOrbitTleSpecification(),
+            'lowDrag' => new LowDragTleSpecification(),
+            'classifiedSatellite' => new ClassifiedSatelliteTleSpecification(),
+            'unclassifiedSatellite' => new UnclassifiedSatelliteTleSpecification(),
+            'recentTle' => new RecentTleTleSpecification(),
+        ];
+
         $builder = $this->entityManager
             ->createQueryBuilder()
             ->select('tle')
@@ -65,70 +97,97 @@ final class TleCalculate extends Command
             $builder->setParameter('tle', $tle);
         }
 
-        $repository = $this->entityManager->getRepository(TleInformation::class);
-
         /** @var Tle $tle */
         foreach ($builder->getQuery()->toIterable() as $i => $tle) {
-            $exists = true;
+            $stats['total']++;
 
-            $tleInformation = $repository->find($tle->getId());
+            try {
+                $exists = true;
+                $tleInformation = $this->infoRepository->find($tle->getId());
 
-            if (null === $tleInformation) {
-                $exists = false;
-                $tleInformation = new TleInformation($tle);
-            }
+                if (null === $tleInformation) {
+                    $exists = false;
+                    $tleInformation = new TleInformation($tle);
+                    $stats['created']++;
+                } else {
+                    $stats['updated']++;
+                }
 
-            $tleModel = new \Ivanstan\Tle\Model\Tle($tle->getLine1(), $tle->getLine2(), $tle->getName());
+                $tleModel = new \Ivanstan\Tle\Model\Tle($tle->getLine1(), $tle->getLine2(), $tle->getName());
 
-            $tleInformation->inclination = $tleModel->getInclination();
-            $tleInformation->eccentricity = $tleModel->eccentricity();
-            $tleInformation->period = $tleModel->period();
+                $tleInformation->inclination = $tleModel->getInclination();
+                $tleInformation->eccentricity = $tleModel->eccentricity();
+                $tleInformation->raan = $tleModel->raan();
+                $tleInformation->semiMajorAxis = $tleModel->semiMajorAxis();
 
-            if ($tleModel->meanMotion() > 0) {
-                $tleInformation->period = $tleModel->period();
-            } else {
-                $output->writeln(sprintf('Satellite %d has mean motion problem', $tle->getId()));
-            }
+                // Calculate period once
+                if ($tleModel->meanMotion() > 0) {
+                    $tleInformation->period = $tleModel->period();
+                } else {
+                    $tleInformation->period = null;
+                    $stats['meanMotionProblems']++;
+                    $output->writeln(sprintf('<comment>Warning: Satellite %d (ID: %d) has mean motion problem</comment>', $tleModel->getId(), $tle->getId()));
+                }
 
-            $tleInformation->raan = $tleModel->raan();
-            $tleInformation->semiMajorAxis = $tleModel->semiMajorAxis();
+                // Calculate all specifications using pre-instantiated objects
+                foreach ($specifications as $property => $specification) {
+                    $tleInformation->$property = $specification->isSatisfiedBy($tleModel);
+                }
 
-            // Calculate all orbit type specifications
-            $tleInformation->geostationaryOrbit = (new GeostationaryOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->geosynchronousOrbit = (new GeosynchronousOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->circularOrbit = (new CircularOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->ellipticalOrbit = (new EllipticalOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->lowEarthOrbit = (new LowEarthOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->mediumEarthOrbit = (new MediumEarthOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->highEarthOrbit = (new HighEarthOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->polarOrbit = (new PolarOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->sunSynchronousOrbit = (new SunSynchronousOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->molniyaOrbit = (new MolniyaOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->tundraOrbit = (new TundraOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->criticalInclinationOrbit = (new CriticalInclinationOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->posigradeOrbit = (new PosigradeOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->retrogradeOrbit = (new RetrogradeOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->decayingOrbit = (new DecayingOrbitTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->lowDrag = (new LowDragTleSpecification())->isSatisfiedBy($tleModel);
+                if (!$exists) {
+                    $this->entityManager->persist($tleInformation);
+                }
 
-            // Calculate satellite classification specifications
-            $tleInformation->classifiedSatellite = (new ClassifiedSatelliteTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->unclassifiedSatellite = (new UnclassifiedSatelliteTleSpecification())->isSatisfiedBy($tleModel);
-            $tleInformation->recentTle = (new RecentTleTleSpecification())->isSatisfiedBy($tleModel);
-
-            if (!$exists) {
-                $this->entityManager->persist($tleInformation);
-            }
-
-            if (($i % self::BATCH_SIZE) === 0) {
-                $this->entityManager->flush();
-                $this->entityManager->clear();
+                // Flush periodically to avoid memory issues
+                if (($i % self::BATCH_SIZE) === 0) {
+                    $this->entityManager->flush();
+                    $this->entityManager->clear();
+                }
+            } catch (\Throwable $e) {
+                $stats['errors']++;
+                $output->writeln(sprintf(
+                    '<error>Error processing TLE %d: %s</error>',
+                    $tle->getId(),
+                    $e->getMessage()
+                ));
+                
+                // Continue processing next TLE
+                continue;
             }
         }
 
-        $this->entityManager->flush();
+        // Final flush for remaining entities
+        try {
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $output->writeln(sprintf('<error>Error flushing final batch: %s</error>', $e->getMessage()));
+        }
 
-        $this->calculateStats();
+        // Calculate global statistics
+        try {
+            $this->calculateStats();
+        } catch (\Throwable $e) {
+            $output->writeln(sprintf('<error>Error calculating stats: %s</error>', $e->getMessage()));
+        }
+
+        // Print summary statistics
+        $output->writeln('');
+        $output->writeln('<info>Processing Summary:</info>');
+        $output->writeln(sprintf('  Total processed:       <fg=cyan>%d</>', $stats['total']));
+        $output->writeln(sprintf('  New records created:   <fg=green>%d</>', $stats['created']));
+        $output->writeln(sprintf('  Existing records updated: <fg=yellow>%d</>', $stats['updated']));
+        
+        if ($stats['meanMotionProblems'] > 0) {
+            $output->writeln(sprintf('  Mean motion problems:  <comment>%d</comment>', $stats['meanMotionProblems']));
+        }
+        
+        if ($stats['errors'] > 0) {
+            $output->writeln(sprintf('  Errors encountered:    <error>%d</error>', $stats['errors']));
+            return Command::FAILURE;
+        }
+
+        $output->writeln('');
+        $output->writeln('<info>✓ Calculation completed successfully!</info>');
 
         return Command::SUCCESS;
     }
