@@ -20,7 +20,7 @@ import PublicIcon from '@mui/icons-material/Public'
 import SyncIcon from '@mui/icons-material/Sync'
 import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
 import TripOriginIcon from '@mui/icons-material/TripOrigin'
-import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'
+import LanguageIcon from '@mui/icons-material/Language'
 import FlightIcon from '@mui/icons-material/Flight'
 import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 import AcUnitIcon from '@mui/icons-material/AcUnit'
@@ -64,7 +64,7 @@ const TAG_ICONS: Record<string, React.ComponentType> = {
   geosynchronousOrbit: SyncIcon,
   circularOrbit: RadioButtonUncheckedIcon,
   ellipticalOrbit: TripOriginIcon,
-  lowEarthOrbit: FlightTakeoffIcon,
+  lowEarthOrbit: LanguageIcon,
   mediumEarthOrbit: FlightIcon,
   highEarthOrbit: RocketLaunchIcon,
   polarOrbit: AcUnitIcon,
