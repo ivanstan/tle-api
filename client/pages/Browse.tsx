@@ -9,6 +9,7 @@ import {
   Chip,
   Box,
 } from '@mui/material'
+import type { SvgIconComponent } from '@mui/icons-material'
 import { When } from 'react-if'
 import { TleBrowser } from '../components/TleBrowser'
 import styled from 'styled-components'
@@ -52,7 +53,7 @@ const TAG_TITLES: Record<string, string> = {
 }
 
 // Map machine names to Material-UI icons
-const TAG_ICONS: Record<string, React.ComponentType> = {
+const TAG_ICONS: Record<string, SvgIconComponent> = {
   // Orbit types
   geostationaryOrbit: PublicIcon,
   geosynchronousOrbit: SyncIcon,
@@ -216,7 +217,7 @@ const getColumns = (isMobile: boolean, activeFilters: Set<string>, onTagClick: (
     sortable: false,
     disableColumnMenu: true,
     renderCell: (params: GridRenderCellParams) => {
-      const tags: Array<{ key: string; title: string; icon: React.ComponentType; color: string }> = []
+      const tags: Array<{ key: string; title: string; icon: SvgIconComponent; color: string }> = []
       
       // Debug: Log the row data to check structure
       if (params.row.name && Math.random() < 0.1) { // Log ~10% of rows to avoid spam
