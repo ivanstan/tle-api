@@ -537,8 +537,6 @@ export const Browse = () => {
   const [data, setData] = useState<Tle[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [parameters, setParameters] = useState<Record<string, string | number>>({ extra: 1 })
-  const [activeTagFilters, setActiveTagFilters] = useState<Set<string>>(new Set())
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState<Tle | null>(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -547,13 +545,44 @@ export const Browse = () => {
     page: 0,
   })
 
-  // Initialize filters from URL parameters
+  // Initialize parameters from URL
+  const [parameters, setParameters] = useState<Record<string, string | number>>(() => {
+    const params: Record<string, string | number> = { extra: 1 }
+    searchParams.forEach((value, key) => {
+      if (value === '1' && (
+        key.endsWith('Orbit') || 
+        key.endsWith('Drag') || 
+        key === 'recentTle'
+      )) {
+        params[key] = 1
+      }
+    })
+    console.log('Initial parameters:', params)
+    return params
+  })
+
+  // Initialize activeTagFilters from URL
+  const [activeTagFilters, setActiveTagFilters] = useState<Set<string>>(() => {
+    const filters = new Set<string>()
+    searchParams.forEach((value, key) => {
+      if (value === '1' && (
+        key.endsWith('Orbit') || 
+        key.endsWith('Drag') || 
+        key === 'recentTle'
+      )) {
+        filters.add(key)
+      }
+    })
+    console.log('Initial filters:', Array.from(filters))
+    return filters
+  })
+
+  // Sync with URL changes
   useEffect(() => {
     const filters = new Set<string>()
     const params: Record<string, string | number> = { extra: 1 }
     
     searchParams.forEach((value, key) => {
-      // Check if it's a tag filter (boolean filters with value '1')
       if (value === '1' && (
         key.endsWith('Orbit') || 
         key.endsWith('Drag') || 
@@ -564,11 +593,10 @@ export const Browse = () => {
       }
     })
     
+    console.log('URL changed, syncing filters:', Array.from(filters))
     setActiveTagFilters(filters)
-    if (filters.size > 0) {
-      setParameters((prev) => ({ ...prev, ...params }))
-    }
-  }, [])
+    setParameters((prev) => ({ ...prev, ...params }))
+  }, [searchParams.toString()])
 
   useEffect(() => {
     const handleResize = () => {
