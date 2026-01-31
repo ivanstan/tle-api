@@ -20,6 +20,10 @@ const PageWrapper = styled.div`
   min-height: calc(100vh - 64px);
   background: linear-gradient(135deg, #0a0e1a 0%, #0f1628 40%, #162033 100%);
   padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `
 
 const Toolbar = styled.div`
@@ -27,6 +31,10 @@ const Toolbar = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
 `
 
 const DrawerContent = styled.div`
@@ -37,6 +45,13 @@ const DrawerContent = styled.div`
 const DrawerHeader = styled.div`
   padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  @media (max-width: 768px) {
+    padding: 16px;
+  }
 `
 
 export const RETROGRADE = 'retrograde'
@@ -51,18 +66,22 @@ const formatTime = (seconds: number) => {
     .join(':')
 }
 
-const columns: GridColDef[] = [
+const getColumns = (isMobile: boolean): GridColDef[] => [
   {
     field: 'name',
     headerName: 'Name',
     type: 'string',
-    width: 250,
+    flex: isMobile ? 1 : undefined,
+    width: isMobile ? undefined : 250,
+    minWidth: isMobile ? 150 : 250,
     disableColumnMenu: true,
   },
   {
     field: 'inclination',
     headerName: 'Inclination',
-    width: 250,
+    flex: isMobile ? 0 : undefined,
+    width: isMobile ? 110 : 250,
+    minWidth: isMobile ? 110 : 250,
     sortable: true,
     disableColumnMenu: true,
     filterable: true,
@@ -74,14 +93,16 @@ const columns: GridColDef[] = [
   {
     field: 'eccentricity',
     headerName: 'Eccentricity',
-    width: 250,
+    flex: isMobile ? 0 : undefined,
+    width: isMobile ? 110 : 250,
+    minWidth: isMobile ? 110 : 250,
     valueGetter: (_value, row) => {
       return row.extra?.eccentricity ?? '-'
     },
     disableColumnMenu: true,
     sortable: true,
   },
-  {
+  ...(!isMobile ? [{
     field: 'semi_major_axis',
     headerName: 'Semi Major Axis',
     width: 250,
@@ -115,11 +136,15 @@ const columns: GridColDef[] = [
     },
     disableColumnMenu: true,
     sortable: true,
-  },
+  }] : []),
 ]
 
 const TleBrowserWrapper = styled.div`
   padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `
 
 const URL = 'https://tle.ivanstanojevic.me'
@@ -127,9 +152,9 @@ const URL = 'https://tle.ivanstanojevic.me'
 const provider = new TleProvider()
 
 // DataGrid dark theme with zebra rows
-const dataGridStyles = {
+const getDataGridStyles = (isMobile: boolean) => ({
   border: '1px solid rgba(255, 255, 255, 0.08)',
-  borderRadius: '12px',
+  borderRadius: isMobile ? '8px' : '12px',
   backgroundColor: 'rgba(255, 255, 255, 0.02)',
   
   '& .MuiDataGrid-columnHeaders': {
@@ -140,7 +165,7 @@ const dataGridStyles = {
   '& .MuiDataGrid-columnHeaderTitle': {
     fontFamily: '"JetBrains Mono", monospace',
     fontWeight: 600,
-    fontSize: '0.8rem',
+    fontSize: isMobile ? '0.7rem' : '0.8rem',
     textTransform: 'uppercase',
     letterSpacing: '0.05em',
     color: 'rgba(255, 255, 255, 0.8)',
@@ -149,6 +174,7 @@ const dataGridStyles = {
   '& .MuiDataGrid-cell': {
     borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
     fontFamily: '"IBM Plex Sans", sans-serif',
+    fontSize: isMobile ? '0.85rem' : '1rem',
     color: 'rgba(255, 255, 255, 0.85)',
   },
   
@@ -175,14 +201,43 @@ const dataGridStyles = {
   '& .MuiDataGrid-footerContainer': {
     borderTop: '1px solid rgba(255, 255, 255, 0.08)',
     backgroundColor: 'rgba(255, 255, 255, 0.02)',
+    minHeight: isMobile ? '52px' : 'auto',
   },
   
   '& .MuiTablePagination-root': {
     color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: isMobile ? '0.75rem' : '1rem',
+    overflow: 'hidden',
+  },
+  
+  '& .MuiTablePagination-toolbar': {
+    minHeight: isMobile ? '52px' : '52px',
+    paddingLeft: isMobile ? '8px' : '16px',
+    paddingRight: isMobile ? '4px' : '16px',
+  },
+  
+  '& .MuiTablePagination-selectLabel': {
+    fontSize: isMobile ? '0.75rem' : '0.875rem',
+    margin: 0,
+  },
+  
+  '& .MuiTablePagination-displayedRows': {
+    fontSize: isMobile ? '0.75rem' : '0.875rem',
+    margin: 0,
+  },
+  
+  '& .MuiTablePagination-select': {
+    fontSize: isMobile ? '0.75rem' : '0.875rem',
+    paddingRight: '24px',
   },
   
   '& .MuiTablePagination-selectIcon': {
     color: 'rgba(255, 255, 255, 0.5)',
+    right: 0,
+  },
+  
+  '& .MuiTablePagination-actions': {
+    marginLeft: isMobile ? '8px' : '20px',
   },
   
   '& .MuiIconButton-root': {
@@ -210,11 +265,11 @@ const dataGridStyles = {
   '& .MuiDataGrid-columnSeparator': {
     color: 'rgba(255, 255, 255, 0.1)',
   },
-}
+})
 
 // TextField styles for dark theme
-const textFieldStyles = {
-  width: 260,
+const getTextFieldStyles = (isMobile: boolean) => ({
+  width: isMobile ? '100%' : 260,
   '& .MuiFilledInput-root': {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: '8px',
@@ -243,11 +298,11 @@ const textFieldStyles = {
   '& .MuiInputAdornment-root': {
     color: 'rgba(255, 255, 255, 0.4)',
   },
-}
+})
 
 // Select styles for dark theme
-const selectStyles = {
-  width: 200,
+const getSelectStyles = (isMobile: boolean) => ({
+  width: isMobile ? '100%' : 200,
   '& .MuiFilledInput-root': {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: '8px',
@@ -269,7 +324,7 @@ const selectStyles = {
   '& .MuiSelect-icon': {
     color: 'rgba(255, 255, 255, 0.5)',
   },
-}
+})
 
 export const Browse = () => {
   const [data, setData] = useState<Tle[]>([])
@@ -279,10 +334,20 @@ export const Browse = () => {
   const [orbitValue, setOrbitValue] = useState('-')
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState<Tle | null>(null)
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     pageSize: 20,
     page: 0,
   })
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   const collection = useCallback(async () => {
     setLoading(true)
@@ -376,7 +441,7 @@ export const Browse = () => {
           label="Search satellites..."
           variant="filled"
           onChange={handleSearchChange}
-          sx={textFieldStyles}
+          sx={getTextFieldStyles(isMobile)}
           slotProps={{
             input: {
               startAdornment: (
@@ -392,7 +457,7 @@ export const Browse = () => {
           variant="filled"
           onChange={handleInclinationFilter}
           value={orbitValue}
-          sx={selectStyles}
+          sx={getSelectStyles(isMobile)}
         >
           <MenuItem value={'-'}>All orbits</MenuItem>
           <MenuItem value={RETROGRADE}>Retrograde</MenuItem>
@@ -400,15 +465,15 @@ export const Browse = () => {
         </Select>
       </Toolbar>
 
-      <div style={{ height: 'calc(100vh - 200px)', minHeight: 400 }}>
+      <div style={{ height: isMobile ? 'calc(100vh - 250px)' : 'calc(100vh - 200px)', minHeight: 400 }}>
         <DataGrid
           rows={data}
           loading={loading}
-          columns={columns}
+          columns={getColumns(isMobile)}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           getRowId={(row) => row.satelliteId}
-          rowHeight={48}
+          rowHeight={isMobile ? 52 : 48}
           rowCount={total}
           density={'standard'}
           onSortModelChange={handleSortModelChange}
@@ -419,7 +484,7 @@ export const Browse = () => {
           sortingOrder={['desc', 'asc']}
           disableColumnSelector={true}
           pageSizeOptions={[20, 50, 100]}
-          sx={dataGridStyles}
+          sx={getDataGridStyles(isMobile)}
         />
       </div>
 
@@ -435,6 +500,7 @@ export const Browse = () => {
           sx: {
             backgroundColor: '#0f1628',
             borderLeft: '1px solid rgba(255, 255, 255, 0.08)',
+            width: isMobile ? '100%' : '450px',
           },
         }}
       >
