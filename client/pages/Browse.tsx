@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridRowSelectionModel } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridRowSelectionModel, GridRenderCellParams } from '@mui/x-data-grid'
 import {
   Drawer,
   IconButton,
@@ -8,13 +8,104 @@ import {
   Select,
   TextField,
   SelectChangeEvent,
+  Chip,
+  Box,
 } from '@mui/material'
 import { When } from 'react-if'
 import { TleBrowser } from '../components/TleBrowser'
 import styled from 'styled-components'
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos'
 import SearchIcon from '@mui/icons-material/Search'
+import PublicIcon from '@mui/icons-material/Public'
+import SyncIcon from '@mui/icons-material/Sync'
+import RadioButtonUncheckedIcon from '@mui/icons-material/RadioButtonUnchecked'
+import TripOriginIcon from '@mui/icons-material/TripOrigin'
+import FlightTakeoffIcon from '@mui/icons-material/FlightTakeoff'
+import FlightIcon from '@mui/icons-material/Flight'
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
+import AcUnitIcon from '@mui/icons-material/AcUnit'
+import WbSunnyIcon from '@mui/icons-material/WbSunny'
+import TrendingDownIcon from '@mui/icons-material/TrendingDown'
+import SpeedIcon from '@mui/icons-material/Speed'
+import LockOpenIcon from '@mui/icons-material/LockOpen'
+import LockIcon from '@mui/icons-material/Lock'
+import FiberNewIcon from '@mui/icons-material/FiberNew'
 import { TleProvider } from '../services/TleProvider'
+
+// Map machine names to human-readable titles
+const TAG_TITLES: Record<string, string> = {
+  // Orbit types
+  geostationaryOrbit: 'Geostationary',
+  geosynchronousOrbit: 'Geosynchronous',
+  circularOrbit: 'Circular',
+  ellipticalOrbit: 'Elliptical',
+  lowEarthOrbit: 'LEO',
+  mediumEarthOrbit: 'MEO',
+  highEarthOrbit: 'HEO',
+  polarOrbit: 'Polar',
+  sunSynchronousOrbit: 'Sun-Sync',
+  molniyaOrbit: 'Molniya',
+  tundraOrbit: 'Tundra',
+  criticalInclinationOrbit: 'Critical Inc.',
+  posigradeOrbit: 'Prograde',
+  retrogradeOrbit: 'Retrograde',
+  decayingOrbit: 'Decaying',
+  lowDrag: 'Low Drag',
+  // Classification
+  classifiedSatellite: 'Classified',
+  unclassifiedSatellite: 'Unclassified',
+  recentTle: 'Recent',
+}
+
+// Map machine names to Material-UI icons
+const TAG_ICONS: Record<string, React.ComponentType> = {
+  // Orbit types
+  geostationaryOrbit: PublicIcon,
+  geosynchronousOrbit: SyncIcon,
+  circularOrbit: RadioButtonUncheckedIcon,
+  ellipticalOrbit: TripOriginIcon,
+  lowEarthOrbit: FlightTakeoffIcon,
+  mediumEarthOrbit: FlightIcon,
+  highEarthOrbit: RocketLaunchIcon,
+  polarOrbit: AcUnitIcon,
+  sunSynchronousOrbit: WbSunnyIcon,
+  molniyaOrbit: RocketLaunchIcon,
+  tundraOrbit: RocketLaunchIcon,
+  criticalInclinationOrbit: TrendingDownIcon,
+  posigradeOrbit: TrendingDownIcon,
+  retrogradeOrbit: TrendingDownIcon,
+  decayingOrbit: TrendingDownIcon,
+  lowDrag: SpeedIcon,
+  // Classification
+  classifiedSatellite: LockIcon,
+  unclassifiedSatellite: LockOpenIcon,
+  recentTle: FiberNewIcon,
+}
+
+// Map machine names to colors
+const TAG_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning'> = {
+  // Orbit types
+  geostationaryOrbit: 'primary',
+  geosynchronousOrbit: 'primary',
+  circularOrbit: 'info',
+  ellipticalOrbit: 'info',
+  lowEarthOrbit: 'success',
+  mediumEarthOrbit: 'success',
+  highEarthOrbit: 'success',
+  polarOrbit: 'info',
+  sunSynchronousOrbit: 'warning',
+  molniyaOrbit: 'secondary',
+  tundraOrbit: 'secondary',
+  criticalInclinationOrbit: 'default',
+  posigradeOrbit: 'info',
+  retrogradeOrbit: 'info',
+  decayingOrbit: 'error',
+  lowDrag: 'success',
+  // Classification
+  classifiedSatellite: 'error',
+  unclassifiedSatellite: 'success',
+  recentTle: 'warning',
+}
 
 const PageWrapper = styled.div`
   min-height: calc(100vh - 64px);
@@ -71,17 +162,83 @@ const getColumns = (isMobile: boolean): GridColDef[] => [
     field: 'name',
     headerName: 'Name',
     type: 'string',
-    flex: isMobile ? 1 : undefined,
-    width: isMobile ? undefined : 250,
-    minWidth: isMobile ? 150 : 250,
+    flex: isMobile ? 0 : undefined,
+    width: isMobile ? 150 : 200,
+    minWidth: isMobile ? 150 : 200,
     disableColumnMenu: true,
   },
   {
+    field: 'tags',
+    headerName: 'Tags',
+    flex: 1,
+    minWidth: isMobile ? 200 : 300,
+    sortable: false,
+    disableColumnMenu: true,
+    renderCell: (params: GridRenderCellParams) => {
+      const tags: Array<{ key: string; title: string; icon: React.ComponentType; color: string }> = []
+      
+      // Process orbit fields
+      if (params.row.orbit) {
+        Object.entries(params.row.orbit).forEach(([key, value]) => {
+          if (value === true && TAG_TITLES[key]) {
+            tags.push({
+              key,
+              title: TAG_TITLES[key],
+              icon: TAG_ICONS[key],
+              color: TAG_COLORS[key] || 'default',
+            })
+          }
+        })
+      }
+      
+      // Process classification fields
+      if (params.row.classification) {
+        Object.entries(params.row.classification).forEach(([key, value]) => {
+          if (value === true && TAG_TITLES[key]) {
+            tags.push({
+              key,
+              title: TAG_TITLES[key],
+              icon: TAG_ICONS[key],
+              color: TAG_COLORS[key] || 'default',
+            })
+          }
+        })
+      }
+      
+      return (
+        <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', py: 0.5 }}>
+          {tags.map((tag) => {
+            const IconComponent = tag.icon
+            return (
+              <Chip
+                key={tag.key}
+                icon={<IconComponent style={{ fontSize: isMobile ? '0.9rem' : '1rem' }} />}
+                label={tag.title}
+                size={isMobile ? 'small' : 'small'}
+                color={tag.color as any}
+                variant="outlined"
+                sx={{
+                  fontSize: isMobile ? '0.65rem' : '0.7rem',
+                  height: isMobile ? '20px' : '24px',
+                  '& .MuiChip-label': {
+                    padding: isMobile ? '0 6px' : '0 8px',
+                  },
+                  '& .MuiChip-icon': {
+                    marginLeft: isMobile ? '4px' : '5px',
+                    marginRight: isMobile ? '-2px' : '-4px',
+                  },
+                }}
+              />
+            )
+          })}
+        </Box>
+      )
+    },
+  },
+  ...(!isMobile ? [{
     field: 'inclination',
     headerName: 'Inclination',
-    flex: isMobile ? 0 : undefined,
-    width: isMobile ? 110 : 250,
-    minWidth: isMobile ? 110 : 250,
+    width: 130,
     sortable: true,
     disableColumnMenu: true,
     filterable: true,
@@ -93,15 +250,13 @@ const getColumns = (isMobile: boolean): GridColDef[] => [
   {
     field: 'eccentricity',
     headerName: 'Eccentricity',
-    flex: isMobile ? 0 : undefined,
-    width: isMobile ? 110 : 250,
-    minWidth: isMobile ? 110 : 250,
+    width: 130,
     valueGetter: (_value, row) => {
       return row.extra?.eccentricity ?? '-'
     },
     disableColumnMenu: true,
     sortable: true,
-  },
+  }] : []),
   ...(!isMobile ? [{
     field: 'semi_major_axis',
     headerName: 'Semi Major Axis',
@@ -176,6 +331,18 @@ const getDataGridStyles = (isMobile: boolean) => ({
     fontFamily: '"IBM Plex Sans", sans-serif',
     fontSize: isMobile ? '0.85rem' : '1rem',
     color: 'rgba(255, 255, 255, 0.85)',
+    display: 'flex',
+    alignItems: 'center',
+  },
+  
+  '& .MuiDataGrid-row': {
+    maxHeight: 'none !important',
+  },
+  
+  '& .MuiDataGrid-cell--withRenderer': {
+    alignItems: 'flex-start',
+    paddingTop: '8px',
+    paddingBottom: '8px',
   },
   
   // Zebra striping - alternating row colors
@@ -473,7 +640,7 @@ export const Browse = () => {
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           getRowId={(row) => row.satelliteId}
-          rowHeight={isMobile ? 52 : 48}
+          getRowHeight={() => 'auto'}
           rowCount={total}
           density={'standard'}
           onSortModelChange={handleSortModelChange}
