@@ -51,15 +51,16 @@ export const TleBrowser = ({ data: tleData }: TleBrowserProps) => {
     setColor(styles.borderColor)
   }
 
-  const overflow = window.innerWidth > 500 ? 'auto' : 'scroll'
+  const overflow = window.innerWidth > 768 ? 'auto' : 'scroll'
+  const isMobile = window.innerWidth < 768
 
   return (
     <>
       <div
-        className="code tle-display d-flex justify-content-between"
+        className="code tle-display d-flex flex-column flex-md-row justify-content-between"
         style={{ overflowX: overflow as 'auto' | 'scroll' }}
       >
-        <div>
+        <div style={{ flex: 1 }}>
           <div className="name">
             <span
               className={'element name'}
@@ -69,7 +70,7 @@ export const TleBrowser = ({ data: tleData }: TleBrowserProps) => {
             </span>
           </div>
 
-          <div className="line1" style={{ minWidth: 651 }}>
+          <div className="line1" style={{ minWidth: isMobile ? 'auto' : 651 }}>
             <span
               className={'element line_number'}
               onMouseEnter={(element) => hover(TleElements.lineNumber1, element)}
@@ -164,7 +165,7 @@ export const TleBrowser = ({ data: tleData }: TleBrowserProps) => {
             </span>
           </div>
 
-          <div className="line2">
+          <div className="line2" style={{ minWidth: isMobile ? 'auto' : 651 }}>
             <span
               className={'element line_number'}
               onMouseEnter={(element) => hover(TleElements.lineNumber2, element)}
@@ -235,25 +236,27 @@ export const TleBrowser = ({ data: tleData }: TleBrowserProps) => {
             </span>
           </div>
         </div>
-        <div className="align-self-center d-none d-md-block">
+        <div className="align-self-center mt-2 mt-md-0 ms-md-3">
           <CopyButton value={data.line1 + '\n' + data.line2} />
         </div>
       </div>
 
-      <div className={'d-flex pt-1'} style={{ fontSize: 12 }}>
-        <span className={'d-none d-md-inline'}>
+      <div className={'d-flex flex-column flex-md-row pt-2'} style={{ fontSize: 12 }}>
+        <span className={'d-none d-md-inline mb-1 mb-md-0'}>
           Get daily updates for {data.name} using following API endpoint&nbsp;
         </span>
+        <span className={'d-block d-md-none mb-1 fw-bold'}>API endpoint:</span>
         <a
           target="_blank"
           rel="nofollow noreferrer"
           href={'https://tle.ivanstanojevic.me/api/tle/' + data.satelliteId}
+          style={{ wordBreak: 'break-all' }}
         >
           https://tle.ivanstanojevic.me/api/tle/{data.satelliteId}
         </a>
       </div>
 
-      <div className="details">
+      <div className="details mt-2">
         <When condition={active === TleElements.name}>
           <TleElementDetails color={color} title={'Satellite name'} />
         </When>
