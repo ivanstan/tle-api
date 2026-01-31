@@ -300,63 +300,65 @@ const getColumns = (isMobile: boolean, activeFilters: Set<string>, onTagClick: (
       )
     },
   },
-  ...(!isMobile ? [{
-    field: 'inclination',
-    headerName: 'Inclination',
-    width: 130,
-    sortable: true,
-    disableColumnMenu: true,
-    filterable: true,
-    valueGetter: (_value, row) => {
-      const value = row.extra?.inclination
-      return value != null ? value.toFixed(2) + '°' : '-'
-    },
-  },
-  {
-    field: 'eccentricity',
-    headerName: 'Eccentricity',
-    width: 130,
-    valueGetter: (_value, row) => {
-      return row.extra?.eccentricity ?? '-'
-    },
-    disableColumnMenu: true,
-    sortable: true,
-  }] : []),
-  ...(!isMobile ? [{
-    field: 'semi_major_axis',
-    headerName: 'Semi Major Axis',
-    width: 250,
-    valueGetter: (_value, row) => {
-      const value = row.extra?.semi_major_axis
-      return value != null ? (parseFloat(value) / 1000).toFixed(2) : '-'
-    },
-    disableColumnMenu: true,
-    sortable: true,
-  },
-  {
-    field: 'period',
-    headerName: 'Period',
-    type: 'string',
-    width: 250,
-    valueGetter: (_value, row) => {
-      const value = row.extra?.period
-      return value != null ? formatTime(value) : '-'
-    },
-    disableColumnMenu: true,
-    sortable: true,
-  },
-  {
-    field: 'raan',
-    headerName: 'RAAN',
-    type: 'string',
-    width: 250,
-    valueGetter: (_value, row) => {
-      const value = row.extra?.raan
-      return value != null ? value.toFixed(2) + '°' : '-'
-    },
-    disableColumnMenu: true,
-    sortable: true,
-  }] : []),
+  ...(!isMobile ? [
+    {
+      field: 'inclination',
+      headerName: 'Inclination',
+      width: 130,
+      sortable: true,
+      disableColumnMenu: true,
+      filterable: true,
+      valueGetter: (_value: any, row: any) => {
+        const value = row.extra?.inclination
+        return value != null ? value.toFixed(2) + '°' : '-'
+      },
+    } as GridColDef,
+    {
+      field: 'eccentricity',
+      headerName: 'Eccentricity',
+      width: 130,
+      valueGetter: (_value: any, row: any) => {
+        return row.extra?.eccentricity ?? '-'
+      },
+      disableColumnMenu: true,
+      sortable: true,
+    } as GridColDef,
+  ] : []),
+  ...(!isMobile ? [
+    {
+      field: 'semi_major_axis',
+      headerName: 'Semi Major Axis',
+      width: 250,
+      valueGetter: (_value: any, row: any) => {
+        const value = row.extra?.semi_major_axis
+        return value != null ? (parseFloat(value) / 1000).toFixed(2) : '-'
+      },
+      disableColumnMenu: true,
+      sortable: true,
+    } as GridColDef,
+    {
+      field: 'period',
+      headerName: 'Period',
+      width: 250,
+      valueGetter: (_value: any, row: any) => {
+        const value = row.extra?.period
+        return value != null ? formatTime(value) : '-'
+      },
+      disableColumnMenu: true,
+      sortable: true,
+    } as GridColDef,
+    {
+      field: 'raan',
+      headerName: 'RAAN',
+      width: 250,
+      valueGetter: (_value: any, row: any) => {
+        const value = row.extra?.raan
+        return value != null ? value.toFixed(2) + '°' : '-'
+      },
+      disableColumnMenu: true,
+      sortable: true,
+    } as GridColDef,
+  ] : []),
 ]
 
 const TleBrowserWrapper = styled.div`
