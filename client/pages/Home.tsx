@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { TleSelect } from '../components/TleSelect'
 import { TleBrowser } from '../components/TleBrowser'
+import { NewsSection } from '../components/NewsSection'
 import { TlePopularProvider } from '../services/TlePopularProvider'
 import styled, { keyframes } from 'styled-components'
 import { TleProvider } from '../services/TleProvider'
@@ -461,6 +462,8 @@ const Home = () => {
           ))}
         </PopularGrid>
       </HeroSection>
+
+      <NewsSection />
 
       {data?.name && (
         <DataSection>
