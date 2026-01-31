@@ -47,9 +47,7 @@ const TAG_TITLES: Record<string, string> = {
   retrogradeOrbit: 'Retrograde',
   decayingOrbit: 'Decaying',
   lowDrag: 'Low Drag',
-  // Classification
-  classifiedSatellite: 'Classified',
-  unclassifiedSatellite: 'Unclassified',
+  // Recent TLE
   recentTle: 'Recent',
 }
 
@@ -72,9 +70,7 @@ const TAG_ICONS: Record<string, React.ComponentType> = {
   retrogradeOrbit: TrendingDownIcon,
   decayingOrbit: TrendingDownIcon,
   lowDrag: SpeedIcon,
-  // Classification
-  classifiedSatellite: LockIcon,
-  unclassifiedSatellite: LockOpenIcon,
+  // Recent TLE
   recentTle: FiberNewIcon,
 }
 
@@ -97,9 +93,7 @@ const TAG_COLORS: Record<string, 'default' | 'primary' | 'secondary' | 'error' |
   retrogradeOrbit: 'info',
   decayingOrbit: 'error',
   lowDrag: 'success',
-  // Classification
-  classifiedSatellite: 'error',
-  unclassifiedSatellite: 'success',
+  // Recent TLE
   recentTle: 'warning',
 }
 
@@ -223,6 +217,15 @@ const getColumns = (isMobile: boolean, activeFilters: Set<string>, onTagClick: (
     disableColumnMenu: true,
     renderCell: (params: GridRenderCellParams) => {
       const tags: Array<{ key: string; title: string; icon: React.ComponentType; color: string }> = []
+      
+      // Debug: Log the row data to check structure
+      if (params.row.name && Math.random() < 0.1) { // Log ~10% of rows to avoid spam
+        console.log('Row data sample:', {
+          name: params.row.name,
+          orbit: params.row.orbit,
+          classification: params.row.classification
+        })
+      }
       
       // Process orbit fields
       if (params.row.orbit) {
@@ -584,8 +587,15 @@ export const Browse = () => {
       searchParams.set(key, String(value))
     })
 
+    console.log('API Request:', url + '?' + searchParams.toString())
+    
     const response = await fetch(url + '?' + searchParams.toString())
     const result = await response.json()
+
+    console.log('API Response sample:', {
+      totalItems: result.totalItems,
+      firstItem: result.member?.[0]
+    })
 
     setData(result.member || [])
     setTotal(result.totalItems || 0)
