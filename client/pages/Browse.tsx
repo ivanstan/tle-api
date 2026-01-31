@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { DataGrid, GridColDef, GridPaginationModel, GridSortModel, GridRowSelectionModel, GridRenderCellParams } from '@mui/x-data-grid'
 import {
   Drawer,
@@ -157,7 +158,7 @@ const formatTime = (seconds: number) => {
     .join(':')
 }
 
-const getColumns = (isMobile: boolean): GridColDef[] => [
+const getColumns = (isMobile: boolean, activeFilters: Set<string>, onTagClick: (tagKey: string) => void): GridColDef[] => [
   {
     field: 'name',
     headerName: 'Name',
@@ -209,6 +210,7 @@ const getColumns = (isMobile: boolean): GridColDef[] => [
         <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap', py: 0.5 }}>
           {tags.map((tag) => {
             const IconComponent = tag.icon
+            const isActive = activeFilters.has(tag.key)
             return (
               <Chip
                 key={tag.key}
@@ -216,10 +218,20 @@ const getColumns = (isMobile: boolean): GridColDef[] => [
                 label={tag.title}
                 size={isMobile ? 'small' : 'small'}
                 color={tag.color as any}
-                variant="outlined"
+                variant={isActive ? 'filled' : 'outlined'}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onTagClick(tag.key)
+                }}
                 sx={{
                   fontSize: isMobile ? '0.65rem' : '0.7rem',
                   height: isMobile ? '20px' : '24px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+                  },
                   '& .MuiChip-label': {
                     padding: isMobile ? '0 6px' : '0 8px',
                   },
@@ -227,6 +239,10 @@ const getColumns = (isMobile: boolean): GridColDef[] => [
                     marginLeft: isMobile ? '4px' : '5px',
                     marginRight: isMobile ? '-2px' : '-4px',
                   },
+                  ...(isActive && {
+                    fontWeight: 'bold',
+                    borderWidth: '2px',
+                  }),
                 }}
               />
             )
@@ -494,11 +510,13 @@ const getSelectStyles = (isMobile: boolean) => ({
 })
 
 export const Browse = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
   const [data, setData] = useState<Tle[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [parameters, setParameters] = useState<Record<string, string | number>>({ extra: 1 })
   const [orbitValue, setOrbitValue] = useState('-')
+  const [activeTagFilters, setActiveTagFilters] = useState<Set<string>>(new Set())
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState<Tle | null>(null)
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768)
@@ -506,6 +524,31 @@ export const Browse = () => {
     pageSize: 20,
     page: 0,
   })
+
+  // Initialize filters from URL parameters
+  useEffect(() => {
+    const filters = new Set<string>()
+    const params: Record<string, string | number> = { extra: 1 }
+    
+    searchParams.forEach((value, key) => {
+      // Check if it's a tag filter (boolean filters with value '1')
+      if (value === '1' && (
+        key.endsWith('Orbit') || 
+        key.endsWith('Drag') || 
+        key === 'classifiedSatellite' || 
+        key === 'unclassifiedSatellite' || 
+        key === 'recentTle'
+      )) {
+        filters.add(key)
+        params[key] = 1
+      }
+    })
+    
+    setActiveTagFilters(filters)
+    if (filters.size > 0) {
+      setParameters((prev) => ({ ...prev, ...params }))
+    }
+  }, [])
 
   useEffect(() => {
     const handleResize = () => {
@@ -601,6 +644,45 @@ export const Browse = () => {
     setOrbitValue(value)
   }
 
+  const handleTagClick = (tagKey: string) => {
+    setActiveTagFilters((prev) => {
+      const newFilters = new Set(prev)
+      
+      if (newFilters.has(tagKey)) {
+        // Remove filter
+        newFilters.delete(tagKey)
+        
+        // Update URL params
+        const newSearchParams = new URLSearchParams(searchParams)
+        newSearchParams.delete(tagKey)
+        setSearchParams(newSearchParams)
+        
+        // Update API parameters
+        setParameters((prevParams) => {
+          const newParams = { ...prevParams }
+          delete newParams[tagKey]
+          return newParams
+        })
+      } else {
+        // Add filter
+        newFilters.add(tagKey)
+        
+        // Update URL params
+        const newSearchParams = new URLSearchParams(searchParams)
+        newSearchParams.set(tagKey, '1')
+        setSearchParams(newSearchParams)
+        
+        // Update API parameters
+        setParameters((prevParams) => ({
+          ...prevParams,
+          [tagKey]: 1,
+        }))
+      }
+      
+      return newFilters
+    })
+  }
+
   return (
     <PageWrapper>
       <Toolbar>
@@ -636,7 +718,7 @@ export const Browse = () => {
         <DataGrid
           rows={data}
           loading={loading}
-          columns={getColumns(isMobile)}
+          columns={getColumns(isMobile, activeTagFilters, handleTagClick)}
           paginationModel={paginationModel}
           onPaginationModelChange={handlePaginationModelChange}
           getRowId={(row) => row.satelliteId}
