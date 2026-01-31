@@ -46,7 +46,28 @@ class TleModelNormalizer implements NormalizerInterface
             ];
 
             $normalized['orbit'] = [
-                'geostationary' => $object->getInfo()->geostationary,
+                'geostationaryOrbit' => $object->getInfo()->geostationaryOrbit,
+                'geosynchronousOrbit' => $object->getInfo()->geosynchronousOrbit,
+                'circularOrbit' => $object->getInfo()->circularOrbit,
+                'ellipticalOrbit' => $object->getInfo()->ellipticalOrbit,
+                'lowEarthOrbit' => $object->getInfo()->lowEarthOrbit,
+                'mediumEarthOrbit' => $object->getInfo()->mediumEarthOrbit,
+                'highEarthOrbit' => $object->getInfo()->highEarthOrbit,
+                'polarOrbit' => $object->getInfo()->polarOrbit,
+                'sunSynchronousOrbit' => $object->getInfo()->sunSynchronousOrbit,
+                'molniyaOrbit' => $object->getInfo()->molniyaOrbit,
+                'tundraOrbit' => $object->getInfo()->tundraOrbit,
+                'criticalInclinationOrbit' => $object->getInfo()->criticalInclinationOrbit,
+                'posigradeOrbit' => $object->getInfo()->posigradeOrbit,
+                'retrogradeOrbit' => $object->getInfo()->retrogradeOrbit,
+                'decayingOrbit' => $object->getInfo()->decayingOrbit,
+                'lowDrag' => $object->getInfo()->lowDrag,
+            ];
+            
+            $normalized['classification'] = [
+                'classifiedSatellite' => $object->getInfo()->classifiedSatellite,
+                'unclassifiedSatellite' => $object->getInfo()->unclassifiedSatellite,
+                'recentTle' => $object->getInfo()->recentTle,
             ];
         }
 
