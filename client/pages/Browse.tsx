@@ -5,10 +5,7 @@ import {
   Drawer,
   IconButton,
   InputAdornment,
-  MenuItem,
-  Select,
   TextField,
-  SelectChangeEvent,
   Chip,
   Box,
 } from '@mui/material'
@@ -28,8 +25,6 @@ import AcUnitIcon from '@mui/icons-material/AcUnit'
 import WbSunnyIcon from '@mui/icons-material/WbSunny'
 import TrendingDownIcon from '@mui/icons-material/TrendingDown'
 import SpeedIcon from '@mui/icons-material/Speed'
-import LockOpenIcon from '@mui/icons-material/LockOpen'
-import LockIcon from '@mui/icons-material/Lock'
 import FiberNewIcon from '@mui/icons-material/FiberNew'
 import { TleProvider } from '../services/TleProvider'
 
@@ -146,8 +141,59 @@ const DrawerHeader = styled.div`
   }
 `
 
-export const RETROGRADE = 'retrograde'
-export const POSIGRADE = 'posigrade'
+const FilterSection = styled.div`
+  margin-bottom: 20px;
+  
+  @media (max-width: 768px) {
+    margin-bottom: 16px;
+  }
+`
+
+const FilterSectionTitle = styled.h3`
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 12px;
+  
+  &::before {
+    content: '//';
+    margin-right: 8px;
+    opacity: 0.5;
+  }
+`
+
+const FilterPillsContainer = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  
+  @media (max-width: 768px) {
+    gap: 6px;
+  }
+`
+
+// All available filter options
+const ORBIT_FILTERS = [
+  { key: 'lowEarthOrbit', label: 'LEO', icon: LanguageIcon, color: 'success' as const },
+  { key: 'mediumEarthOrbit', label: 'MEO', icon: FlightIcon, color: 'success' as const },
+  { key: 'highEarthOrbit', label: 'HEO', icon: RocketLaunchIcon, color: 'success' as const },
+  { key: 'geostationaryOrbit', label: 'Geostationary', icon: PublicIcon, color: 'primary' as const },
+  { key: 'geosynchronousOrbit', label: 'Geosynchronous', icon: SyncIcon, color: 'primary' as const },
+  { key: 'polarOrbit', label: 'Polar', icon: AcUnitIcon, color: 'info' as const },
+  { key: 'sunSynchronousOrbit', label: 'Sun-Sync', icon: WbSunnyIcon, color: 'warning' as const },
+  { key: 'circularOrbit', label: 'Circular', icon: RadioButtonUncheckedIcon, color: 'info' as const },
+  { key: 'ellipticalOrbit', label: 'Elliptical', icon: TripOriginIcon, color: 'info' as const },
+  { key: 'molniyaOrbit', label: 'Molniya', icon: RocketLaunchIcon, color: 'secondary' as const },
+  { key: 'tundraOrbit', label: 'Tundra', icon: RocketLaunchIcon, color: 'secondary' as const },
+  { key: 'retrogradeOrbit', label: 'Retrograde', icon: TrendingDownIcon, color: 'info' as const },
+  { key: 'posigradeOrbit', label: 'Prograde', icon: TrendingDownIcon, color: 'info' as const },
+  { key: 'decayingOrbit', label: 'Decaying', icon: TrendingDownIcon, color: 'error' as const },
+  { key: 'lowDrag', label: 'Low Drag', icon: SpeedIcon, color: 'success' as const },
+  { key: 'recentTle', label: 'Recent', icon: FiberNewIcon, color: 'warning' as const },
+]
 
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
@@ -483,39 +529,12 @@ const getTextFieldStyles = (isMobile: boolean) => ({
   },
 })
 
-// Select styles for dark theme
-const getSelectStyles = (isMobile: boolean) => ({
-  width: isMobile ? '100%' : 200,
-  '& .MuiFilledInput-root': {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: '8px',
-    border: '1px solid rgba(255, 255, 255, 0.08)',
-    '&:hover': {
-      backgroundColor: 'rgba(255, 255, 255, 0.07)',
-    },
-    '&.Mui-focused': {
-      backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    },
-    '&:before, &:after': {
-      display: 'none',
-    },
-  },
-  '& .MuiSelect-select': {
-    color: '#ffffff',
-    fontFamily: '"IBM Plex Sans", sans-serif',
-  },
-  '& .MuiSelect-icon': {
-    color: 'rgba(255, 255, 255, 0.5)',
-  },
-})
-
 export const Browse = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const [data, setData] = useState<Tle[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [parameters, setParameters] = useState<Record<string, string | number>>({ extra: 1 })
-  const [orbitValue, setOrbitValue] = useState('-')
   const [activeTagFilters, setActiveTagFilters] = useState<Set<string>>(new Set())
   const [open, setOpen] = useState(false)
   const [current, setCurrent] = useState<Tle | null>(null)
@@ -621,28 +640,6 @@ export const Browse = () => {
     }
   }
 
-  const handleInclinationFilter = (event: SelectChangeEvent) => {
-    const value = event.target.value
-
-    setParameters((prev) => {
-      const newParams = { ...prev }
-
-      if (value === RETROGRADE) {
-        newParams['inclination[gt]'] = 90
-        delete newParams['inclination[lt]']
-      } else if (value === POSIGRADE) {
-        newParams['inclination[lt]'] = 90
-        delete newParams['inclination[gt]']
-      } else {
-        delete newParams['inclination[lt]']
-        delete newParams['inclination[gt]']
-      }
-
-      return newParams
-    })
-
-    setOrbitValue(value)
-  }
 
   const handleTagClick = (tagKey: string) => {
     setActiveTagFilters((prev) => {
@@ -701,20 +698,44 @@ export const Browse = () => {
             },
           }}
         />
-
-        <Select
-          variant="filled"
-          onChange={handleInclinationFilter}
-          value={orbitValue}
-          sx={getSelectStyles(isMobile)}
-        >
-          <MenuItem value={'-'}>All orbits</MenuItem>
-          <MenuItem value={RETROGRADE}>Retrograde</MenuItem>
-          <MenuItem value={POSIGRADE}>Posigrade</MenuItem>
-        </Select>
       </Toolbar>
 
-      <div style={{ height: isMobile ? 'calc(100vh - 250px)' : 'calc(100vh - 200px)', minHeight: 400 }}>
+      <FilterSection>
+        <FilterSectionTitle>Filters</FilterSectionTitle>
+        <FilterPillsContainer>
+          {ORBIT_FILTERS.map((filter) => {
+            const IconComponent = filter.icon
+            const isActive = activeTagFilters.has(filter.key)
+            return (
+              <Chip
+                key={filter.key}
+                icon={<IconComponent style={{ fontSize: '1rem' }} />}
+                label={filter.label}
+                size="small"
+                color={filter.color}
+                variant={isActive ? 'filled' : 'outlined'}
+                onClick={() => handleTagClick(filter.key)}
+                sx={{
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontFamily: '"IBM Plex Sans", sans-serif',
+                  fontSize: isMobile ? '0.75rem' : '0.8rem',
+                  '&:hover': {
+                    transform: 'scale(1.05)',
+                    boxShadow: '0 2px 8px rgba(74, 165, 100, 0.3)',
+                  },
+                  ...(isActive && {
+                    fontWeight: 'bold',
+                    boxShadow: '0 0 0 2px rgba(74, 165, 100, 0.2)',
+                  }),
+                }}
+              />
+            )
+          })}
+        </FilterPillsContainer>
+      </FilterSection>
+
+      <div style={{ height: isMobile ? 'calc(100vh - 300px)' : 'calc(100vh - 280px)', minHeight: 400 }}>
         <DataGrid
           rows={data}
           loading={loading}
