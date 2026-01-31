@@ -1556,16 +1556,16 @@
         },
         {
             "name": "ivanstan/tle-php",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ivanstan/tle-php.git",
-                "reference": "3cd77f58c2c9c4ffc31a7c243369c0f4866af4e6"
+                "reference": "50caf0577e5ed5404aaf74a14450d81915e709b7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ivanstan/tle-php/zipball/3cd77f58c2c9c4ffc31a7c243369c0f4866af4e6",
-                "reference": "3cd77f58c2c9c4ffc31a7c243369c0f4866af4e6",
+                "url": "https://api.github.com/repos/ivanstan/tle-php/zipball/50caf0577e5ed5404aaf74a14450d81915e709b7",
+                "reference": "50caf0577e5ed5404aaf74a14450d81915e709b7",
                 "shasum": ""
             },
             "require": {
@@ -1595,9 +1595,9 @@
             "description": "TLE Framework written in PHP and client to NASA TLE API.",
             "support": {
                 "issues": "https://github.com/ivanstan/tle-php/issues",
-                "source": "https://github.com/ivanstan/tle-php/tree/2.0.0"
+                "source": "https://github.com/ivanstan/tle-php/tree/2.1.0"
             },
-            "time": "2026-01-02T17:41:26+00:00"
+            "time": "2026-01-31T16:38:05+00:00"
         },
         {
             "name": "jean85/pretty-package-versions",
