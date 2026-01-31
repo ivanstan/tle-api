@@ -6,6 +6,7 @@ namespace Deployer;
 
 require 'recipe/symfony.php';
 
+set('keep_releases', 3);
 set('repository', 'https://github.com/ivanstan/tle-api');
 set('bin_dir', 'bin');
 set('http_user', 'glutenfr');
