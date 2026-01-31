@@ -554,8 +554,6 @@ export const Browse = () => {
       if (value === '1' && (
         key.endsWith('Orbit') || 
         key.endsWith('Drag') || 
-        key === 'classifiedSatellite' || 
-        key === 'unclassifiedSatellite' || 
         key === 'recentTle'
       )) {
         filters.add(key)
