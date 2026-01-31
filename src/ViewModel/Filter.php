@@ -8,6 +8,7 @@ class Filter
 {
     public const FILTER_TYPE_FLOAT = 'float';
     public const FILTER_TYPE_ARRAY = 'array';
+    public const FILTER_TYPE_BOOLEAN = 'boolean';
 
     public const OPERATOR_EQUAL = '=';
     public const OPERATOR_GREATER_THEN = '>';
@@ -53,14 +54,14 @@ class Filter
             return $operators[$this->operator];
         }
 
-        if (self::FILTER_TYPE_ARRAY === $this->type) {
+        if (self::FILTER_TYPE_ARRAY === $this->type || self::FILTER_TYPE_BOOLEAN === $this->type) {
             return self::OPERATOR_EQUAL;
         }
 
         return '';
     }
 
-    protected function validateValue(mixed $value): array|null|float
+    protected function validateValue(mixed $value): array|null|float|bool
     {
         if (self::FILTER_TYPE_FLOAT === $this->type) {
             $value = (float) $value;
@@ -78,6 +79,18 @@ class Filter
             }
 
             return $value;
+        }
+
+        if (self::FILTER_TYPE_BOOLEAN === $this->type) {
+            // Convert string values to boolean
+            if ($value === '1' || $value === 1 || $value === true || $value === 'true') {
+                return true;
+            }
+            if ($value === '0' || $value === 0 || $value === false || $value === 'false') {
+                return false;
+            }
+            
+            throw new \InvalidArgumentException(\sprintf('Filter %s value should be boolean (0, 1, true, false)', $this->filter));
         }
 
         return null;

@@ -55,6 +55,14 @@ class TleRepository extends EntityRepository
                 continue;
             }
 
+            if (Filter::FILTER_TYPE_BOOLEAN === $filter->type) {
+                $placeholder = \sprintf('filter_%s_%d', $filter->filter, $index);
+                $builder->andWhere(\sprintf('info.%s = :%s', $filter->filter, $placeholder));
+                $builder->setParameter($placeholder, $filter->value);
+
+                continue;
+            }
+
             $placeholder = \sprintf('filter_%s_%d', $filter->filter, $index);
             $builder->andWhere(\sprintf('info.%s %s :%s', $filter->filter, $filter->sqlOperator, $placeholder));
             $builder->setParameter($placeholder, $filter->value);
