@@ -3,12 +3,7 @@
   "info": {
     "title": "TLE API",
     "version": "2.0.0",
-    "description": "Public API for querying Two-Line Element (TLE) sets by satellite ID or via a searchable collection endpoint.",
-    "contact": {
-      "name": "Ivan Stanojevic",
-      "email": "istanojevic@itekako.com",
-      "url": "https://tle.ivanstanojevic.me"
-    }
+    "description": "Public API for querying Two-Line Element (TLE) sets by satellite ID or via a searchable collection endpoint."
   },
   "servers": [
     {
