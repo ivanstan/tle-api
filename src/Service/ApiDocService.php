@@ -29,6 +29,7 @@ class ApiDocService
         $data = $this->build($file);
 
         $result->set($data);
+        $this->cache->save($result);
 
         return $data;
     }
