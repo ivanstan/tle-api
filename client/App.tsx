@@ -1,6 +1,7 @@
 import { HashRouter as Router, Route, Routes } from 'react-router-dom'
 import Home from './pages/Home'
 import { Docs } from './pages/Docs'
+import { Privacy } from './pages/Privacy'
 import Navigation from './components/Navigation'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Health } from './pages/Health'
@@ -100,6 +101,7 @@ function App() {
               <Route path="/operation/collection" element={<Docs />} />
               <Route path="/health" element={<Health />} />
               <Route path="/browse" element={<Browse />} />
+              <Route path="/privacy" element={<Privacy />} />
             </Routes>
           </Router>
         </LocalizationProvider>
