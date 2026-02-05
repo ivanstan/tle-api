@@ -132,6 +132,9 @@ const Navigation = () => {
       <NavButton href={'#health'}>
         Health
       </NavButton>
+      <NavButton href={'#privacy'}>
+        Privacy
+      </NavButton>
     </>
   )
 

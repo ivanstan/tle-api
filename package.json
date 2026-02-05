@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",
-    "luxon": "^3.5.0",
     "@emotion/styled": "^11.13.5",
     "@mui/icons-material": "^6.3.0",
     "@mui/material": "^6.3.0",
@@ -25,6 +24,7 @@
     "@sentry/react": "^8.47.0",
     "chart.js": "^4.4.7",
     "date-fns": "^2.30.0",
+    "luxon": "^3.5.0",
     "mobx": "^6.13.5",
     "mobx-utils": "^6.0.8",
     "react": "^18.3.1",
@@ -32,8 +32,10 @@
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^18.3.1",
     "react-if": "^4.1.5",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.1.1",
     "redoc": "^2.2.0",
+    "remark-gfm": "^4.0.1",
     "satellite.js": "^5.0.0",
     "styled-components": "^6.1.14",
     "tle-client": "ivanstan/tle.js"
