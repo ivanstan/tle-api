@@ -297,6 +297,43 @@ const SatelliteName = styled.span`
   text-overflow: ellipsis;
 `
 
+const RibbonWrapper = styled.div`
+  position: fixed;
+  top: 64px;
+  right: 0;
+  width: 160px;
+  height: 160px;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1000;
+`
+
+const RibbonLink = styled.a`
+  pointer-events: all;
+  position: absolute;
+  top: 22px;
+  right: -44px;
+  width: 176px;
+  padding: 9px 0;
+  background: linear-gradient(135deg, #4aa564 0%, #35864d 100%);
+  color: #ffffff;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 12px rgba(74, 165, 100, 0.5);
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background: linear-gradient(135deg, #5bbf76 0%, #4aa564 100%);
+    box-shadow: 0 4px 20px rgba(74, 165, 100, 0.7);
+  }
+`
+
 const DataSection = styled.div`
   position: relative;
   z-index: 1;
@@ -398,6 +435,9 @@ const Home = () => {
 
   return (
     <PageWrapper>
+      <RibbonWrapper>
+        <RibbonLink href="#/mcp">Try our MCP server</RibbonLink>
+      </RibbonWrapper>
       <StarField>
         {stars.map((star) => (
           <Star

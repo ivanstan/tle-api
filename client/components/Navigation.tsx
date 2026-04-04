@@ -135,6 +135,9 @@ const Navigation = () => {
       <NavButton href={'#privacy'}>
         Privacy
       </NavButton>
+      <NavButton href={'#/mcp'}>
+        MCP
+      </NavButton>
     </>
   )
 
