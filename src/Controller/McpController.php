@@ -162,7 +162,7 @@ final class McpController extends AbstractApiController
         return [
             'protocolVersion' => '2025-11-25',
             'capabilities' => [
-                'tools' => [],
+                'tools' => (object)[],
             ],
             'serverInfo' => [
                 'name' => 'tle-satellite-server',
