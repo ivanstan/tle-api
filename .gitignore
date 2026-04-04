@@ -2,6 +2,10 @@
 
 .idea
 
+# MCP registry tokens
+.mcpregistry_github_token
+.mcpregistry_registry_token
+
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
