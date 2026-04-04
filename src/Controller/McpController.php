@@ -7,6 +7,7 @@ use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/mcp')]
@@ -17,60 +18,143 @@ final class McpController extends AbstractApiController
     ) {
     }
 
-    #[Route('/', name: 'mcp_protocol', methods: ['GET', 'POST', 'OPTIONS'])]
-    public function handleMcpProtocol(Request $request): Response
+    /**
+     * SSE endpoint: mcp-remote connects here via GET and receives a stream.
+     * Server sends an "endpoint" event with the URL for the client to POST messages to.
+     */
+    #[Route('', name: 'mcp_sse', methods: ['GET'])]
+    public function sse(Request $request): StreamedResponse
     {
-        // Handle OPTIONS for CORS
+        $sessionId = bin2hex(random_bytes(16));
+        $endpointUrl = $request->getSchemeAndHttpHost() . '/mcp/message?sessionId=' . $sessionId;
+
+        $response = new StreamedResponse(function () use ($sessionId, $endpointUrl) {
+            // Clear any existing output buffers
+            while (ob_get_level() > 0) {
+                ob_end_flush();
+            }
+
+            @ini_set('max_execution_time', 0);
+            @set_time_limit(0);
+
+            // Send the endpoint event so mcp-remote knows where to POST
+            echo "event: endpoint\n";
+            echo "data: {$endpointUrl}\n\n";
+            flush();
+
+            $responseFile = sys_get_temp_dir() . '/mcp_' . $sessionId;
+            $lastHeartbeat = time();
+
+            while (!connection_aborted()) {
+                // Check if a response has been written by the message handler
+                if (file_exists($responseFile)) {
+                    $data = file_get_contents($responseFile);
+                    @unlink($responseFile);
+
+                    echo "event: message\n";
+                    echo "data: {$data}\n\n";
+                    flush();
+                }
+
+                // Heartbeat every 15 seconds to keep connection alive
+                if (time() - $lastHeartbeat >= 15) {
+                    echo ": ping\n\n";
+                    flush();
+                    $lastHeartbeat = time();
+                }
+
+                usleep(100_000); // poll every 100ms
+            }
+
+            // Cleanup session file if client disconnected
+            if (file_exists($responseFile)) {
+                @unlink($responseFile);
+            }
+        });
+
+        $response->headers->set('Content-Type', 'text/event-stream');
+        $response->headers->set('Cache-Control', 'no-cache');
+        $response->headers->set('Connection', 'keep-alive');
+        $response->headers->set('X-Accel-Buffering', 'no'); // disable nginx buffering
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+
+        return $response;
+    }
+
+    /**
+     * Message endpoint: mcp-remote POSTs JSON-RPC messages here.
+     * Response is written to a temp file which the SSE stream picks up.
+     */
+    #[Route('/message', name: 'mcp_message', methods: ['POST', 'OPTIONS'])]
+    public function message(Request $request): Response
+    {
         if ($request->getMethod() === 'OPTIONS') {
             return new Response('', Response::HTTP_OK, [
                 'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers' => 'Content-Type'
+                'Access-Control-Allow-Methods' => 'POST, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type',
             ]);
         }
 
-        // Handle GET - return server info for discovery
-        if ($request->getMethod() === 'GET') {
-            $response = new JsonResponse([
-                'name' => 'tle-satellite-server',
-                'version' => '1.0.0',
-                'protocolVersion' => '2024-11-05',
-            ]);
-            $response->headers->set('Access-Control-Allow-Origin', '*');
-            return $response;
-        }
-
-        // Parse JSON-RPC request
+        $sessionId = $request->query->get('sessionId');
         $jsonRpc = json_decode($request->getContent(), true);
-        
+
         if (!$jsonRpc || !isset($jsonRpc['method'])) {
             return new JsonResponse([
                 'jsonrpc' => '2.0',
                 'error' => ['code' => -32600, 'message' => 'Invalid Request'],
-                'id' => $jsonRpc['id'] ?? null
-            ]);
+                'id' => null,
+            ], Response::HTTP_BAD_REQUEST);
         }
 
         $method = $jsonRpc['method'];
         $params = $jsonRpc['params'] ?? [];
         $id = $jsonRpc['id'] ?? null;
 
-        // Handle MCP protocol methods
-        $result = match($method) {
+        // Notifications don't need a response
+        if (str_starts_with($method, 'notifications/')) {
+            return new Response('', Response::HTTP_ACCEPTED, [
+                'Access-Control-Allow-Origin' => '*',
+            ]);
+        }
+
+        $result = match ($method) {
             'initialize' => $this->handleInitialize($params),
             'tools/list' => $this->handleToolsList(),
             'tools/call' => $this->handleToolCall($params),
-            default => ['error' => ['code' => -32601, 'message' => 'Method not found']]
+            default => null
         };
 
-        $response = new JsonResponse([
-            'jsonrpc' => '2.0',
-            'result' => $result,
-            'id' => $id
-        ]);
+        if ($result === null) {
+            $payload = [
+                'jsonrpc' => '2.0',
+                'error' => ['code' => -32601, 'message' => 'Method not found'],
+                'id' => $id,
+            ];
+        } else {
+            $payload = [
+                'jsonrpc' => '2.0',
+                'result' => $result,
+                'id' => $id,
+            ];
+        }
 
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        // Write response to temp file for the SSE stream to pick up
+        if ($sessionId) {
+            file_put_contents(
+                sys_get_temp_dir() . '/mcp_' . $sessionId,
+                json_encode($payload)
+            );
+
+            return new Response('', Response::HTTP_ACCEPTED, [
+                'Access-Control-Allow-Origin' => '*',
+            ]);
+        }
+
+        // No session: return directly (fallback)
+        return new JsonResponse($payload, Response::HTTP_OK, [
+            'Access-Control-Allow-Origin' => '*',
+        ]);
     }
 
     private function handleInitialize(array $params): array
@@ -78,12 +162,12 @@ final class McpController extends AbstractApiController
         return [
             'protocolVersion' => '2024-11-05',
             'capabilities' => [
-                'tools' => []
+                'tools' => [],
             ],
             'serverInfo' => [
                 'name' => 'tle-satellite-server',
-                'version' => '1.0.0'
-            ]
+                'version' => '1.0.0',
+            ],
         ];
     }
 
@@ -99,47 +183,47 @@ final class McpController extends AbstractApiController
                         'properties' => [
                             'query' => [
                                 'type' => 'string',
-                                'description' => 'Search query to find satellites (e.g., "ISS", "Hubble", "Starlink")'
+                                'description' => 'Search query (e.g. "ISS", "Hubble", "Starlink")',
                             ],
                             'page' => [
                                 'type' => 'integer',
-                                'description' => 'Page number for pagination (default: 1)',
-                                'default' => 1
+                                'description' => 'Page number (default: 1)',
+                                'default' => 1,
                             ],
                             'page_size' => [
                                 'type' => 'integer',
-                                'description' => 'Number of results per page (default: 10, max: 100)',
-                                'default' => 10
+                                'description' => 'Results per page (default: 10, max: 100)',
+                                'default' => 10,
                             ],
                             'extra' => [
                                 'type' => 'boolean',
                                 'description' => 'Include extra orbital parameters (inclination, eccentricity, period, etc.)',
-                                'default' => false
-                            ]
+                                'default' => false,
+                            ],
                         ],
-                        'required' => ['query']
-                    ]
+                        'required' => ['query'],
+                    ],
                 ],
                 [
                     'name' => 'get_satellite',
-                    'description' => 'Get detailed information about a specific satellite by its NORAD catalog ID. Returns TLE data and optional orbital parameters.',
+                    'description' => 'Get detailed information about a specific satellite by its NORAD catalog ID.',
                     'inputSchema' => [
                         'type' => 'object',
                         'properties' => [
                             'satellite_id' => [
                                 'type' => 'integer',
-                                'description' => 'NORAD catalog ID of the satellite (e.g., 25544 for ISS)'
+                                'description' => 'NORAD catalog ID (e.g. 25544 for ISS)',
                             ],
                             'extra' => [
                                 'type' => 'boolean',
-                                'description' => 'Include extra orbital parameters (inclination, eccentricity, period, etc.)',
-                                'default' => false
-                            ]
+                                'description' => 'Include extra orbital parameters',
+                                'default' => false,
+                            ],
                         ],
-                        'required' => ['satellite_id']
-                    ]
-                ]
-            ]
+                        'required' => ['satellite_id'],
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -148,21 +232,22 @@ final class McpController extends AbstractApiController
         $name = $params['name'] ?? null;
         $arguments = $params['arguments'] ?? [];
 
-        if ($name === 'search_satellites') {
-            return $this->toolSearchSatellites($arguments);
-        } elseif ($name === 'get_satellite') {
-            return $this->toolGetSatellite($arguments);
-        }
-
-        return ['error' => 'Unknown tool'];
+        return match ($name) {
+            'search_satellites' => $this->toolSearchSatellites($arguments),
+            'get_satellite' => $this->toolGetSatellite($arguments),
+            default => [
+                'content' => [['type' => 'text', 'text' => "Unknown tool: {$name}"]],
+                'isError' => true,
+            ],
+        };
     }
 
     private function toolSearchSatellites(array $args): array
     {
         $query = $args['query'] ?? '';
-        $page = $args['page'] ?? 1;
-        $pageSize = min($args['page_size'] ?? 10, 100);
-        $extra = $args['extra'] ?? false;
+        $page = (int) ($args['page'] ?? 1);
+        $pageSize = min((int) ($args['page_size'] ?? 10), 100);
+        $extra = (bool) ($args['extra'] ?? false);
 
         $builder = $this->tleRepository->collection($query, 'popularity', 'desc', []);
         $builder->setFirstResult(($page - 1) * $pageSize);
@@ -172,12 +257,13 @@ final class McpController extends AbstractApiController
 
         $satellites = [];
         foreach ($results as $tle) {
+            $model = new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName());
             $satData = [
                 'satelliteId' => $tle->getId(),
                 'name' => $tle->getName(),
+                'date' => $model->epochDateTime()->format(\DateTimeInterface::ATOM),
                 'line1' => $tle->getLine1(),
                 'line2' => $tle->getLine2(),
-                'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
             ];
 
             if ($extra && $tle->getInfo()) {
@@ -194,34 +280,28 @@ final class McpController extends AbstractApiController
             $satellites[] = $satData;
         }
 
-        $data = [
-            'total' => count($results),
-            'page' => $page,
-            'page_size' => $pageSize,
-            'satellites' => $satellites
-        ];
-
         return [
-            'content' => [
-                [
-                    'type' => 'text',
-                    'text' => json_encode($data, JSON_PRETTY_PRINT)
-                ]
-            ]
+            'content' => [[
+                'type' => 'text',
+                'text' => json_encode([
+                    'total' => count($results),
+                    'page' => $page,
+                    'page_size' => $pageSize,
+                    'satellites' => $satellites,
+                ], JSON_PRETTY_PRINT),
+            ]],
         ];
     }
 
     private function toolGetSatellite(array $args): array
     {
         $satelliteId = $args['satellite_id'] ?? null;
-        $extra = $args['extra'] ?? false;
+        $extra = (bool) ($args['extra'] ?? false);
 
         if (!$satelliteId) {
             return [
-                'content' => [
-                    ['type' => 'text', 'text' => json_encode(['error' => 'satellite_id is required'])]
-                ],
-                'isError' => true
+                'content' => [['type' => 'text', 'text' => '{"error": "satellite_id is required"}']],
+                'isError' => true,
             ];
         }
 
@@ -229,19 +309,18 @@ final class McpController extends AbstractApiController
 
         if (!$tle) {
             return [
-                'content' => [
-                    ['type' => 'text', 'text' => json_encode(['error' => 'Satellite not found', 'satellite_id' => $satelliteId])]
-                ],
-                'isError' => true
+                'content' => [['type' => 'text', 'text' => json_encode(['error' => 'Satellite not found', 'satellite_id' => $satelliteId])]],
+                'isError' => true,
             ];
         }
 
+        $model = new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName());
         $satData = [
             'satelliteId' => $tle->getId(),
             'name' => $tle->getName(),
+            'date' => $model->epochDateTime()->format(\DateTimeInterface::ATOM),
             'line1' => $tle->getLine1(),
             'line2' => $tle->getLine2(),
-            'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
         ];
 
         if ($extra && $tle->getInfo()) {
@@ -256,144 +335,10 @@ final class McpController extends AbstractApiController
         }
 
         return [
-            'content' => [
-                [
-                    'type' => 'text',
-                    'text' => json_encode($satData, JSON_PRETTY_PRINT)
-                ]
-            ]
+            'content' => [[
+                'type' => 'text',
+                'text' => json_encode($satData, JSON_PRETTY_PRINT),
+            ]],
         ];
     }
-
-    // Keep these endpoints for direct REST API access (optional)
-    #[Route('/tools/search_satellites', name: 'mcp_search_satellites', methods: ['GET', 'POST', 'OPTIONS'])]
-    public function searchSatellites(Request $request): Response
-    {
-        // Handle OPTIONS for CORS
-        if ($request->getMethod() === 'OPTIONS') {
-            return new Response('', Response::HTTP_OK, [
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers' => 'Content-Type'
-            ]);
-        }
-
-        // Handle GET with query parameters
-        if ($request->getMethod() === 'GET') {
-            $data = [
-                'query' => $request->query->get('query', ''),
-                'page' => (int) $request->query->get('page', 1),
-                'page_size' => (int) $request->query->get('page_size', 10),
-                'extra' => $request->query->get('extra', 'false') === 'true'
-            ];
-        } else {
-            $data = json_decode($request->getContent(), true) ?? [];
-        }
-        $query = $data['query'] ?? '';
-        $page = $data['page'] ?? 1;
-        $pageSize = min($data['page_size'] ?? 10, 100);
-        $extra = $data['extra'] ?? false;
-
-        $builder = $this->tleRepository->collection($query, 'popularity', 'desc', []);
-        $builder->setFirstResult(($page - 1) * $pageSize);
-        $builder->setMaxResults($pageSize);
-
-        $results = $builder->getQuery()->getResult();
-
-        $satellites = [];
-        foreach ($results as $tle) {
-            $satData = [
-                'satelliteId' => $tle->getId(),
-                'name' => $tle->getName(),
-                'line1' => $tle->getLine1(),
-                'line2' => $tle->getLine2(),
-                'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
-            ];
-
-            if ($extra && $tle->getInfo()) {
-                $info = $tle->getInfo();
-                $satData['extra'] = [
-                    'inclination' => $info->inclination,
-                    'eccentricity' => $info->eccentricity,
-                    'semi_major_axis' => $info->semiMajorAxis,
-                    'period' => $info->period,
-                    'raan' => $info->raan,
-                ];
-            }
-
-            $satellites[] = $satData;
-        }
-
-        $response = $this->response([
-            'total' => count($results),
-            'page' => $page,
-            'page_size' => $pageSize,
-            'satellites' => $satellites
-        ]);
-
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-    }
-
-    #[Route('/tools/get_satellite', name: 'mcp_get_satellite', methods: ['GET', 'POST', 'OPTIONS'])]
-    public function getSatellite(Request $request): Response
-    {
-        // Handle OPTIONS for CORS
-        if ($request->getMethod() === 'OPTIONS') {
-            return new Response('', Response::HTTP_OK, [
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
-                'Access-Control-Allow-Headers' => 'Content-Type'
-            ]);
-        }
-
-        // Handle GET with query parameters
-        if ($request->getMethod() === 'GET') {
-            $data = [
-                'satellite_id' => (int) $request->query->get('satellite_id'),
-                'extra' => $request->query->get('extra', 'false') === 'true'
-            ];
-        } else {
-            $data = json_decode($request->getContent(), true) ?? [];
-        }
-        $satelliteId = $data['satellite_id'] ?? null;
-        $extra = $data['extra'] ?? false;
-
-        if (!$satelliteId) {
-            return new JsonResponse(['error' => 'satellite_id is required'], Response::HTTP_BAD_REQUEST);
-        }
-
-        $tle = $this->tleRepository->find($satelliteId);
-
-        if (!$tle) {
-            return new JsonResponse([
-                'error' => 'Satellite not found',
-                'satellite_id' => $satelliteId
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $satData = [
-            'satelliteId' => $tle->getId(),
-            'name' => $tle->getName(),
-            'line1' => $tle->getLine1(),
-            'line2' => $tle->getLine2(),
-            'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
-        ];
-
-        if ($extra && $tle->getInfo()) {
-            $info = $tle->getInfo();
-            $satData['extra'] = [
-                'inclination' => $info->inclination,
-                'eccentricity' => $info->eccentricity,
-                'semi_major_axis' => $info->semiMajorAxis,
-                'period' => $info->period,
-                'raan' => $info->raan,
-            ];
-        }
-
-        $response = $this->response($satData);
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
-    }
-
 }
