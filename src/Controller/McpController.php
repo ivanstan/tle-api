@@ -16,35 +16,112 @@ final class McpController extends AbstractApiController
     ) {
     }
 
-    #[Route('/', name: 'mcp_info', methods: ['GET'])]
-    public function info(): Response
+    #[Route('/', name: 'mcp_info', methods: ['GET', 'POST', 'OPTIONS'])]
+    public function info(Request $request): Response
     {
-        return $this->response([
+        // Handle OPTIONS for CORS
+        if ($request->getMethod() === 'OPTIONS') {
+            return new Response('', Response::HTTP_OK, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type'
+            ]);
+        }
+
+        // MCP protocol response
+        $response = $this->response([
             'name' => 'tle-satellite-server',
             'version' => '1.0.0',
             'description' => 'MCP server providing satellite orbital data and TLE information',
-            'protocol_version' => '2025-03-26',
-            'base_url' => 'https://tle.ivanstanojevic.me/mcp',
+            'protocolVersion' => '2024-11-05',
+            'capabilities' => [
+                'tools' => [
+                    'listChanged' => false
+                ]
+            ],
+            'serverInfo' => [
+                'name' => 'tle-satellite-server',
+                'version' => '1.0.0'
+            ],
             'tools' => [
                 [
                     'name' => 'search_satellites',
-                    'description' => 'Search for satellites by name',
-                    'endpoint' => '/mcp/tools/search_satellites'
+                    'description' => 'Search for satellites by name. Returns a list of satellites matching the search query with their TLE data.',
+                    'inputSchema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'query' => [
+                                'type' => 'string',
+                                'description' => 'Search query to find satellites (e.g., "ISS", "Hubble", "Starlink")'
+                            ],
+                            'page' => [
+                                'type' => 'integer',
+                                'description' => 'Page number for pagination (default: 1)',
+                                'default' => 1
+                            ],
+                            'page_size' => [
+                                'type' => 'integer',
+                                'description' => 'Number of results per page (default: 10, max: 100)',
+                                'default' => 10
+                            ],
+                            'extra' => [
+                                'type' => 'boolean',
+                                'description' => 'Include extra orbital parameters (inclination, eccentricity, period, etc.)',
+                                'default' => false
+                            ]
+                        ],
+                        'required' => ['query']
+                    ]
                 ],
                 [
                     'name' => 'get_satellite',
-                    'description' => 'Get satellite by NORAD ID',
-                    'endpoint' => '/mcp/tools/get_satellite'
+                    'description' => 'Get detailed information about a specific satellite by its NORAD catalog ID. Returns TLE data and optional orbital parameters.',
+                    'inputSchema' => [
+                        'type' => 'object',
+                        'properties' => [
+                            'satellite_id' => [
+                                'type' => 'integer',
+                                'description' => 'NORAD catalog ID of the satellite (e.g., 25544 for ISS)'
+                            ],
+                            'extra' => [
+                                'type' => 'boolean',
+                                'description' => 'Include extra orbital parameters (inclination, eccentricity, period, etc.)',
+                                'default' => false
+                            ]
+                        ],
+                        'required' => ['satellite_id']
+                    ]
                 ]
             ]
         ]);
+
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
     }
 
-    #[Route('/tools/search_satellites', name: 'mcp_search_satellites', methods: ['POST'])]
+    #[Route('/tools/search_satellites', name: 'mcp_search_satellites', methods: ['GET', 'POST', 'OPTIONS'])]
     public function searchSatellites(Request $request): Response
     {
-        $data = json_decode($request->getContent(), true) ?? [];
-        
+        // Handle OPTIONS for CORS
+        if ($request->getMethod() === 'OPTIONS') {
+            return new Response('', Response::HTTP_OK, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type'
+            ]);
+        }
+
+        // Handle GET with query parameters
+        if ($request->getMethod() === 'GET') {
+            $data = [
+                'query' => $request->query->get('query', ''),
+                'page' => (int) $request->query->get('page', 1),
+                'page_size' => (int) $request->query->get('page_size', 10),
+                'extra' => $request->query->get('extra', 'false') === 'true'
+            ];
+        } else {
+            $data = json_decode($request->getContent(), true) ?? [];
+        }
         $query = $data['query'] ?? '';
         $page = $data['page'] ?? 1;
         $pageSize = min($data['page_size'] ?? 10, 100);
@@ -80,18 +157,38 @@ final class McpController extends AbstractApiController
             $satellites[] = $satData;
         }
 
-        return $this->response([
+        $response = $this->response([
             'total' => count($results),
             'page' => $page,
             'page_size' => $pageSize,
             'satellites' => $satellites
         ]);
+
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
     }
 
-    #[Route('/tools/get_satellite', name: 'mcp_get_satellite', methods: ['POST'])]
+    #[Route('/tools/get_satellite', name: 'mcp_get_satellite', methods: ['GET', 'POST', 'OPTIONS'])]
     public function getSatellite(Request $request): Response
     {
-        $data = json_decode($request->getContent(), true) ?? [];
+        // Handle OPTIONS for CORS
+        if ($request->getMethod() === 'OPTIONS') {
+            return new Response('', Response::HTTP_OK, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Headers' => 'Content-Type'
+            ]);
+        }
+
+        // Handle GET with query parameters
+        if ($request->getMethod() === 'GET') {
+            $data = [
+                'satellite_id' => (int) $request->query->get('satellite_id'),
+                'extra' => $request->query->get('extra', 'false') === 'true'
+            ];
+        } else {
+            $data = json_decode($request->getContent(), true) ?? [];
+        }
         $satelliteId = $data['satellite_id'] ?? null;
         $extra = $data['extra'] ?? false;
 
@@ -127,7 +224,9 @@ final class McpController extends AbstractApiController
             ];
         }
 
-        return $this->response($satData);
+        $response = $this->response($satData);
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
     }
 
 }
