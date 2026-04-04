@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\TleRepository;
+use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,16 +17,27 @@ final class McpController extends AbstractApiController
     ) {
     }
 
-    #[Route('/', name: 'mcp_protocol', methods: ['POST', 'OPTIONS'])]
+    #[Route('/', name: 'mcp_protocol', methods: ['GET', 'POST', 'OPTIONS'])]
     public function handleMcpProtocol(Request $request): Response
     {
         // Handle OPTIONS for CORS
         if ($request->getMethod() === 'OPTIONS') {
             return new Response('', Response::HTTP_OK, [
                 'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Methods' => 'POST, OPTIONS',
+                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
                 'Access-Control-Allow-Headers' => 'Content-Type'
             ]);
+        }
+
+        // Handle GET - return server info for discovery
+        if ($request->getMethod() === 'GET') {
+            $response = new JsonResponse([
+                'name' => 'tle-satellite-server',
+                'version' => '1.0.0',
+                'protocolVersion' => '2024-11-05',
+            ]);
+            $response->headers->set('Access-Control-Allow-Origin', '*');
+            return $response;
         }
 
         // Parse JSON-RPC request
@@ -165,7 +177,7 @@ final class McpController extends AbstractApiController
                 'name' => $tle->getName(),
                 'line1' => $tle->getLine1(),
                 'line2' => $tle->getLine2(),
-                'date' => $tle->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+                'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
             ];
 
             if ($extra && $tle->getInfo()) {
@@ -229,7 +241,7 @@ final class McpController extends AbstractApiController
             'name' => $tle->getName(),
             'line1' => $tle->getLine1(),
             'line2' => $tle->getLine2(),
-            'date' => $tle->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+            'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
         ];
 
         if ($extra && $tle->getInfo()) {
@@ -295,7 +307,7 @@ final class McpController extends AbstractApiController
                 'name' => $tle->getName(),
                 'line1' => $tle->getLine1(),
                 'line2' => $tle->getLine2(),
-                'date' => $tle->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+                'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
             ];
 
             if ($extra && $tle->getInfo()) {
@@ -365,7 +377,7 @@ final class McpController extends AbstractApiController
             'name' => $tle->getName(),
             'line1' => $tle->getLine1(),
             'line2' => $tle->getLine2(),
-            'date' => $tle->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+            'date' => (new TleModel($tle->getLine1(), $tle->getLine2(), $tle->getName()))->epochDateTime()->format(\DateTimeInterface::ATOM),
         ];
 
         if ($extra && $tle->getInfo()) {
