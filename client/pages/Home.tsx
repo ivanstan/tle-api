@@ -298,11 +298,11 @@ const SatelliteName = styled.span`
 `
 
 const RibbonWrapper = styled.div`
-  position: fixed;
-  top: 64px;
+  position: absolute;
+  top: 0;
   right: 0;
-  width: 160px;
-  height: 160px;
+  width: 220px;
+  height: 220px;
   overflow: hidden;
   pointer-events: none;
   z-index: 1000;
@@ -311,16 +311,16 @@ const RibbonWrapper = styled.div`
 const RibbonLink = styled.a`
   pointer-events: all;
   position: absolute;
-  top: 22px;
-  right: -44px;
-  width: 176px;
-  padding: 9px 0;
+  top: 42px;
+  right: -52px;
+  width: 230px;
+  padding: 10px 0;
   background: linear-gradient(135deg, #4aa564 0%, #35864d 100%);
   color: #ffffff;
   font-family: 'JetBrains Mono', monospace;
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
   text-align: center;
   text-decoration: none;
   text-transform: uppercase;
@@ -328,9 +328,14 @@ const RibbonLink = styled.a`
   box-shadow: 0 2px 12px rgba(74, 165, 100, 0.5);
   transition: background 0.2s ease, box-shadow 0.2s ease;
 
+  &:visited {
+    color: #ffffff;
+  }
+
   &:hover {
     background: linear-gradient(135deg, #5bbf76 0%, #4aa564 100%);
     box-shadow: 0 4px 20px rgba(74, 165, 100, 0.7);
+    color: #ffffff;
   }
 `
 

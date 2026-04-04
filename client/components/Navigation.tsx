@@ -39,8 +39,8 @@ const NavButton = styled(Button)`
     width: 100%;
 
     &:hover {
-      color: #ffffff;
-      background: rgba(255, 255, 255, 0.05);
+      color: #4aa564;
+      background: rgba(74, 165, 100, 0.08);
     }
 
     @media (min-width: 768px) {
