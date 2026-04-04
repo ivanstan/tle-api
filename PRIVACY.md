@@ -68,37 +68,52 @@ Information may only be disclosed:
 
 Any shared information will be limited to what is strictly necessary.
 
-## 6. Third-Party Services
+## 6. Model Context Protocol (MCP) Integration
+
+This Service provides a Model Context Protocol (MCP) server that enables AI assistants like Claude and Cursor to access satellite data on your behalf.
+
+When using the MCP integration:
+
+- The AI assistant sends requests to our server based on your prompts
+- No conversation data is stored by our server
+- Only the requested satellite data is returned
+- The same privacy practices apply as with direct API access
+
+Your interactions with AI assistants are governed by their respective privacy policies (e.g., Anthropic's Privacy Policy for Claude).
+
+## 7. Third-Party Services
 
 The Service may be hosted using third-party infrastructure providers (such as cloud hosting platforms). These providers may process technical request data as part of normal server operation.
 
 We do not share personal data with third parties for marketing or analytics.
 
-## 7. Security
+## 8. Security
 
 We take reasonable technical measures to protect the Service against unauthorized access, misuse, or disruption. However, no internet transmission or storage system can be guaranteed 100% secure.
 
-## 8. Children's Privacy
+## 9. Children's Privacy
 
 This Service is intended for general technical and scientific use. We do not knowingly collect personal information from children.
 
-## 9. Your Rights
+## 10. Your Rights
 
 Because we do not maintain user accounts or personal profiles, we generally cannot identify individual users in our logs.
 
 If you believe your personal data has been processed inappropriately, you may contact us and we will review the request in accordance with applicable laws.
 
-## 10. Changes to This Policy
+## 11. Changes to This Policy
 
 We may update this Privacy Policy from time to time. Updates will be reflected by changing the "Last updated" date at the top of this document.
 
 Continued use of the Service after changes constitutes acceptance of the revised policy.
 
-## 11. Contact
+## 12. Contact
 
 If you have questions about this Privacy Policy or the Service, you may contact:
 
-**Ivan Stanojevic**  
-Email: istanojevic@itekako.com  
-Website: https://tle.ivanstanojevic.me
+**Ivan Stanojević**  
+Email: ivanstan@gmail.com  
+GitHub: https://github.com/ivanstan  
+Website: https://tle.ivanstanojevic.me  
+MCP Server: https://registry.modelcontextprotocol.io/v0.1/servers?search=tle-satellite
 
