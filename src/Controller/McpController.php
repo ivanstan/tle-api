@@ -16,33 +16,68 @@ final class McpController extends AbstractApiController
     ) {
     }
 
-    #[Route('/', name: 'mcp_info', methods: ['GET', 'POST', 'OPTIONS'])]
-    public function info(Request $request): Response
+    #[Route('/', name: 'mcp_protocol', methods: ['POST', 'OPTIONS'])]
+    public function handleMcpProtocol(Request $request): Response
     {
         // Handle OPTIONS for CORS
         if ($request->getMethod() === 'OPTIONS') {
             return new Response('', Response::HTTP_OK, [
                 'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, OPTIONS',
+                'Access-Control-Allow-Methods' => 'POST, OPTIONS',
                 'Access-Control-Allow-Headers' => 'Content-Type'
             ]);
         }
 
-        // MCP protocol response
-        $response = $this->response([
-            'name' => 'tle-satellite-server',
-            'version' => '1.0.0',
-            'description' => 'MCP server providing satellite orbital data and TLE information',
+        // Parse JSON-RPC request
+        $jsonRpc = json_decode($request->getContent(), true);
+        
+        if (!$jsonRpc || !isset($jsonRpc['method'])) {
+            return new JsonResponse([
+                'jsonrpc' => '2.0',
+                'error' => ['code' => -32600, 'message' => 'Invalid Request'],
+                'id' => $jsonRpc['id'] ?? null
+            ]);
+        }
+
+        $method = $jsonRpc['method'];
+        $params = $jsonRpc['params'] ?? [];
+        $id = $jsonRpc['id'] ?? null;
+
+        // Handle MCP protocol methods
+        $result = match($method) {
+            'initialize' => $this->handleInitialize($params),
+            'tools/list' => $this->handleToolsList(),
+            'tools/call' => $this->handleToolCall($params),
+            default => ['error' => ['code' => -32601, 'message' => 'Method not found']]
+        };
+
+        $response = new JsonResponse([
+            'jsonrpc' => '2.0',
+            'result' => $result,
+            'id' => $id
+        ]);
+
+        $response->headers->set('Access-Control-Allow-Origin', '*');
+        return $response;
+    }
+
+    private function handleInitialize(array $params): array
+    {
+        return [
             'protocolVersion' => '2024-11-05',
             'capabilities' => [
-                'tools' => [
-                    'listChanged' => false
-                ]
+                'tools' => []
             ],
             'serverInfo' => [
                 'name' => 'tle-satellite-server',
                 'version' => '1.0.0'
-            ],
+            ]
+        ];
+    }
+
+    private function handleToolsList(): array
+    {
+        return [
             'tools' => [
                 [
                     'name' => 'search_satellites',
@@ -93,12 +128,132 @@ final class McpController extends AbstractApiController
                     ]
                 ]
             ]
-        ]);
-
-        $response->headers->set('Access-Control-Allow-Origin', '*');
-        return $response;
+        ];
     }
 
+    private function handleToolCall(array $params): array
+    {
+        $name = $params['name'] ?? null;
+        $arguments = $params['arguments'] ?? [];
+
+        if ($name === 'search_satellites') {
+            return $this->toolSearchSatellites($arguments);
+        } elseif ($name === 'get_satellite') {
+            return $this->toolGetSatellite($arguments);
+        }
+
+        return ['error' => 'Unknown tool'];
+    }
+
+    private function toolSearchSatellites(array $args): array
+    {
+        $query = $args['query'] ?? '';
+        $page = $args['page'] ?? 1;
+        $pageSize = min($args['page_size'] ?? 10, 100);
+        $extra = $args['extra'] ?? false;
+
+        $builder = $this->tleRepository->collection($query, 'popularity', 'desc', []);
+        $builder->setFirstResult(($page - 1) * $pageSize);
+        $builder->setMaxResults($pageSize);
+
+        $results = $builder->getQuery()->getResult();
+
+        $satellites = [];
+        foreach ($results as $tle) {
+            $satData = [
+                'satelliteId' => $tle->getId(),
+                'name' => $tle->getName(),
+                'line1' => $tle->getLine1(),
+                'line2' => $tle->getLine2(),
+                'date' => $tle->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+            ];
+
+            if ($extra && $tle->getInfo()) {
+                $info = $tle->getInfo();
+                $satData['extra'] = [
+                    'inclination' => $info->inclination,
+                    'eccentricity' => $info->eccentricity,
+                    'semi_major_axis' => $info->semiMajorAxis,
+                    'period' => $info->period,
+                    'raan' => $info->raan,
+                ];
+            }
+
+            $satellites[] = $satData;
+        }
+
+        $data = [
+            'total' => count($results),
+            'page' => $page,
+            'page_size' => $pageSize,
+            'satellites' => $satellites
+        ];
+
+        return [
+            'content' => [
+                [
+                    'type' => 'text',
+                    'text' => json_encode($data, JSON_PRETTY_PRINT)
+                ]
+            ]
+        ];
+    }
+
+    private function toolGetSatellite(array $args): array
+    {
+        $satelliteId = $args['satellite_id'] ?? null;
+        $extra = $args['extra'] ?? false;
+
+        if (!$satelliteId) {
+            return [
+                'content' => [
+                    ['type' => 'text', 'text' => json_encode(['error' => 'satellite_id is required'])]
+                ],
+                'isError' => true
+            ];
+        }
+
+        $tle = $this->tleRepository->find($satelliteId);
+
+        if (!$tle) {
+            return [
+                'content' => [
+                    ['type' => 'text', 'text' => json_encode(['error' => 'Satellite not found', 'satellite_id' => $satelliteId])]
+                ],
+                'isError' => true
+            ];
+        }
+
+        $satData = [
+            'satelliteId' => $tle->getId(),
+            'name' => $tle->getName(),
+            'line1' => $tle->getLine1(),
+            'line2' => $tle->getLine2(),
+            'date' => $tle->getUpdatedAt()->format(\DateTimeInterface::ATOM),
+        ];
+
+        if ($extra && $tle->getInfo()) {
+            $info = $tle->getInfo();
+            $satData['extra'] = [
+                'inclination' => $info->inclination,
+                'eccentricity' => $info->eccentricity,
+                'semi_major_axis' => $info->semiMajorAxis,
+                'period' => $info->period,
+                'raan' => $info->raan,
+            ];
+        }
+
+        return [
+            'content' => [
+                [
+                    'type' => 'text',
+                    'text' => json_encode($satData, JSON_PRETTY_PRINT)
+                ]
+            ]
+        ];
+    }
+
+    // Keep these endpoints for direct REST API access (optional)
     #[Route('/tools/search_satellites', name: 'mcp_search_satellites', methods: ['GET', 'POST', 'OPTIONS'])]
     public function searchSatellites(Request $request): Response
     {
