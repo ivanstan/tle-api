@@ -18,6 +18,7 @@
         "doctrine/orm": "^3.3",
         "ivanstan/symfony-support": "^1.0",
         "ivanstan/tle-php": "^2.0",
+        "mcp/sdk": "^0.4",
         "sentry/sentry-symfony": "^5.1",
         "symfony/apache-pack": "^1.0",
         "symfony/asset": "7.4.*",
