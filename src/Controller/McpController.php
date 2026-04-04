@@ -178,6 +178,7 @@ final class McpController extends AbstractApiController
                 [
                     'name' => 'search_satellites',
                     'description' => 'Search for satellites by name. Returns a list of satellites matching the search query with their TLE data.',
+                    'readOnlyHint' => true,
                     'inputSchema' => [
                         'type' => 'object',
                         'properties' => [
@@ -207,6 +208,7 @@ final class McpController extends AbstractApiController
                 [
                     'name' => 'get_satellite',
                     'description' => 'Get detailed information about a specific satellite by its NORAD catalog ID.',
+                    'readOnlyHint' => true,
                     'inputSchema' => [
                         'type' => 'object',
                         'properties' => [
