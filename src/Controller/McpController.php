@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\McpRequest as McpRequestEntity;
 use App\Repository\TleRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Ivanstan\Tle\Model\Tle as TleModel;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,7 +16,8 @@ use Symfony\Component\Routing\Annotation\Route;
 final class McpController extends AbstractApiController
 {
     public function __construct(
-        private readonly TleRepository $tleRepository
+        private readonly TleRepository $tleRepository,
+        private readonly EntityManagerInterface $entityManager,
     ) {
     }
 
@@ -139,6 +142,8 @@ final class McpController extends AbstractApiController
             ];
         }
 
+        $this->trackRequest($request, $sessionId, $method, $params, $result);
+
         // Write response to temp file for the SSE stream to pick up
         if ($sessionId) {
             file_put_contents(
@@ -155,6 +160,24 @@ final class McpController extends AbstractApiController
         return new JsonResponse($payload, Response::HTTP_OK, [
             'Access-Control-Allow-Origin' => '*',
         ]);
+    }
+
+    private function trackRequest(Request $request, ?string $sessionId, string $method, array $params, ?array $result): void
+    {
+        $isToolCall = $method === 'tools/call';
+
+        $record = new McpRequestEntity();
+        $record->setSessionId($sessionId);
+        $record->setMethod($method);
+        $record->setToolName($isToolCall ? ($params['name'] ?? null) : null);
+        $record->setInput($isToolCall ? ($params['arguments'] ?? null) : null);
+        $record->setOutput($isToolCall ? $result : null);
+        $record->setIp($request->getClientIp());
+        $record->setUserAgent($request->headers->get('User-Agent'));
+        $record->setIsError($isToolCall && ($result['isError'] ?? false));
+
+        $this->entityManager->persist($record);
+        $this->entityManager->flush();
     }
 
     private function handleInitialize(array $params): array
