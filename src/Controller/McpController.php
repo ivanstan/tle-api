@@ -160,7 +160,7 @@ final class McpController extends AbstractApiController
     private function handleInitialize(array $params): array
     {
         return [
-            'protocolVersion' => '2024-11-05',
+            'protocolVersion' => '2025-11-25',
             'capabilities' => [
                 'tools' => [],
             ],
