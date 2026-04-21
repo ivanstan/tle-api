@@ -17,16 +17,24 @@ import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
 import Divider from '@mui/material/Divider'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import FormGroup from '@mui/material/FormGroup'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
 import Popover from '@mui/material/Popover'
 import Select from '@mui/material/Select'
+import Slider from '@mui/material/Slider'
+import Switch from '@mui/material/Switch'
+import Tab from '@mui/material/Tab'
+import Tabs from '@mui/material/Tabs'
 import TextField from '@mui/material/TextField'
 import Toolbar from '@mui/material/Toolbar'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
+import ChevronRightIcon from '@mui/icons-material/ChevronRight'
 import PauseIcon from '@mui/icons-material/Pause'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt'
@@ -252,17 +260,24 @@ function computeNightOverlay(sunLat: number, sunLng: number) {
     return Math.atan(-Math.cos(φs) * Math.cos(dλ) / Math.sin(φs)) / D2R
   }
 
-  const nightPoleLat = sunLat >= 0 ? -89.9 : 89.9
+  const nightPoleLat = sunLat >= 0 ? -89.5 : 89.5
   const terminator: { lat: number; lng: number }[] = []
-  for (let lng = -180; lng <= 180; lng += 2) {
+  for (let lng = -179.99; lng <= 179.99; lng += 2) {
     terminator.push({ lat: termLat(lng), lng })
   }
 
-  const nightPolygon: { lat: number; lng: number }[] = [
-    ...terminator,
-    { lat: nightPoleLat, lng:  180 },
-    { lat: nightPoleLat, lng: -180 },
-  ]
+  // Build a closed ring. CRITICAL: the pole "cap" is sampled in 5° steps so
+  // each edge is short — a single edge from (lat, +180) directly to (lat, -180)
+  // would be drawn by Google Maps as a straight pixel-line across the whole map
+  // width (the wrong way around the world) and the polygon would not fill.
+  const polePath: { lat: number; lng: number }[] = []
+  for (let lng = 179.99; lng >= -179.99; lng -= 5) {
+    polePath.push({ lat: nightPoleLat, lng })
+  }
+
+  const nightPolygon: { lat: number; lng: number }[] = sunLat >= 0
+    ? [...terminator, ...polePath]                    // walk terminator W→E, then sweep south pole E→W
+    : [...terminator.slice().reverse(), ...polePath.slice().reverse()] // mirror for southern sun
 
   return { nightPolygon, terminator }
 }
@@ -335,11 +350,11 @@ function moonMarkerIcon(): string {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
 }
 
-/** Compute ORBIT_COUNT orbits of ground track centred on simTime, split into past/future segments. */
-function computeGroundTrack(elements: OrbitalElements, simTime: Date) {
+/** Compute `orbitCount` orbits of ground track centred on simTime, split into past/future segments. */
+function computeGroundTrack(elements: OrbitalElements, simTime: Date, orbitCount: number) {
   // orbital period: elements.no is mean motion in rad/min
   const periodMs  = ((2 * Math.PI) / elements.no) * 60_000
-  const halfMs    = (ORBIT_COUNT / 2) * periodMs
+  const halfMs    = (orbitCount / 2) * periodMs
   const stepMs    = ORBIT_STEP_SECONDS * 1_000
   const nowMs     = simTime.getTime()
 
@@ -382,6 +397,24 @@ function fmtCoord(deg: number, pos: string, neg: string) {
   return `${Math.abs(deg).toFixed(4)}° ${deg >= 0 ? pos : neg}`
 }
 
+// ─── localStorage settings hook ───────────────────────────────────────────────
+function useLocalStorage<T>(key: string, initial: T): [T, (v: T | ((p: T) => T)) => void] {
+  const [val, setVal] = useState<T>(() => {
+    try {
+      const s = localStorage.getItem(key)
+      return s !== null ? (JSON.parse(s) as T) : initial
+    } catch { return initial }
+  })
+  const set = useCallback((v: T | ((p: T) => T)) => {
+    setVal((prev) => {
+      const next = typeof v === 'function' ? (v as (p: T) => T)(prev) : v
+      try { localStorage.setItem(key, JSON.stringify(next)) } catch {}
+      return next
+    })
+  }, [key])
+  return [val, set]
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export const SatelliteMap = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -398,6 +431,17 @@ export const SatelliteMap = () => {
 
   // Map / UI state
   const [selectedId, setSelectedId]       = useState<number | null>(null)
+  const [sidebarOpen, setSidebarOpen]     = useState(true)
+  const [sidebarTab,  setSidebarTab]      = useState<'info' | 'settings'>('info')
+
+  // ── Persisted settings ────────────────────────────────────────────────────
+  const [showNightOverlay,   setShowNightOverlay]   = useLocalStorage('map.showNightOverlay',   true)
+  const [nightOpacity,       setNightOpacity]        = useLocalStorage('map.nightOpacity',        0.5)
+  const [showTerminator,     setShowTerminator]      = useLocalStorage('map.showTerminator',      true)
+  const [showSunMoon,        setShowSunMoon]         = useLocalStorage('map.showSunMoon',         true)
+  const [showOrbitalMarkers, setShowOrbitalMarkers]  = useLocalStorage('map.showOrbitalMarkers',  true)
+  const [showFootprints,     setShowFootprints]      = useLocalStorage('map.showFootprints',      true)
+  const [orbitCount,         setOrbitCount]          = useLocalStorage('map.orbitCount',          1)
   const [mapInstance, setMapInstance]     = useState<google.maps.Map | null>(null)
   const [pickerAnchor, setPickerAnchor]   = useState<HTMLElement | null>(null)
   const [selectorInput, setSelectorInput] = useState('')
@@ -434,7 +478,6 @@ export const SatelliteMap = () => {
       const sunPos  = getSunSubsolarPoint(simTime)
       const moonPos = getMoonSublunarPoint(simTime)
       const { nightPolygon, terminator } = computeNightOverlay(sunPos.lat, sunPos.lng)
-      console.log('[celestial]', { sunPos, moonPos, terminatorPts: terminator.length, nightPts: nightPolygon.length })
       return { nightPolygon, terminator, sunPos, moonPos }
     } catch (err) {
       console.error('[celestial overlay]', err)
@@ -451,14 +494,14 @@ export const SatelliteMap = () => {
   // from tearing down and recreating the overlay every tick.
   const nightOptions = useMemo<google.maps.PolygonOptions>(() => ({
     fillColor:     '#000820',
-    fillOpacity:   0.5,
+    fillOpacity:   nightOpacity,
     strokeColor:   '#000820',
-    strokeOpacity: 0,
-    strokeWeight:  0,
+    strokeOpacity: 0.01,
+    strokeWeight:  1,
     clickable:     false,
     geodesic:      false,
     zIndex:        0,
-  }), [])
+  }), [nightOpacity])
 
   const terminatorOptions = useMemo<google.maps.PolylineOptions>(() => ({
     strokeColor:   '#ffffff',
@@ -491,7 +534,7 @@ export const SatelliteMap = () => {
   const satellites = useMemo(
     () => tleRecords.map((rec) => {
       const pos   = computePosition(rec.elements, simTime)
-      const track = computeGroundTrack(rec.elements, simTime)
+      const track = computeGroundTrack(rec.elements, simTime, orbitCount)
 
       let footprint: { lat: number; lng: number }[] = []
       if (pos) {
@@ -507,7 +550,7 @@ export const SatelliteMap = () => {
 
       return { ...rec, pos, track, footprint, orbitalMarkers }
     }),
-    [tleRecords, simTime],
+    [tleRecords, simTime, orbitCount],
   )
 
   // ── TLE fetch (once per ID list change) ─────────────────────────────────────
@@ -558,20 +601,7 @@ export const SatelliteMap = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rawIds])
 
-  // ── Map auto-fit ─────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!mapInstance || satellites.length === 0) return
-    const valid = satellites.filter((s) => s.pos)
-    if (valid.length === 0) return
-    if (valid.length === 1) {
-      mapInstance.panTo({ lat: valid[0].pos!.lat, lng: valid[0].pos!.lng })
-      mapInstance.setZoom(4)
-    } else {
-      const bounds = new window.google.maps.LatLngBounds()
-      valid.forEach(({ pos }) => bounds.extend({ lat: pos!.lat, lng: pos!.lng }))
-      mapInstance.fitBounds(bounds, 80)
-    }
-  }, [mapInstance, tleRecords]) // only fit when TLE records change, not every tick
+  // ── Map auto-fit (removed) ────────────────────────────────────────────────
 
   // ── Satellite search debounce ────────────────────────────────────────────────
   useEffect(() => {
@@ -798,7 +828,185 @@ export const SatelliteMap = () => {
       </Popover>
 
       {/* ── Map area ───────────────────────────────────────────────────────── */}
-      <Box sx={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
+      <Box sx={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+
+        {/* ── Collapsible sidebar ──────────────────────────────────────────── */}
+        <Box sx={{
+          width: sidebarOpen ? 260 : 0,
+          minWidth: sidebarOpen ? 260 : 0,
+          transition: 'width 0.22s ease, min-width 0.22s ease',
+          overflow: 'hidden',
+          bgcolor: 'background.paper',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          flexDirection: 'column',
+        }}>
+          {/* Tab bar */}
+          <Tabs
+            value={sidebarTab}
+            onChange={(_, v) => setSidebarTab(v)}
+            variant="fullWidth"
+            sx={{ minWidth: 260, borderBottom: '1px solid', borderColor: 'divider', flexShrink: 0 }}
+          >
+            <Tab label="Info"     value="info"     sx={{ fontSize: '0.78rem', minHeight: 40 }} />
+            <Tab label="Settings" value="settings" sx={{ fontSize: '0.78rem', minHeight: 40 }} />
+          </Tabs>
+
+          {/* Info tab */}
+          {sidebarTab === 'info' && (
+            <Box sx={{ p: 2, overflowY: 'auto', flex: 1, minWidth: 260 }}>
+              <Typography sx={{ mb: 1.5, fontFamily: 'monospace', fontSize: '0.75rem', letterSpacing: '0.08em', color: 'text.secondary', textTransform: 'uppercase' }}>
+                Live Positions
+              </Typography>
+
+              {loading && (
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
+                  <CircularProgress size={16} /><Typography variant="body2" color="text.secondary">Loading…</Typography>
+                </Box>
+              )}
+
+              {errors.map((err) => (
+                <Alert key={err} severity="warning" sx={{ mb: 1, fontSize: '0.72rem', py: 0 }}>{err}</Alert>
+              ))}
+
+              {satellites.map((s) => {
+                const isSelected = s.id === selectedId
+                return (
+                  <Box key={s.id} onClick={() => setSelectedId(isSelected ? null : s.id)} sx={{
+                    mb: 1.25, p: 1.25, borderRadius: 1, cursor: 'pointer', border: '1px solid',
+                    borderColor: isSelected ? s.color : 'divider',
+                    bgcolor: isSelected ? `${s.color}18` : 'transparent',
+                    transition: 'all 0.15s',
+                    '&:hover': { borderColor: s.color, bgcolor: `${s.color}10` },
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                      <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
+                      <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
+                        {s.tle.name}
+                      </Typography>
+                    </Box>
+                    {s.pos ? (
+                      <>
+                        <Typography variant="caption" display="block" color="text.secondary">
+                          {fmtCoord(s.pos.lat, 'N', 'S')} · {fmtCoord(s.pos.lng, 'E', 'W')}
+                        </Typography>
+                        <Typography variant="caption" display="block" color="text.secondary">
+                          Alt: {formatAlt(s.pos.alt)}
+                        </Typography>
+                      </>
+                    ) : (
+                      <Typography variant="caption" color="error.main">Position unavailable</Typography>
+                    )}
+                  </Box>
+                )
+              })}
+
+              {!loading && satellites.length > 0 && (
+                <Typography sx={{ display: 'block', mt: 1, fontSize: '0.62rem', fontFamily: 'monospace', color: 'text.secondary' }}>
+                  {formatSimTime(simTime)}
+                </Typography>
+              )}
+            </Box>
+          )}
+
+          {/* Settings tab */}
+          {sidebarTab === 'settings' && (
+            <Box sx={{ p: 2, overflowY: 'auto', flex: 1, minWidth: 260 }}>
+
+              {/* Overlays */}
+              <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
+                Overlays
+              </Typography>
+              <FormGroup sx={{ mt: 0.5, mb: 1 }}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={showNightOverlay} onChange={(e) => setShowNightOverlay(e.target.checked)} />}
+                  label={<Typography variant="body2">Night overlay</Typography>}
+                />
+                <FormControlLabel
+                  control={<Switch size="small" checked={showTerminator} onChange={(e) => setShowTerminator(e.target.checked)} />}
+                  label={<Typography variant="body2">Terminator line</Typography>}
+                />
+                <FormControlLabel
+                  control={<Switch size="small" checked={showSunMoon} onChange={(e) => setShowSunMoon(e.target.checked)} />}
+                  label={<Typography variant="body2">Sun / Moon subpoints</Typography>}
+                />
+              </FormGroup>
+
+              {showNightOverlay && (
+                <Box sx={{ px: 0.5, mb: 2 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Night opacity — {Math.round(nightOpacity * 100)}%
+                  </Typography>
+                  <Slider
+                    size="small"
+                    min={0.1} max={0.9} step={0.05}
+                    value={nightOpacity}
+                    onChange={(_, v) => setNightOpacity(v as number)}
+                    sx={{ color: '#4aa564' }}
+                  />
+                </Box>
+              )}
+
+              <Divider sx={{ my: 1.5 }} />
+
+              {/* Satellites */}
+              <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.65rem', letterSpacing: '0.1em' }}>
+                Satellites
+              </Typography>
+              <FormGroup sx={{ mt: 0.5, mb: 1 }}>
+                <FormControlLabel
+                  control={<Switch size="small" checked={showOrbitalMarkers} onChange={(e) => setShowOrbitalMarkers(e.target.checked)} />}
+                  label={<Typography variant="body2">Orbital markers (AN/DN/Pe/Ap)</Typography>}
+                />
+                <FormControlLabel
+                  control={<Switch size="small" checked={showFootprints} onChange={(e) => setShowFootprints(e.target.checked)} />}
+                  label={<Typography variant="body2">Visibility footprints</Typography>}
+                />
+              </FormGroup>
+
+              <Box sx={{ px: 0.5 }}>
+                <Typography variant="caption" color="text.secondary">
+                  Ground track — {orbitCount} orbit{orbitCount !== 1 ? 's' : ''}
+                </Typography>
+                <Slider
+                  size="small"
+                  min={0.5} max={5} step={0.5}
+                  value={orbitCount}
+                  onChange={(_, v) => setOrbitCount(v as number)}
+                  marks
+                  sx={{ color: '#4aa564' }}
+                />
+              </Box>
+
+            </Box>
+          )}
+        </Box>
+
+        {/* ── Map + collapse toggle ────────────────────────────────────────── */}
+        <Box sx={{ position: 'relative', flex: 1, overflow: 'hidden' }}>
+          {/* Sidebar toggle tab */}
+          <Box sx={{
+            position: 'absolute', left: 0, top: '50%',
+            transform: 'translateY(-50%)', zIndex: 20,
+          }}>
+            <IconButton
+              onClick={() => setSidebarOpen((o) => !o)}
+              size="small"
+              sx={{
+                bgcolor: 'background.paper',
+                borderRadius: '0 6px 6px 0',
+                border: '1px solid',
+                borderLeft: 'none',
+                borderColor: 'divider',
+                width: 20, height: 48,
+                '&:hover': { bgcolor: 'action.hover' },
+              }}
+            >
+              {sidebarOpen ? <ChevronLeftIcon fontSize="small" /> : <ChevronRightIcon fontSize="small" />}
+            </IconButton>
+          </Box>
+
         {loadError && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', p: 3 }}>
             <Alert severity="error" sx={{ maxWidth: 480 }}>
@@ -807,82 +1015,23 @@ export const SatelliteMap = () => {
           </Box>
         )}
 
-        {/* Sidebar */}
-        <Paper elevation={4} sx={{
-          position: 'absolute', top: 16, left: 16, zIndex: 10,
-          p: 2, minWidth: 230, maxWidth: 280, maxHeight: 'calc(100% - 32px)',
-          overflowY: 'auto', bgcolor: 'background.paper', borderRadius: 2,
-        }}>
-          <Typography sx={{ mb: 1.5, fontFamily: 'monospace', fontSize: '0.75rem', letterSpacing: '0.08em', color: 'text.secondary', textTransform: 'uppercase' }}>
-            Live Positions
-          </Typography>
-
-          {loading && (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
-              <CircularProgress size={16} /><Typography variant="body2" color="text.secondary">Loading…</Typography>
-            </Box>
-          )}
-
-          {errors.map((err) => (
-            <Alert key={err} severity="warning" sx={{ mb: 1, fontSize: '0.72rem', py: 0 }}>{err}</Alert>
-          ))}
-
-          {satellites.map((s) => {
-            const isSelected = s.id === selectedId
-            return (
-              <Box key={s.id} onClick={() => setSelectedId(isSelected ? null : s.id)} sx={{
-                mb: 1.25, p: 1.25, borderRadius: 1, cursor: 'pointer', border: '1px solid',
-                borderColor: isSelected ? s.color : 'divider',
-                bgcolor: isSelected ? `${s.color}18` : 'transparent',
-                transition: 'all 0.15s',
-                '&:hover': { borderColor: s.color, bgcolor: `${s.color}10` },
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                  <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
-                  <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>
-                    {s.tle.name}
-                  </Typography>
-                </Box>
-                {s.pos ? (
-                  <>
-                    <Typography variant="caption" display="block" color="text.secondary">
-                      {fmtCoord(s.pos.lat, 'N', 'S')} · {fmtCoord(s.pos.lng, 'E', 'W')}
-                    </Typography>
-                    <Typography variant="caption" display="block" color="text.secondary">
-                      Alt: {formatAlt(s.pos.alt)}
-                    </Typography>
-                  </>
-                ) : (
-                  <Typography variant="caption" color="error.main">Position unavailable</Typography>
-                )}
-              </Box>
-            )
-          })}
-
-          {!loading && satellites.length > 0 && (
-            <Typography sx={{ display: 'block', mt: 1, fontSize: '0.62rem', fontFamily: 'monospace', color: 'text.secondary' }}>
-              {formatSimTime(simTime)}
-            </Typography>
-          )}
-        </Paper>
-
         {/* Google Map */}
         {isLoaded && !loadError ? (
           <GoogleMap mapContainerStyle={MAP_CONTAINER_STYLE} center={DEFAULT_CENTER} zoom={2}
             options={MAP_OPTIONS} onLoad={onMapLoad}>
 
             {/* Night hemisphere overlay */}
-            {nightPolygon.length > 2 && (
+            {showNightOverlay && nightPolygon.length > 2 && (
               <Polygon paths={nightPolygon} options={nightOptions} />
             )}
 
-            {/* Terminator line — day/night boundary */}
-            {terminator.length > 1 && (
+            {/* Terminator line */}
+            {showTerminator && terminator.length > 1 && (
               <Polyline path={terminator} options={terminatorOptions} />
             )}
 
             {/* Solar subpoint */}
-            {sunPos && (
+            {showSunMoon && sunPos && (
               <Marker key="sun-marker"
                 position={{ lat: sunPos.lat, lng: sunPos.lng }}
                 title={`Sun — ${sunPos.lat.toFixed(2)}°, ${sunPos.lng.toFixed(2)}°`}
@@ -895,7 +1044,7 @@ export const SatelliteMap = () => {
             )}
 
             {/* Lunar subpoint */}
-            {moonPos && (
+            {showSunMoon && moonPos && (
               <Marker key="moon-marker"
                 position={{ lat: moonPos.lat, lng: moonPos.lng }}
                 title={`Moon — ${moonPos.lat.toFixed(2)}°, ${moonPos.lng.toFixed(2)}°`}
@@ -907,8 +1056,8 @@ export const SatelliteMap = () => {
               />
             )}
 
-            {/* Visibility footprints — rendered first so they sit under everything */}
-            {satellites.map((s) => s.footprint.length > 2 && (
+            {/* Visibility footprints */}
+            {showFootprints && satellites.map((s) => s.footprint.length > 2 && (
               <Polygon
                 key={`fp-${s.id}`}
                 paths={s.footprint}
@@ -948,7 +1097,7 @@ export const SatelliteMap = () => {
             ))}
 
             {/* Orbital markers (nodes, periapsis, apoapsis) */}
-            {satellites.flatMap((s) =>
+            {showOrbitalMarkers && satellites.flatMap((s) =>
               s.orbitalMarkers.map((m, i) => {
                 const style = ORBITAL_MARKER_STYLE[m.type]
                 return (
@@ -979,34 +1128,14 @@ export const SatelliteMap = () => {
                 onClick={() => setSelectedId(s.id === selectedId ? null : s.id)}
               />
             ))}
-
-            {selectedSat?.pos && (
-              <InfoWindow
-                position={{ lat: selectedSat.pos.lat, lng: selectedSat.pos.lng }}
-                onCloseClick={() => setSelectedId(null)}
-              >
-                <Box sx={{ color: '#000', minWidth: 180, p: 0.5 }}>
-                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 0.5 }}>{selectedSat.tle.name}</Typography>
-                  <Typography variant="body2">NORAD ID: {selectedSat.id}</Typography>
-                  <Typography variant="body2">Lat: {selectedSat.pos.lat.toFixed(4)}°</Typography>
-                  <Typography variant="body2">Lon: {selectedSat.pos.lng.toFixed(4)}°</Typography>
-                  <Typography variant="body2">Alt: {formatAlt(selectedSat.pos.alt)}</Typography>
-                  {selectedSat.footprint.length > 0 && (() => {
-                    try {
-                      const fp = calculateVisibilityFootprint({ latitude: selectedSat.pos.lat, longitude: selectedSat.pos.lng, altitude: selectedSat.pos.alt })
-                      return <Typography variant="body2">Visible from: ~{fp.radiusKm.toFixed(0)} km radius</Typography>
-                    } catch { return null }
-                  })()}
-                </Box>
-              </InfoWindow>
-            )}
           </GoogleMap>
         ) : !loadError && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
             <CircularProgress />
           </Box>
         )}
-      </Box>
+        </Box> {/* end inner map Box */}
+      </Box>   {/* end flex row (sidebar + map) */}
     </Box>
   )
 }
