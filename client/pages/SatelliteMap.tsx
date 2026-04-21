@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api'
-import { parseTLE, propagate, dateToJD, calculateGST, eciToGeodetic } from 'tle.js/dist/propagators'
+import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Polyline, Polygon } from '@react-google-maps/api'
+import { parseTLE, propagate, dateToJD, calculateGST, eciToGeodetic, calculateVisibilityFootprint } from 'tle.js/dist/propagators'
 import type { OrbitalElements } from 'tle.js/dist/propagators'
 import TleClient from 'tle.js'
 import type { TleModel } from 'tle.js'
@@ -36,6 +36,8 @@ import SkipPreviousIcon from '@mui/icons-material/SkipPrevious'
 // ─── Constants ────────────────────────────────────────────────────────────────
 const UPDATE_INTERVAL_MS = 1000
 const STEP_MS = 60_000
+const ORBIT_COUNT       = 1   // total orbits rendered — half before, half after current position
+const ORBIT_STEP_SECONDS = 60 // sample interval for ground-track polyline (seconds)
 const SPEED_OPTIONS = [
   { label: '1×',    value: 1 },
   { label: '10×',   value: 10 },
@@ -53,6 +55,11 @@ const MAP_OPTIONS: google.maps.MapOptions = {
   streetViewControl: false,
   fullscreenControl: true,
   styles: [{ elementType: 'labels', stylers: [{ visibility: 'simplified' }] }],
+  minZoom: 2,
+  restriction: {
+    latLngBounds: { north: 85.05, south: -85.05, west: -180, east: 180 },
+    strictBounds: true,
+  },
 }
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -91,6 +98,142 @@ function computePosition(elements: OrbitalElements, date: Date): Position | null
     return { lat: geo.latitude, lng: geo.longitude, alt: geo.altitude }
   } catch {
     return null
+  }
+}
+
+type LatLng = { lat: number; lng: number }
+
+/** Split a polyline into segments wherever it crosses the antimeridian (±180°). */
+function splitAtAntimeridian(pts: LatLng[]): LatLng[][] {
+  if (pts.length < 2) return pts.length ? [pts] : []
+  const segs: LatLng[][] = []
+  let cur: LatLng[] = [pts[0]]
+  for (let i = 1; i < pts.length; i++) {
+    if (Math.abs(pts[i].lng - pts[i - 1].lng) > 180) {
+      segs.push(cur)
+      cur = []
+    }
+    cur.push(pts[i])
+  }
+  segs.push(cur)
+  return segs.filter((s) => s.length > 1)
+}
+
+// ─── Orbital markers ──────────────────────────────────────────────────────────
+
+type OrbitalMarkerType = 'ascending-node' | 'descending-node' | 'periapsis' | 'apoapsis'
+
+interface OrbitalMarker {
+  lat: number
+  lng: number
+  alt: number
+  type: OrbitalMarkerType
+}
+
+const ORBITAL_MARKER_STYLE: Record<OrbitalMarkerType, { letter: string; title: string }> = {
+  'ascending-node':  { letter: 'AN', title: 'Ascending Node'  },
+  'descending-node': { letter: 'DN', title: 'Descending Node' },
+  'periapsis':       { letter: 'Pe', title: 'Periapsis'       },
+  'apoapsis':        { letter: 'Ap', title: 'Apoapsis'        },
+}
+
+/** Build an SVG data-URL badge (circle with two-letter label). */
+function markerIcon(letter: string, fill: string): string {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">` +
+    `<circle cx="16" cy="16" r="14" fill="${fill}" stroke="rgba(0,0,0,0.55)" stroke-width="1.5"/>` +
+    `<text x="16" y="20.5" text-anchor="middle" font-family="Arial,sans-serif" font-size="10.5" font-weight="bold" fill="white">${letter}</text>` +
+    `</svg>`
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+}
+
+/**
+ * Scan one complete orbit (10-second resolution) centred on simTime and return
+ * the four key orbital markers.
+ *
+ * Periapsis / Apoapsis are only emitted when eccentricity > 0.005 to avoid
+ * meaningless markers on near-circular orbits.
+ */
+function computeOrbitalMarkers(elements: OrbitalElements, simTime: Date): OrbitalMarker[] {
+  const STEP_MS  = 10_000                                     // 10-second sample interval
+  const periodMs = ((2 * Math.PI) / elements.no) * 60_000    // full orbital period in ms
+  const nowMs    = simTime.getTime()
+  const start    = nowMs - periodMs / 2
+  const end      = nowMs + periodMs / 2
+
+  type Sample = { lat: number; lng: number; alt: number }
+  const pts: Sample[] = []
+  for (let t = start; t <= end; t += STEP_MS) {
+    const p = computePosition(elements, new Date(t))
+    if (p) pts.push(p)
+  }
+  if (pts.length < 3) return []
+
+  const markers: OrbitalMarker[] = []
+
+  // ── Equator crossings ───────────────────────────────────────────────────────
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1], b = pts[i]
+    const latSpan = b.lat - a.lat
+    if (Math.abs(latSpan) < 1e-9) continue
+
+    if (a.lat < 0 && b.lat >= 0) {
+      // Ascending node — interpolate to lat = 0
+      const f   = -a.lat / latSpan
+      const lng = a.lng + f * (b.lng - a.lng)
+      markers.push({ lat: 0, lng, alt: a.alt + f * (b.alt - a.alt), type: 'ascending-node' })
+    } else if (a.lat >= 0 && b.lat < 0) {
+      // Descending node
+      const f   = a.lat / latSpan
+      const lng = a.lng + f * (b.lng - a.lng)
+      markers.push({ lat: 0, lng, alt: a.alt + f * (b.alt - a.alt), type: 'descending-node' })
+    }
+  }
+
+  // ── Altitude extremes (only meaningful for eccentric orbits) ────────────────
+  const MIN_ECCENTRICITY = 0.005
+  if (elements.ecco > MIN_ECCENTRICITY) {
+    let minPt = pts[0], maxPt = pts[0]
+    for (const p of pts) {
+      if (p.alt < minPt.alt) minPt = p
+      if (p.alt > maxPt.alt) maxPt = p
+    }
+    markers.push({ ...minPt, type: 'periapsis' })
+    markers.push({ ...maxPt, type: 'apoapsis'  })
+  }
+
+  return markers
+}
+
+/** Compute ORBIT_COUNT orbits of ground track centred on simTime, split into past/future segments. */
+function computeGroundTrack(elements: OrbitalElements, simTime: Date) {
+  // orbital period: elements.no is mean motion in rad/min
+  const periodMs  = ((2 * Math.PI) / elements.no) * 60_000
+  const halfMs    = (ORBIT_COUNT / 2) * periodMs
+  const stepMs    = ORBIT_STEP_SECONDS * 1_000
+  const nowMs     = simTime.getTime()
+
+  const past: LatLng[]   = []
+  const future: LatLng[] = []
+
+  for (let t = nowMs - halfMs; t <= nowMs + halfMs; t += stepMs) {
+    const pos = computePosition(elements, new Date(t))
+    if (!pos) continue
+    const pt = { lat: pos.lat, lng: pos.lng }
+    if (t <= nowMs) past.push(pt)
+    else future.push(pt)
+  }
+
+  // Ensure both segments meet exactly at the satellite's current position
+  const now = computePosition(elements, simTime)
+  if (now) {
+    const nowPt = { lat: now.lat, lng: now.lng }
+    past.push(nowPt)
+    future.unshift(nowPt)
+  }
+
+  return {
+    past:   splitAtAntimeridian(past),
+    future: splitAtAntimeridian(future),
   }
 }
 
@@ -156,7 +299,24 @@ export const SatelliteMap = () => {
 
   // ── Positions (local SGP4 — no API call every tick) ─────────────────────────
   const satellites = useMemo(
-    () => tleRecords.map((rec) => ({ ...rec, pos: computePosition(rec.elements, simTime) })),
+    () => tleRecords.map((rec) => {
+      const pos   = computePosition(rec.elements, simTime)
+      const track = computeGroundTrack(rec.elements, simTime)
+
+      let footprint: { lat: number; lng: number }[] = []
+      if (pos) {
+        try {
+          const fp = calculateVisibilityFootprint(
+            { latitude: pos.lat, longitude: pos.lng, altitude: pos.alt },
+          )
+          footprint = fp.boundaryPoints.map((p) => ({ lat: p.latitude, lng: p.longitude }))
+        } catch { /* satellite may have decayed */ }
+      }
+
+      const orbitalMarkers = computeOrbitalMarkers(rec.elements, simTime)
+
+      return { ...rec, pos, track, footprint, orbitalMarkers }
+    }),
     [tleRecords, simTime],
   )
 
@@ -174,6 +334,9 @@ export const SatelliteMap = () => {
       })
       return () => { cancelled = true }
     }
+
+    // Drop removed satellites immediately so their orbits vanish before the fetch completes
+    setTleRecords((prev) => prev.filter((r) => satelliteIds.includes(r.id)))
 
     let cancelled = false
     setLoading(true)
@@ -518,6 +681,66 @@ export const SatelliteMap = () => {
           <GoogleMap mapContainerStyle={MAP_CONTAINER_STYLE} center={DEFAULT_CENTER} zoom={2}
             options={MAP_OPTIONS} onLoad={onMapLoad}>
 
+            {/* Visibility footprints — rendered first so they sit under everything */}
+            {satellites.map((s) => s.footprint.length > 2 && (
+              <Polygon
+                key={`fp-${s.id}`}
+                paths={s.footprint}
+                options={{
+                  fillColor:    s.color,
+                  fillOpacity:  0.07,
+                  strokeColor:  s.color,
+                  strokeOpacity: 0.5,
+                  strokeWeight: 1,
+                  geodesic:     true,
+                }}
+              />
+            ))}
+
+            {/* Ground-track polylines — rendered before markers so they sit below */}
+            {satellites.map((s) => (
+              <span key={`track-${s.id}`}>
+                {/* Past orbit — dimmer, thinner */}
+                {s.track.past.map((seg, i) => (
+                  <Polyline key={`${s.id}-p${i}`} path={seg} options={{
+                    strokeColor:   s.color,
+                    strokeOpacity: 0.35,
+                    strokeWeight:  1.5,
+                    geodesic:      true,
+                  }} />
+                ))}
+                {/* Future orbit — bright, solid */}
+                {s.track.future.map((seg, i) => (
+                  <Polyline key={`${s.id}-f${i}`} path={seg} options={{
+                    strokeColor:   s.color,
+                    strokeOpacity: 0.85,
+                    strokeWeight:  2.5,
+                    geodesic:      true,
+                  }} />
+                ))}
+              </span>
+            ))}
+
+            {/* Orbital markers (nodes, periapsis, apoapsis) */}
+            {satellites.flatMap((s) =>
+              s.orbitalMarkers.map((m, i) => {
+                const style = ORBITAL_MARKER_STYLE[m.type]
+                return (
+                  <Marker
+                    key={`${s.id}-om-${m.type}-${i}`}
+                    position={{ lat: m.lat, lng: m.lng }}
+                    title={`${s.tle.name} — ${style.title}\nAlt: ${m.alt.toFixed(0)} km`}
+                    zIndex={4}
+                    icon={{
+                      url: markerIcon(style.letter, s.color),
+                      scaledSize: new window.google.maps.Size(32, 32),
+                      anchor:     new window.google.maps.Point(16, 16),
+                    }}
+                  />
+                )
+              })
+            )}
+
             {satellites.filter((s) => s.pos).map((s) => (
               <Marker key={s.id}
                 position={{ lat: s.pos!.lat, lng: s.pos!.lng }}
@@ -542,6 +765,12 @@ export const SatelliteMap = () => {
                   <Typography variant="body2">Lat: {selectedSat.pos.lat.toFixed(4)}°</Typography>
                   <Typography variant="body2">Lon: {selectedSat.pos.lng.toFixed(4)}°</Typography>
                   <Typography variant="body2">Alt: {formatAlt(selectedSat.pos.alt)}</Typography>
+                  {selectedSat.footprint.length > 0 && (() => {
+                    try {
+                      const fp = calculateVisibilityFootprint({ latitude: selectedSat.pos.lat, longitude: selectedSat.pos.lng, altitude: selectedSat.pos.alt })
+                      return <Typography variant="body2">Visible from: ~{fp.radiusKm.toFixed(0)} km radius</Typography>
+                    } catch { return null }
+                  })()}
                 </Box>
               </InfoWindow>
             )}
