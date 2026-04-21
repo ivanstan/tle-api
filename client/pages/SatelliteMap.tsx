@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Polyline, Polygon } from '@react-google-maps/api'
-import { parseTLE, propagate, dateToJD, calculateGST, eciToGeodetic, calculateVisibilityFootprint, observe, createObserver } from 'tle.js/dist/propagators'
-import type { OrbitalElements, LookAngles } from 'tle.js/dist/propagators'
+import { parseTLE, propagate, dateToJD, calculateGST, eciToGeodetic, calculateVisibilityFootprint, observe, createObserver, getNextPass } from 'tle.js/dist/propagators'
+import type { OrbitalElements, LookAngles, SatellitePass } from 'tle.js/dist/propagators'
 import TleClient from 'tle.js'
 import type { TleModel } from 'tle.js'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
@@ -453,6 +453,11 @@ export const SatelliteMap = () => {
 
   // Detail-view drives the sidebar slide: 'list' | 'satellite' | 'observer'
   const [detailView, setDetailView] = useState<'list' | 'satellite' | 'observer'>('list')
+
+  // Next overhead pass — recomputed whenever the selected satellite or observer changes
+  // undefined = computing, null = not found within search window
+  const [nextPass, setNextPass] = useState<SatellitePass | null | undefined>(undefined)
+  const [nextPassLoading, setNextPassLoading] = useState(false)
   const [mapInstance, setMapInstance]     = useState<google.maps.Map | null>(null)
   const [pickerAnchor, setPickerAnchor]   = useState<HTMLElement | null>(null)
   const [selectorInput, setSelectorInput] = useState('')
@@ -485,6 +490,34 @@ export const SatelliteMap = () => {
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // ── Next overhead pass ───────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!selectedId) { setNextPass(undefined); return }
+    const sat = satellites.find((s) => s.id === selectedId)
+    if (!sat) { setNextPass(undefined); return }
+
+    setNextPassLoading(true)
+    setNextPass(undefined)
+
+    // Defer to avoid blocking the render tick
+    const timer = setTimeout(() => {
+      try {
+        const jd     = dateToJD(simTime)
+        const tsince = (jd - sat.elements.jdsatepoch) * 1440
+        const obs    = createObserver(observerPos.lat, observerPos.lng, 0)
+        const pass   = getNextPass(sat.elements, obs, propagate, tsince, 10080) // search 7 days
+        setNextPass(pass)
+      } catch {
+        setNextPass(null)
+      } finally {
+        setNextPassLoading(false)
+      }
+    }, 0)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedId, observerPos.lat, observerPos.lng])
 
   // ── Playback interval ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -1073,6 +1106,65 @@ export const SatelliteMap = () => {
                           ) : (
                             <Typography variant="caption" color="text.secondary">Unavailable</Typography>
                           )}
+                        </Box>
+
+                        {/* Next overhead pass */}
+                        <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
+                          Next Overhead Pass
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          {nextPassLoading || nextPass === undefined ? (
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5 }}>
+                              <CircularProgress size={12} />
+                              <Typography variant="caption" color="text.secondary">Calculating…</Typography>
+                            </Box>
+                          ) : nextPass === null ? (
+                            <Typography variant="caption" color="text.secondary">No pass found within 7 days</Typography>
+                          ) : (() => {
+                            // Convert tsince (minutes from TLE epoch) → Date
+                            const tsinceToDate = (tsince: number) =>
+                              new Date((el.jdsatepoch + tsince / 1440 - 2440587.5) * 86400000)
+
+                            const riseDate    = tsinceToDate(nextPass.riseTime)
+                            const maxDate     = tsinceToDate(nextPass.maxElevationTime)
+                            const setDate     = tsinceToDate(nextPass.setTime)
+                            const inFuture    = riseDate > simTime
+                            const minsAway    = (riseDate.getTime() - simTime.getTime()) / 60000
+
+                            const fmtTime = (d: Date) =>
+                              d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })
+                            const fmtDur  = (min: number) => {
+                              const m = Math.floor(Math.abs(min))
+                              const s = Math.round((Math.abs(min) - m) * 60)
+                              return `${m}m ${s}s`
+                            }
+                            const qualityColor: Record<string, string> = {
+                              excellent: '#4caf50', good: '#8bc34a', fair: '#ff9800', poor: '#f44336',
+                            }
+
+                            return (
+                              <>
+                                {/* Quality badge + time away */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, py: 0.5, mb: 0.25 }}>
+                                  <Box sx={{
+                                    px: 0.75, py: 0.1, borderRadius: 0.5, fontSize: '0.6rem', fontWeight: 700,
+                                    bgcolor: qualityColor[nextPass.quality] + '22',
+                                    color: qualityColor[nextPass.quality],
+                                    textTransform: 'uppercase', letterSpacing: '0.06em',
+                                  }}>
+                                    {nextPass.quality}
+                                  </Box>
+                                  <Typography variant="caption" color="text.secondary">
+                                    {inFuture ? `in ${fmtDur(minsAway)}` : 'currently overhead'}
+                                  </Typography>
+                                </Box>
+                                <Row label="Rise"      value={`${fmtTime(riseDate)} · ${azLabel(nextPass.riseAzimuth)} (${nextPass.riseAzimuth.toFixed(0)}°)`} />
+                                <Row label="Max elev." value={`${nextPass.maxElevation.toFixed(1)}° @ ${fmtTime(maxDate)}`} />
+                                <Row label="Set"       value={`${fmtTime(setDate)} · ${azLabel(nextPass.setAzimuth)} (${nextPass.setAzimuth.toFixed(0)}°)`} />
+                                <Row label="Duration"  value={fmtDur(nextPass.duration)} />
+                              </>
+                            )
+                          })()}
                         </Box>
 
                         <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
