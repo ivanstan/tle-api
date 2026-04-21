@@ -442,6 +442,8 @@ export const SatelliteMap = () => {
   const [showOrbitalMarkers, setShowOrbitalMarkers]  = useLocalStorage('map.showOrbitalMarkers',  true)
   const [showFootprints,     setShowFootprints]      = useLocalStorage('map.showFootprints',      true)
   const [orbitCount,         setOrbitCount]          = useLocalStorage('map.orbitCount',          1)
+  const [showEquator,        setShowEquator]         = useLocalStorage('map.showEquator',         false)
+  const [showGreenwich,      setShowGreenwich]       = useLocalStorage('map.showGreenwich',       false)
   const [mapInstance, setMapInstance]     = useState<google.maps.Map | null>(null)
   const [pickerAnchor, setPickerAnchor]   = useState<HTMLElement | null>(null)
   const [selectorInput, setSelectorInput] = useState('')
@@ -529,6 +531,20 @@ export const SatelliteMap = () => {
     strokeColor:  '#37474F',
     strokeWeight: 2,
   }) : undefined, [isLoaded])
+
+  // Static reference lines (equator + Greenwich)
+  const EQUATOR_PATH    = useMemo(() =>
+    Array.from({ length: 361 }, (_, i) => ({ lat: 0, lng: i - 180 })), [])
+  const GREENWICH_PATH  = useMemo(() =>
+    Array.from({ length: 181 }, (_, i) => ({ lat: i - 90, lng: 0 })), [])
+  const REF_LINE_OPTIONS = useMemo<google.maps.PolylineOptions>(() => ({
+    strokeColor:   '#ef5350',
+    strokeOpacity: 0.7,
+    strokeWeight:  1.5,
+    clickable:     false,
+    geodesic:      false,
+    zIndex:        2,
+  }), [])
 
   // ── Positions (local SGP4 — no API call every tick) ─────────────────────────
   const satellites = useMemo(
@@ -931,6 +947,14 @@ export const SatelliteMap = () => {
                   control={<Switch size="small" checked={showSunMoon} onChange={(e) => setShowSunMoon(e.target.checked)} />}
                   label={<Typography variant="body2">Sun / Moon subpoints</Typography>}
                 />
+                <FormControlLabel
+                  control={<Switch size="small" checked={showEquator} onChange={(e) => setShowEquator(e.target.checked)} />}
+                  label={<Typography variant="body2">Equatorial line</Typography>}
+                />
+                <FormControlLabel
+                  control={<Switch size="small" checked={showGreenwich} onChange={(e) => setShowGreenwich(e.target.checked)} />}
+                  label={<Typography variant="body2">Greenwich meridian</Typography>}
+                />
               </FormGroup>
 
               {showNightOverlay && (
@@ -1020,6 +1044,11 @@ export const SatelliteMap = () => {
           <GoogleMap mapContainerStyle={MAP_CONTAINER_STYLE} center={DEFAULT_CENTER} zoom={2}
             options={MAP_OPTIONS} onLoad={onMapLoad}>
 
+            {/* All overlays are gated on mapInstance so they only mount after
+                onLoad fires — prevents silent failures when settings are already
+                true from localStorage on the very first render. */}
+            {mapInstance && <>
+
             {/* Night hemisphere overlay */}
             {showNightOverlay && nightPolygon.length > 2 && (
               <Polygon paths={nightPolygon} options={nightOptions} />
@@ -1029,6 +1058,10 @@ export const SatelliteMap = () => {
             {showTerminator && terminator.length > 1 && (
               <Polyline path={terminator} options={terminatorOptions} />
             )}
+
+            {/* Reference lines */}
+            {showEquator   && <Polyline path={EQUATOR_PATH}   options={REF_LINE_OPTIONS} />}
+            {showGreenwich && <Polyline path={GREENWICH_PATH} options={REF_LINE_OPTIONS} />}
 
             {/* Solar subpoint */}
             {showSunMoon && sunPos && (
@@ -1128,6 +1161,8 @@ export const SatelliteMap = () => {
                 onClick={() => setSelectedId(s.id === selectedId ? null : s.id)}
               />
             ))}
+
+            </>} {/* end mapInstance guard */}
           </GoogleMap>
         ) : !loadError && (
           <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
