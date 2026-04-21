@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow, Polyline, Polygon } from '@react-google-maps/api'
-import { parseTLE, propagate, dateToJD, calculateGST, eciToGeodetic, calculateVisibilityFootprint } from 'tle.js/dist/propagators'
-import type { OrbitalElements } from 'tle.js/dist/propagators'
+import { parseTLE, propagate, dateToJD, calculateGST, eciToGeodetic, calculateVisibilityFootprint, observe, createObserver } from 'tle.js/dist/propagators'
+import type { OrbitalElements, LookAngles } from 'tle.js/dist/propagators'
 import TleClient from 'tle.js'
 import type { TleModel } from 'tle.js'
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
@@ -986,12 +986,33 @@ export const SatelliteMap = () => {
                   const periodMin = (2 * Math.PI) / el.no
                   const epochDate = new Date(Date.UTC(el.epochYear, 0, 0) + el.epochDay * 86400000)
 
+                  // Compute look angles from observer to this satellite
+                  let lookAngles: LookAngles | null = null
+                  let isVisible = false
+                  try {
+                    const jd = dateToJD(simTime)
+                    const tsince = (jd - el.jdsatepoch) * 1440
+                    const propResult = propagate(el, tsince)
+                    if (!propResult.error) {
+                      const obs = createObserver(observerPos.lat, observerPos.lng, 0)
+                      const obsResult = observe(propResult, obs, jd)
+                      lookAngles = obsResult.lookAngles
+                      isVisible  = obsResult.visible
+                    }
+                  } catch { /* fallback: null */ }
+
                   const Row = ({ label, value }: { label: string; value: string }) => (
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', py: 0.4, borderBottom: '1px solid', borderColor: 'divider' }}>
                       <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, mr: 1 }}>{label}</Typography>
                       <Typography variant="caption" sx={{ fontFamily: 'monospace', textAlign: 'right' }}>{value}</Typography>
                     </Box>
                   )
+
+                  /** Compass direction label for an azimuth in degrees */
+                  const azLabel = (az: number) => {
+                    const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW']
+                    return dirs[Math.round(az / 22.5) % 16]
+                  }
 
                   return (
                     <>
@@ -1024,6 +1045,33 @@ export const SatelliteMap = () => {
                             </>
                           ) : (
                             <Typography variant="caption" color="error.main">Position unavailable</Typography>
+                          )}
+                        </Box>
+
+                        {/* Look angles from observer */}
+                        <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
+                          Look Angles from Observer
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          {lookAngles ? (
+                            <>
+                              {/* Visibility badge */}
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, py: 0.5, mb: 0.5 }}>
+                                <Box sx={{
+                                  width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                                  bgcolor: isVisible ? 'success.main' : 'text.disabled',
+                                }} />
+                                <Typography variant="caption" color={isVisible ? 'success.main' : 'text.secondary'}>
+                                  {isVisible ? 'Visible above horizon' : 'Below horizon'}
+                                </Typography>
+                              </Box>
+                              <Row label="Azimuth"    value={`${lookAngles.azimuth.toFixed(1)}° ${azLabel(lookAngles.azimuth)}`} />
+                              <Row label="Elevation"  value={`${lookAngles.elevation.toFixed(2)}°`} />
+                              <Row label="Range"      value={`${lookAngles.range.toFixed(1)} km`} />
+                              <Row label="Range rate" value={`${lookAngles.rangeRate >= 0 ? '+' : ''}${lookAngles.rangeRate.toFixed(3)} km/s`} />
+                            </>
+                          ) : (
+                            <Typography variant="caption" color="text.secondary">Unavailable</Typography>
                           )}
                         </Box>
 
