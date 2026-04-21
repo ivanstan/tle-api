@@ -204,6 +204,143 @@ function computeOrbitalMarkers(elements: OrbitalElements, simTime: Date): Orbita
   return markers
 }
 
+// ─── Day / Night terminator ───────────────────────────────────────────────────
+
+/** Returns the geographic position of the sub-solar point (lat/lng in degrees). */
+function getSunSubsolarPoint(date: Date): { lat: number; lng: number } {
+  const D2R = Math.PI / 180
+  const JD  = dateToJD(date)
+  const n   = JD - 2451545.0                                      // days since J2000.0
+
+  const L       = (280.46 + 0.9856474 * n) % 360                 // mean longitude (°)
+  const g       = ((357.528 + 0.9856003 * n) % 360) * D2R        // mean anomaly (rad)
+  const lambda  = (L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * D2R  // ecliptic lon (rad)
+  const epsilon = 23.439 * D2R                                     // obliquity (rad)
+
+  const lat = Math.asin(Math.sin(epsilon) * Math.sin(lambda)) / D2R
+  const ra  = Math.atan2(Math.cos(epsilon) * Math.sin(lambda), Math.cos(lambda))
+  const GMST = (280.46061837 + 360.98564736629 * n) % 360         // Greenwich Mean Sidereal Time (°)
+
+  let lng = (ra / D2R - GMST) % 360
+  if (lng >  180) lng -= 360
+  if (lng < -180) lng += 360
+
+  return { lat, lng }
+}
+
+/**
+ * Builds the night-side overlay as an array of narrow vertical strip polygons.
+ *
+ * A single hemispheric polygon hits Google Maps' winding-rule ambiguity (it
+ * can't tell which half-sphere to fill). Splitting into 2°-wide strips gives
+ * small, unambiguous quadrilaterals that always fill correctly.
+ *
+ * Terminator latitude formula:
+ *   sin(φ)sin(φ_sun) + cos(φ)cos(φ_sun)cos(Δλ) = 0
+ *   → tan(φ) = −cos(φ_sun)cos(Δλ)/sin(φ_sun)
+ */
+function computeNightOverlay(sunLat: number, sunLng: number) {
+  const D2R  = Math.PI / 180
+  const φs   = sunLat * D2R
+  const STEP = 2                         // strip width in degrees
+
+  function termLat(lng: number): number {
+    const dλ = (lng - sunLng) * D2R
+    if (Math.abs(Math.sin(φs)) < 1e-6) {
+      return Math.cos(dλ) >= 0 ? -89.9 : 89.9
+    }
+    return Math.atan(-Math.cos(φs) * Math.cos(dλ) / Math.sin(φs)) / D2R
+  }
+
+  const nightPoleLat = sunLat >= 0 ? -90 : 90
+  const terminator: { lat: number; lng: number }[] = []
+  for (let lng = -180; lng <= 180; lng++) terminator.push({ lat: termLat(lng), lng })
+
+  // Build one narrow strip per STEP degrees of longitude
+  const nightStrips: { lat: number; lng: number }[][] = []
+  for (let lngL = -180; lngL < 180; lngL += STEP) {
+    const lngR = lngL + STEP
+    const latL = termLat(lngL)
+    const latR = termLat(lngR)
+    nightStrips.push([
+      { lat: nightPoleLat, lng: lngL },
+      { lat: latL,         lng: lngL },
+      { lat: latR,         lng: lngR },
+      { lat: nightPoleLat, lng: lngR },
+    ])
+  }
+
+  return { nightStrips, terminator }
+}
+
+/**
+ * Simplified sub-lunar point (accurate to ~1°).
+ * Uses the low-precision Moon position from Meeus "Astronomical Algorithms" Ch. 22.
+ */
+function getMoonSublunarPoint(date: Date): { lat: number; lng: number } {
+  const D2R = Math.PI / 180
+  const JD  = dateToJD(date)
+  const n   = JD - 2451545.0
+
+  // Mean orbital elements (degrees)
+  const L  = (218.316 + 13.176396 * n) % 360   // mean longitude
+  const M  = (134.963 + 13.064993 * n) % 360   // mean anomaly
+  const F  = (93.272  + 13.229350 * n) % 360   // argument of latitude
+
+  // Ecliptic coordinates (degrees)
+  const lambda = (L + 6.289 * Math.sin(M * D2R)) * D2R
+  const beta   = (5.128 * Math.sin(F * D2R)) * D2R
+
+  const epsilon = 23.439 * D2R
+
+  const sinDec = Math.sin(beta) * Math.cos(epsilon) +
+                 Math.cos(beta) * Math.sin(epsilon) * Math.sin(lambda)
+  const lat = Math.asin(Math.max(-1, Math.min(1, sinDec))) / D2R
+
+  const ra  = Math.atan2(
+    Math.cos(beta) * Math.sin(lambda) * Math.cos(epsilon) - Math.sin(beta) * Math.sin(epsilon),
+    Math.cos(beta) * Math.cos(lambda),
+  )
+  const GMST = (280.46061837 + 360.98564736629 * n) % 360
+  let lng = (ra / D2R - GMST) % 360
+  if (lng >  180) lng -= 360
+  if (lng < -180) lng += 360
+
+  return { lat, lng }
+}
+
+// ─── Custom SVG marker icons ──────────────────────────────────────────────────
+
+function sunMarkerIcon(): string {
+  // Rays: 8 directions from r=11 to r=15, center at (18,18)
+  const rays = [0, 45, 90, 135, 180, 225, 270, 315].map((deg) => {
+    const r = Math.PI / 180 * deg
+    const [x1, y1] = [18 + 11 * Math.cos(r), 18 + 11 * Math.sin(r)]
+    const [x2, y2] = [18 + 15 * Math.cos(r), 18 + 15 * Math.sin(r)]
+    return `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#FFD54F" stroke-width="2" stroke-linecap="round"/>`
+  }).join('')
+
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36">` +
+    `<circle cx="18" cy="18" r="16" fill="rgba(255,200,0,0.18)"/>` +
+    rays +
+    `<circle cx="18" cy="18" r="9" fill="#FFB300" stroke="rgba(255,255,255,0.85)" stroke-width="1.5"/>` +
+    `</svg>`
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+}
+
+function moonMarkerIcon(): string {
+  // Crescent: white disc clipped, then dark overlay disc offset to form the crescent
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34">` +
+    `<defs><clipPath id="mc"><circle cx="17" cy="17" r="13"/></clipPath></defs>` +
+    `<circle cx="17" cy="17" r="15" fill="#1A237E" stroke="rgba(200,220,255,0.35)" stroke-width="1"/>` +
+    `<circle cx="17" cy="17" r="13" fill="#CFD8DC" clip-path="url(#mc)"/>` +
+    `<circle cx="22" cy="14" r="11" fill="#1A237E" clip-path="url(#mc)"/>` +
+    `</svg>`
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`
+}
+
 /** Compute ORBIT_COUNT orbits of ground track centred on simTime, split into past/future segments. */
 function computeGroundTrack(elements: OrbitalElements, simTime: Date) {
   // orbital period: elements.no is mean motion in rad/min
@@ -296,6 +433,14 @@ export const SatelliteMap = () => {
     )
     return () => clearInterval(id)
   }, [isPlaying, speed])
+
+  // ── Day / Night overlay + celestial subpoints ────────────────────────────────
+  const { nightStrips, terminator, sunPos, moonPos } = useMemo(() => {
+    const sunPos  = getSunSubsolarPoint(simTime)
+    const moonPos = getMoonSublunarPoint(simTime)
+    const { nightStrips, terminator } = computeNightOverlay(sunPos.lat, sunPos.lng)
+    return { nightStrips, terminator, sunPos, moonPos }
+  }, [simTime])
 
   // ── Positions (local SGP4 — no API call every tick) ─────────────────────────
   const satellites = useMemo(
@@ -680,6 +825,56 @@ export const SatelliteMap = () => {
         {isLoaded && !loadError ? (
           <GoogleMap mapContainerStyle={MAP_CONTAINER_STYLE} center={DEFAULT_CENTER} zoom={2}
             options={MAP_OPTIONS} onLoad={onMapLoad}>
+
+            {/* Night hemisphere overlay — one narrow strip per 2° of longitude */}
+            {nightStrips.map((path, i) => (
+              <Polygon
+                key={`night-${i}`}
+                paths={path}
+                options={{
+                  fillColor:     '#000820',
+                  fillOpacity:   0.5,
+                  strokeOpacity: 0,
+                  geodesic:      false,
+                  zIndex:        0,
+                }}
+              />
+            ))}
+            {/* Terminator line — day/night boundary */}
+            <Polyline
+              path={terminator}
+              options={{
+                strokeColor:   '#ffffff',
+                strokeOpacity: 0.18,
+                strokeWeight:  2,
+                geodesic:      false,
+                zIndex:        1,
+              }}
+            />
+
+            {/* Solar subpoint */}
+            <Marker
+              position={sunPos}
+              title={`Solar Subpoint\nLat: ${sunPos.lat.toFixed(2)}°  Lng: ${sunPos.lng.toFixed(2)}°`}
+              zIndex={6}
+              icon={{
+                url:        sunMarkerIcon(),
+                scaledSize: new window.google.maps.Size(36, 36),
+                anchor:     new window.google.maps.Point(18, 18),
+              }}
+            />
+
+            {/* Lunar subpoint */}
+            <Marker
+              position={moonPos}
+              title={`Lunar Subpoint\nLat: ${moonPos.lat.toFixed(2)}°  Lng: ${moonPos.lng.toFixed(2)}°`}
+              zIndex={6}
+              icon={{
+                url:        moonMarkerIcon(),
+                scaledSize: new window.google.maps.Size(34, 34),
+                anchor:     new window.google.maps.Point(17, 17),
+              }}
+            />
 
             {/* Visibility footprints — rendered first so they sit under everything */}
             {satellites.map((s) => s.footprint.length > 2 && (
