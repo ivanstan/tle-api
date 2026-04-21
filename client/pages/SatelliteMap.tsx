@@ -875,31 +875,34 @@ export const SatelliteMap = () => {
             <Tab label="Settings" value="settings" sx={{ fontSize: '0.78rem', minHeight: 40 }} />
           </Tabs>
 
-          {/* Info tab */}
+          {/* Info tab — two-panel slide */}
           {sidebarTab === 'info' && (
-            <Box sx={{ p: 2, overflowY: 'auto', flex: 1, minWidth: 260 }}>
-              <Typography sx={{ mb: 1.5, fontFamily: 'monospace', fontSize: '0.75rem', letterSpacing: '0.08em', color: 'text.secondary', textTransform: 'uppercase' }}>
-                Live Positions
-              </Typography>
+            <Box sx={{ flex: 1, overflow: 'hidden', position: 'relative', minWidth: 260 }}>
 
-              {loading && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
-                  <CircularProgress size={16} /><Typography variant="body2" color="text.secondary">Loading…</Typography>
-                </Box>
-              )}
+              {/* ── List panel ─────────────────────────────────────────────── */}
+              <Box sx={{
+                position: 'absolute', inset: 0, overflowY: 'auto', p: 2,
+                transform: selectedId !== null ? 'translateX(-100%)' : 'translateX(0)',
+                transition: 'transform 0.25s ease',
+              }}>
+                <Typography sx={{ mb: 1.5, fontFamily: 'monospace', fontSize: '0.75rem', letterSpacing: '0.08em', color: 'text.secondary', textTransform: 'uppercase' }}>
+                  Live Positions
+                </Typography>
 
-              {errors.map((err) => (
-                <Alert key={err} severity="warning" sx={{ mb: 1, fontSize: '0.72rem', py: 0 }}>{err}</Alert>
-              ))}
+                {loading && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, py: 1 }}>
+                    <CircularProgress size={16} /><Typography variant="body2" color="text.secondary">Loading…</Typography>
+                  </Box>
+                )}
 
-              {satellites.map((s) => {
-                const isSelected = s.id === selectedId
-                return (
-                  <Box key={s.id} onClick={() => setSelectedId(isSelected ? null : s.id)} sx={{
+                {errors.map((err) => (
+                  <Alert key={err} severity="warning" sx={{ mb: 1, fontSize: '0.72rem', py: 0 }}>{err}</Alert>
+                ))}
+
+                {satellites.map((s) => (
+                  <Box key={s.id} onClick={() => setSelectedId(s.id)} sx={{
                     mb: 1.25, p: 1.25, borderRadius: 1, cursor: 'pointer', border: '1px solid',
-                    borderColor: isSelected ? s.color : 'divider',
-                    bgcolor: isSelected ? `${s.color}18` : 'transparent',
-                    transition: 'all 0.15s',
+                    borderColor: 'divider', transition: 'all 0.15s',
                     '&:hover': { borderColor: s.color, bgcolor: `${s.color}10` },
                   }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
@@ -921,14 +924,99 @@ export const SatelliteMap = () => {
                       <Typography variant="caption" color="error.main">Position unavailable</Typography>
                     )}
                   </Box>
-                )
-              })}
+                ))}
 
-              {!loading && satellites.length > 0 && (
-                <Typography sx={{ display: 'block', mt: 1, fontSize: '0.62rem', fontFamily: 'monospace', color: 'text.secondary' }}>
-                  {formatSimTime(simTime)}
-                </Typography>
-              )}
+                {!loading && satellites.length > 0 && (
+                  <Typography sx={{ display: 'block', mt: 1, fontSize: '0.62rem', fontFamily: 'monospace', color: 'text.secondary' }}>
+                    {formatSimTime(simTime)}
+                  </Typography>
+                )}
+              </Box>
+
+              {/* ── Detail panel ───────────────────────────────────────────── */}
+              <Box sx={{
+                position: 'absolute', inset: 0, overflowY: 'auto',
+                transform: selectedId !== null ? 'translateX(0)' : 'translateX(100%)',
+                transition: 'transform 0.25s ease',
+              }}>
+                {selectedSat && (() => {
+                  const R = Math.PI / 180
+                  const el = selectedSat.elements
+                  const n_rads = el.no / 60                          // rad/s
+                  const a = Math.pow(398600.4418 / (n_rads * n_rads), 1 / 3)
+                  const perigeeKm = a * (1 - el.ecco) - 6371
+                  const apogeeKm  = a * (1 + el.ecco) - 6371
+                  const periodMin = (2 * Math.PI) / el.no
+                  const epochDate = new Date(Date.UTC(el.epochYear, 0, 0) + el.epochDay * 86400000)
+
+                  const Row = ({ label, value }: { label: string; value: string }) => (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', py: 0.4, borderBottom: '1px solid', borderColor: 'divider' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, mr: 1 }}>{label}</Typography>
+                      <Typography variant="caption" sx={{ fontFamily: 'monospace', textAlign: 'right' }}>{value}</Typography>
+                    </Box>
+                  )
+
+                  return (
+                    <>
+                      {/* Back header */}
+                      <Box sx={{ display: 'flex', alignItems: 'center', p: 1.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1 }}>
+                        <IconButton size="small" onClick={() => setSelectedId(null)}>
+                          <ChevronLeftIcon fontSize="small" />
+                        </IconButton>
+                        <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: selectedSat.color, flexShrink: 0 }} />
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', lineHeight: 1.2 }} noWrap>
+                          {selectedSat.tle.name}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ p: 2 }}>
+                        {/* Live position */}
+                        <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
+                          Live Position
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          {selectedSat.pos ? (
+                            <>
+                              <Row label="Latitude"  value={fmtCoord(selectedSat.pos.lat, 'N', 'S')} />
+                              <Row label="Longitude" value={fmtCoord(selectedSat.pos.lng, 'E', 'W')} />
+                              <Row label="Altitude"  value={formatAlt(selectedSat.pos.alt)} />
+                              {selectedSat.footprint.length > 0 && (() => {
+                                try {
+                                  const fp = calculateVisibilityFootprint({ latitude: selectedSat.pos!.lat, longitude: selectedSat.pos!.lng, altitude: selectedSat.pos!.alt })
+                                  return <Row label="Vis. radius" value={`~${fp.radiusKm.toFixed(0)} km`} />
+                                } catch { return null }
+                              })()}
+                            </>
+                          ) : (
+                            <Typography variant="caption" color="error.main">Position unavailable</Typography>
+                          )}
+                        </Box>
+
+                        {/* Orbital elements */}
+                        <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
+                          Orbital Elements
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Row label="NORAD ID"     value={String(el.satnum)} />
+                          <Row label="Inclination"  value={`${(el.inclo / R).toFixed(4)}°`} />
+                          <Row label="Eccentricity" value={el.ecco.toFixed(7)} />
+                          <Row label="RAAN"         value={`${(el.nodeo / R).toFixed(4)}°`} />
+                          <Row label="Arg. perigee" value={`${(el.argpo / R).toFixed(4)}°`} />
+                          <Row label="Mean anomaly" value={`${(el.mo / R).toFixed(4)}°`} />
+                          <Row label="Mean motion"  value={`${(el.no * 60 * 24 / (2 * Math.PI)).toFixed(8)} rev/day`} />
+                          <Row label="Period"       value={`${Math.floor(periodMin / 60)}h ${(periodMin % 60).toFixed(1)}m`} />
+                          <Row label="Perigee"      value={`${perigeeKm.toFixed(1)} km`} />
+                          <Row label="Apogee"       value={`${apogeeKm.toFixed(1)} km`} />
+                          <Row label="BSTAR"        value={el.bstar.toExponential(4)} />
+                          <Row label="Rev. at epoch" value={String(el.revnum)} />
+                          <Row label="Epoch"        value={epochDate.toISOString().slice(0, 19) + ' UTC'} />
+                        </Box>
+                      </Box>
+                    </>
+                  )
+                })()}
+              </Box>
+
             </Box>
           )}
 
