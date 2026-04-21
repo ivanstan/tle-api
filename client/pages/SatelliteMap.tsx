@@ -9,6 +9,7 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker'
 import { TlePopularProvider } from '../services/TlePopularProvider'
 import { TleProvider } from '../services/TleProvider'
 import { getColor } from '../services/ColorPalette'
+import { PassTrajectoryDiagram } from '../components/PassTrajectoryDiagram'
 import Alert from '@mui/material/Alert'
 import AppBar from '@mui/material/AppBar'
 import Autocomplete from '@mui/material/Autocomplete'
@@ -1162,6 +1163,17 @@ export const SatelliteMap = () => {
                                 <Row label="Max elev." value={`${nextPass.maxElevation.toFixed(1)}° @ ${fmtTime(maxDate)}`} />
                                 <Row label="Set"       value={`${fmtTime(setDate)} · ${azLabel(nextPass.setAzimuth)} (${nextPass.setAzimuth.toFixed(0)}°)`} />
                                 <Row label="Duration"  value={fmtDur(nextPass.duration)} />
+
+                                {/* Sky-plot trajectory diagram */}
+                                {nextPass.skyPath.length > 1 && (
+                                  <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'center' }}>
+                                    <PassTrajectoryDiagram
+                                      pass={nextPass}
+                                      color={selectedSat.color}
+                                      size={190}
+                                    />
+                                  </Box>
+                                )}
                               </>
                             )
                           })()}
