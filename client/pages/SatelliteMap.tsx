@@ -229,20 +229,20 @@ function getSunSubsolarPoint(date: Date): { lat: number; lng: number } {
 }
 
 /**
- * Builds the night-side overlay as an array of narrow vertical strip polygons.
+ * Builds the night-side overlay as a single closed polygon ring.
  *
- * A single hemispheric polygon hits Google Maps' winding-rule ambiguity (it
- * can't tell which half-sphere to fill). Splitting into 2°-wide strips gives
- * small, unambiguous quadrilaterals that always fill correctly.
+ * The polygon walks along the terminator from −180° to +180° longitude, then
+ * back across the night pole. Because the path is a single non-self-
+ * intersecting ring whose interior never crosses 90° of latitude in any single
+ * column, Google Maps fills it unambiguously.
  *
  * Terminator latitude formula:
  *   sin(φ)sin(φ_sun) + cos(φ)cos(φ_sun)cos(Δλ) = 0
  *   → tan(φ) = −cos(φ_sun)cos(Δλ)/sin(φ_sun)
  */
 function computeNightOverlay(sunLat: number, sunLng: number) {
-  const D2R  = Math.PI / 180
-  const φs   = sunLat * D2R
-  const STEP = 2                         // strip width in degrees
+  const D2R = Math.PI / 180
+  const φs  = sunLat * D2R
 
   function termLat(lng: number): number {
     const dλ = (lng - sunLng) * D2R
@@ -252,25 +252,19 @@ function computeNightOverlay(sunLat: number, sunLng: number) {
     return Math.atan(-Math.cos(φs) * Math.cos(dλ) / Math.sin(φs)) / D2R
   }
 
-  const nightPoleLat = sunLat >= 0 ? -90 : 90
+  const nightPoleLat = sunLat >= 0 ? -89.9 : 89.9
   const terminator: { lat: number; lng: number }[] = []
-  for (let lng = -180; lng <= 180; lng++) terminator.push({ lat: termLat(lng), lng })
-
-  // Build one narrow strip per STEP degrees of longitude
-  const nightStrips: { lat: number; lng: number }[][] = []
-  for (let lngL = -180; lngL < 180; lngL += STEP) {
-    const lngR = lngL + STEP
-    const latL = termLat(lngL)
-    const latR = termLat(lngR)
-    nightStrips.push([
-      { lat: nightPoleLat, lng: lngL },
-      { lat: latL,         lng: lngL },
-      { lat: latR,         lng: lngR },
-      { lat: nightPoleLat, lng: lngR },
-    ])
+  for (let lng = -180; lng <= 180; lng += 2) {
+    terminator.push({ lat: termLat(lng), lng })
   }
 
-  return { nightStrips, terminator }
+  const nightPolygon: { lat: number; lng: number }[] = [
+    ...terminator,
+    { lat: nightPoleLat, lng:  180 },
+    { lat: nightPoleLat, lng: -180 },
+  ]
+
+  return { nightPolygon, terminator }
 }
 
 /**
@@ -435,12 +429,63 @@ export const SatelliteMap = () => {
   }, [isPlaying, speed])
 
   // ── Day / Night overlay + celestial subpoints ────────────────────────────────
-  const { nightStrips, terminator, sunPos, moonPos } = useMemo(() => {
-    const sunPos  = getSunSubsolarPoint(simTime)
-    const moonPos = getMoonSublunarPoint(simTime)
-    const { nightStrips, terminator } = computeNightOverlay(sunPos.lat, sunPos.lng)
-    return { nightStrips, terminator, sunPos, moonPos }
+  const { nightPolygon, terminator, sunPos, moonPos } = useMemo(() => {
+    try {
+      const sunPos  = getSunSubsolarPoint(simTime)
+      const moonPos = getMoonSublunarPoint(simTime)
+      const { nightPolygon, terminator } = computeNightOverlay(sunPos.lat, sunPos.lng)
+      console.log('[celestial]', { sunPos, moonPos, terminatorPts: terminator.length, nightPts: nightPolygon.length })
+      return { nightPolygon, terminator, sunPos, moonPos }
+    } catch (err) {
+      console.error('[celestial overlay]', err)
+      return {
+        nightPolygon: [] as { lat: number; lng: number }[],
+        terminator:   [] as { lat: number; lng: number }[],
+        sunPos:  null as { lat: number; lng: number } | null,
+        moonPos: null as { lat: number; lng: number } | null,
+      }
+    }
   }, [simTime])
+
+  // Stable polygon/polyline option references — prevents @react-google-maps/api
+  // from tearing down and recreating the overlay every tick.
+  const nightOptions = useMemo<google.maps.PolygonOptions>(() => ({
+    fillColor:     '#000820',
+    fillOpacity:   0.5,
+    strokeColor:   '#000820',
+    strokeOpacity: 0,
+    strokeWeight:  0,
+    clickable:     false,
+    geodesic:      false,
+    zIndex:        0,
+  }), [])
+
+  const terminatorOptions = useMemo<google.maps.PolylineOptions>(() => ({
+    strokeColor:   '#ffffff',
+    strokeOpacity: 0.25,
+    strokeWeight:  1.5,
+    clickable:     false,
+    geodesic:      false,
+    zIndex:        1,
+  }), [])
+
+  const sunIcon  = useMemo(() => isLoaded ? ({
+    path:         window.google.maps.SymbolPath.CIRCLE,
+    scale:        12,
+    fillColor:    '#FFB300',
+    fillOpacity:  1,
+    strokeColor:  '#FFF59D',
+    strokeWeight: 3,
+  }) : undefined, [isLoaded])
+
+  const moonIcon = useMemo(() => isLoaded ? ({
+    path:         window.google.maps.SymbolPath.CIRCLE,
+    scale:        9,
+    fillColor:    '#CFD8DC',
+    fillOpacity:  1,
+    strokeColor:  '#37474F',
+    strokeWeight: 2,
+  }) : undefined, [isLoaded])
 
   // ── Positions (local SGP4 — no API call every tick) ─────────────────────────
   const satellites = useMemo(
@@ -826,55 +871,41 @@ export const SatelliteMap = () => {
           <GoogleMap mapContainerStyle={MAP_CONTAINER_STYLE} center={DEFAULT_CENTER} zoom={2}
             options={MAP_OPTIONS} onLoad={onMapLoad}>
 
-            {/* Night hemisphere overlay — one narrow strip per 2° of longitude */}
-            {nightStrips.map((path, i) => (
-              <Polygon
-                key={`night-${i}`}
-                paths={path}
-                options={{
-                  fillColor:     '#000820',
-                  fillOpacity:   0.5,
-                  strokeOpacity: 0,
-                  geodesic:      false,
-                  zIndex:        0,
-                }}
-              />
-            ))}
+            {/* Night hemisphere overlay */}
+            {nightPolygon.length > 2 && (
+              <Polygon paths={nightPolygon} options={nightOptions} />
+            )}
+
             {/* Terminator line — day/night boundary */}
-            <Polyline
-              path={terminator}
-              options={{
-                strokeColor:   '#ffffff',
-                strokeOpacity: 0.18,
-                strokeWeight:  2,
-                geodesic:      false,
-                zIndex:        1,
-              }}
-            />
+            {terminator.length > 1 && (
+              <Polyline path={terminator} options={terminatorOptions} />
+            )}
 
             {/* Solar subpoint */}
-            <Marker
-              position={sunPos}
-              title={`Solar Subpoint\nLat: ${sunPos.lat.toFixed(2)}°  Lng: ${sunPos.lng.toFixed(2)}°`}
-              zIndex={6}
-              icon={{
-                url:        sunMarkerIcon(),
-                scaledSize: new window.google.maps.Size(36, 36),
-                anchor:     new window.google.maps.Point(18, 18),
-              }}
-            />
+            {sunPos && (
+              <Marker key="sun-marker"
+                position={{ lat: sunPos.lat, lng: sunPos.lng }}
+                title={`Sun — ${sunPos.lat.toFixed(2)}°, ${sunPos.lng.toFixed(2)}°`}
+                icon={{
+                  path: window.google.maps.SymbolPath.CIRCLE,
+                  scale: 14, fillColor: '#FFB300', fillOpacity: 1,
+                  strokeColor: '#FFF59D', strokeWeight: 3,
+                }}
+              />
+            )}
 
             {/* Lunar subpoint */}
-            <Marker
-              position={moonPos}
-              title={`Lunar Subpoint\nLat: ${moonPos.lat.toFixed(2)}°  Lng: ${moonPos.lng.toFixed(2)}°`}
-              zIndex={6}
-              icon={{
-                url:        moonMarkerIcon(),
-                scaledSize: new window.google.maps.Size(34, 34),
-                anchor:     new window.google.maps.Point(17, 17),
-              }}
-            />
+            {moonPos && (
+              <Marker key="moon-marker"
+                position={{ lat: moonPos.lat, lng: moonPos.lng }}
+                title={`Moon — ${moonPos.lat.toFixed(2)}°, ${moonPos.lng.toFixed(2)}°`}
+                icon={{
+                  path: window.google.maps.SymbolPath.CIRCLE,
+                  scale: 10, fillColor: '#CFD8DC', fillOpacity: 1,
+                  strokeColor: '#37474F', strokeWeight: 2,
+                }}
+              />
+            )}
 
             {/* Visibility footprints — rendered first so they sit under everything */}
             {satellites.map((s) => s.footprint.length > 2 && (
