@@ -1,8 +1,9 @@
-import { HashRouter as Router, Route, Routes } from 'react-router-dom'
+import { HashRouter as Router, Route, Routes, useLocation } from 'react-router-dom'
 import Home from './pages/Home'
 import { Docs } from './pages/Docs'
 import { Privacy } from './pages/Privacy'
 import { Mcp } from './pages/Mcp'
+import { SatelliteMap } from './pages/SatelliteMap'
 import Navigation from './components/Navigation'
 import { createTheme, ThemeProvider } from '@mui/material/styles'
 import { Health } from './pages/Health'
@@ -86,15 +87,13 @@ if (isProduction()) {
   })
 }
 
-function App() {
+function AppRoutes() {
+  const location = useLocation()
+  const isMapPage = location.pathname === '/map'
   return (
-    <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Router>
-            <Navigation />
-            <Routes>
+    <>
+      {!isMapPage && <Navigation />}
+      <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/tle/:id" element={<Home />} />
               <Route path="/docs" element={<Docs />} />
@@ -104,7 +103,20 @@ function App() {
               <Route path="/browse" element={<Browse />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/mcp" element={<Mcp />} />
+              <Route path="/map" element={<SatelliteMap />} />
             </Routes>
+    </>
+  )
+}
+
+function App() {
+  return (
+    <Sentry.ErrorBoundary fallback={<p>An error has occurred</p>}>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Router>
+            <AppRoutes />
           </Router>
         </LocalizationProvider>
       </ThemeProvider>

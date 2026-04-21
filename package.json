@@ -12,7 +12,8 @@
     "build": "tsc -b && vite build --mode production",
     "preview": "vite preview",
     "test": "vitest",
-    "deploy": "sh bin/deploy-frontend"
+    "deploy": "sh bin/deploy-frontend",
+    "postinstall": "node scripts/postinstall.cjs"
   },
   "dependencies": {
     "@emotion/react": "^11.13.5",
@@ -21,6 +22,7 @@
     "@mui/material": "^6.3.0",
     "@mui/x-data-grid": "^7.24.0",
     "@mui/x-date-pickers": "^7.24.0",
+    "@react-google-maps/api": "^2.20.8",
     "@sentry/react": "^8.47.0",
     "chart.js": "^4.4.7",
     "date-fns": "^2.30.0",
@@ -38,7 +40,7 @@
     "remark-gfm": "^4.0.1",
     "satellite.js": "^5.0.0",
     "styled-components": "^6.1.14",
-    "tle-client": "ivanstan/tle.js"
+    "tle.js": "github:ivanstan/heavens.js"
   },
   "devDependencies": {
     "@types/luxon": "^3.4.2",
