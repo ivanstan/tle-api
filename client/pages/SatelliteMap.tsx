@@ -10,6 +10,8 @@ import { TlePopularProvider } from '../services/TlePopularProvider'
 import { TleProvider } from '../services/TleProvider'
 import { getColor } from '../services/ColorPalette'
 import { PassTrajectoryDiagram } from '../components/PassTrajectoryDiagram'
+import { CompassDial }           from '../components/CompassDial'
+import { ElevationDial }         from '../components/ElevationDial'
 import Alert from '@mui/material/Alert'
 import AppBar from '@mui/material/AppBar'
 import Autocomplete from '@mui/material/Autocomplete'
@@ -1090,7 +1092,7 @@ export const SatelliteMap = () => {
                           {lookAngles ? (
                             <>
                               {/* Visibility badge */}
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, py: 0.5, mb: 0.5 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, py: 0.5, mb: 0.75 }}>
                                 <Box sx={{
                                   width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
                                   bgcolor: isVisible ? 'success.main' : 'text.disabled',
@@ -1099,8 +1101,17 @@ export const SatelliteMap = () => {
                                   {isVisible ? 'Visible above horizon' : 'Below horizon'}
                                 </Typography>
                               </Box>
-                              <Row label="Azimuth"    value={`${lookAngles.azimuth.toFixed(1)}° ${azLabel(lookAngles.azimuth)}`} />
-                              <Row label="Elevation"  value={`${lookAngles.elevation.toFixed(2)}°`} />
+
+                              {/* Azimuth + Elevation dials side by side */}
+                              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mb: 1.5 }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+                                  <CompassDial azimuth={lookAngles.azimuth} color={selectedSat.color} size={110} />
+                                </Box>
+                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.25 }}>
+                                  <ElevationDial elevation={lookAngles.elevation} color={selectedSat.color} size={110} />
+                                </Box>
+                              </Box>
+
                               <Row label="Range"      value={`${lookAngles.range.toFixed(1)} km`} />
                               <Row label="Range rate" value={`${lookAngles.rangeRate >= 0 ? '+' : ''}${lookAngles.rangeRate.toFixed(3)} km/s`} />
                             </>
