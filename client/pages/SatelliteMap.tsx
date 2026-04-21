@@ -35,6 +35,7 @@ import Typography from '@mui/material/Typography'
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import MyLocationIcon from '@mui/icons-material/MyLocation'
 import PauseIcon from '@mui/icons-material/Pause'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import SatelliteAltIcon from '@mui/icons-material/SatelliteAlt'
@@ -445,6 +446,13 @@ export const SatelliteMap = () => {
   const [orbitCount,         setOrbitCount]          = useLocalStorage('map.orbitCount',          1)
   const [showEquator,        setShowEquator]         = useLocalStorage('map.showEquator',         false)
   const [showGreenwich,      setShowGreenwich]       = useLocalStorage('map.showGreenwich',       false)
+  // Default observer: Berlin — overridden by geolocation on first visit
+  const [observerPos, setObserverPos] = useLocalStorage<{ lat: number; lng: number }>(
+    'map.observerPos', { lat: 52.52, lng: 13.405 },
+  )
+
+  // Detail-view drives the sidebar slide: 'list' | 'satellite' | 'observer'
+  const [detailView, setDetailView] = useState<'list' | 'satellite' | 'observer'>('list')
   const [mapInstance, setMapInstance]     = useState<google.maps.Map | null>(null)
   const [pickerAnchor, setPickerAnchor]   = useState<HTMLElement | null>(null)
   const [selectorInput, setSelectorInput] = useState('')
@@ -464,6 +472,19 @@ export const SatelliteMap = () => {
 
   const setIds = (ids: number[], replace = false) =>
     setSearchParams(ids.length ? { ids: ids.join(',') } : {}, { replace })
+
+  // ── Geolocation (run once, only if position was never personalised) ──────────
+  useEffect(() => {
+    const stored = localStorage.getItem('map.observerPos')
+    if (stored) return // user already has a saved position, respect it
+    if (!navigator.geolocation) return
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => setObserverPos({ lat: coords.latitude, lng: coords.longitude }),
+      () => { /* denied / unavailable → keep Berlin default */ },
+      { timeout: 8000, maximumAge: 0 },
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // ── Playback interval ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -875,14 +896,14 @@ export const SatelliteMap = () => {
             <Tab label="Settings" value="settings" sx={{ fontSize: '0.78rem', minHeight: 40 }} />
           </Tabs>
 
-          {/* Info tab — two-panel slide */}
+          {/* Info tab — three-panel slide (list / satellite detail / observer detail) */}
           {sidebarTab === 'info' && (
             <Box sx={{ flex: 1, overflow: 'hidden', position: 'relative', minWidth: 260 }}>
 
               {/* ── List panel ─────────────────────────────────────────────── */}
               <Box sx={{
                 position: 'absolute', inset: 0, overflowY: 'auto', p: 2,
-                transform: selectedId !== null ? 'translateX(-100%)' : 'translateX(0)',
+                transform: detailView !== 'list' ? 'translateX(-100%)' : 'translateX(0)',
                 transition: 'transform 0.25s ease',
               }}>
                 <Typography sx={{ mb: 1.5, fontFamily: 'monospace', fontSize: '0.75rem', letterSpacing: '0.08em', color: 'text.secondary', textTransform: 'uppercase' }}>
@@ -899,8 +920,23 @@ export const SatelliteMap = () => {
                   <Alert key={err} severity="warning" sx={{ mb: 1, fontSize: '0.72rem', py: 0 }}>{err}</Alert>
                 ))}
 
+                {/* Observer entry */}
+                <Box onClick={() => setDetailView('observer')} sx={{
+                  mb: 1.25, p: 1.25, borderRadius: 1, cursor: 'pointer', border: '1px solid',
+                  borderColor: 'divider', transition: 'all 0.15s',
+                  '&:hover': { borderColor: '#FF6B35', bgcolor: '#FF6B3510' },
+                }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.25 }}>
+                    <MyLocationIcon sx={{ fontSize: 12, color: '#FF6B35', flexShrink: 0 }} />
+                    <Typography sx={{ fontWeight: 600, fontSize: '0.8rem', lineHeight: 1.2 }}>Observer</Typography>
+                  </Box>
+                  <Typography variant="caption" display="block" color="text.secondary">
+                    {fmtCoord(observerPos.lat, 'N', 'S')} · {fmtCoord(observerPos.lng, 'E', 'W')}
+                  </Typography>
+                </Box>
+
                 {satellites.map((s) => (
-                  <Box key={s.id} onClick={() => setSelectedId(s.id)} sx={{
+                  <Box key={s.id} onClick={() => { setSelectedId(s.id); setDetailView('satellite') }} sx={{
                     mb: 1.25, p: 1.25, borderRadius: 1, cursor: 'pointer', border: '1px solid',
                     borderColor: 'divider', transition: 'all 0.15s',
                     '&:hover': { borderColor: s.color, bgcolor: `${s.color}10` },
@@ -933,16 +969,17 @@ export const SatelliteMap = () => {
                 )}
               </Box>
 
-              {/* ── Detail panel ───────────────────────────────────────────── */}
+              {/* ── Detail panel (satellite or observer) ───────────────────── */}
               <Box sx={{
                 position: 'absolute', inset: 0, overflowY: 'auto',
-                transform: selectedId !== null ? 'translateX(0)' : 'translateX(100%)',
+                transform: detailView !== 'list' ? 'translateX(0)' : 'translateX(100%)',
                 transition: 'transform 0.25s ease',
               }}>
-                {selectedSat && (() => {
+                {/* ── Satellite detail ──────────────────────────────────────── */}
+                {detailView === 'satellite' && selectedSat && (() => {
                   const R = Math.PI / 180
                   const el = selectedSat.elements
-                  const n_rads = el.no / 60                          // rad/s
+                  const n_rads = el.no / 60
                   const a = Math.pow(398600.4418 / (n_rads * n_rads), 1 / 3)
                   const perigeeKm = a * (1 - el.ecco) - 6371
                   const apogeeKm  = a * (1 + el.ecco) - 6371
@@ -958,9 +995,8 @@ export const SatelliteMap = () => {
 
                   return (
                     <>
-                      {/* Back header */}
                       <Box sx={{ display: 'flex', alignItems: 'center', p: 1.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1 }}>
-                        <IconButton size="small" onClick={() => setSelectedId(null)}>
+                        <IconButton size="small" onClick={() => setDetailView('list')}>
                           <ChevronLeftIcon fontSize="small" />
                         </IconButton>
                         <Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: selectedSat.color, flexShrink: 0 }} />
@@ -970,7 +1006,6 @@ export const SatelliteMap = () => {
                       </Box>
 
                       <Box sx={{ p: 2 }}>
-                        {/* Live position */}
                         <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
                           Live Position
                         </Typography>
@@ -992,7 +1027,6 @@ export const SatelliteMap = () => {
                           )}
                         </Box>
 
-                        {/* Orbital elements */}
                         <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
                           Orbital Elements
                         </Typography>
@@ -1011,6 +1045,75 @@ export const SatelliteMap = () => {
                           <Row label="Rev. at epoch" value={String(el.revnum)} />
                           <Row label="Epoch"        value={epochDate.toISOString().slice(0, 19) + ' UTC'} />
                         </Box>
+                      </Box>
+                    </>
+                  )
+                })()}
+
+                {/* ── Observer detail ───────────────────────────────────────── */}
+                {detailView === 'observer' && (() => {
+                  const Row = ({ label, value }: { label: string; value: string }) => (
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', py: 0.4, borderBottom: '1px solid', borderColor: 'divider' }}>
+                      <Typography variant="caption" color="text.secondary" sx={{ flexShrink: 0, mr: 1 }}>{label}</Typography>
+                      <Typography variant="caption" sx={{ fontFamily: 'monospace', textAlign: 'right' }}>{value}</Typography>
+                    </Box>
+                  )
+                  return (
+                    <>
+                      <Box sx={{ display: 'flex', alignItems: 'center', p: 1.5, borderBottom: '1px solid', borderColor: 'divider', gap: 1 }}>
+                        <IconButton size="small" onClick={() => setDetailView('list')}>
+                          <ChevronLeftIcon fontSize="small" />
+                        </IconButton>
+                        <MyLocationIcon sx={{ fontSize: 14, color: '#FF6B35', flexShrink: 0 }} />
+                        <Typography sx={{ fontWeight: 700, fontSize: '0.82rem', lineHeight: 1.2 }}>Observer</Typography>
+                      </Box>
+
+                      <Box sx={{ p: 2 }}>
+                        <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
+                          Position
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          <Row label="Latitude"  value={fmtCoord(observerPos.lat, 'N', 'S')} />
+                          <Row label="Longitude" value={fmtCoord(observerPos.lng, 'E', 'W')} />
+                        </Box>
+
+                        <Typography variant="overline" color="text.secondary" sx={{ fontSize: '0.62rem', letterSpacing: '0.1em' }}>
+                          Satellites overhead
+                        </Typography>
+                        <Box sx={{ mb: 2 }}>
+                          {satellites.filter((s) => {
+                            if (!s.pos || s.footprint.length === 0) return false
+                            try {
+                              const fp = calculateVisibilityFootprint({ latitude: s.pos.lat, longitude: s.pos.lng, altitude: s.pos.alt })
+                              const dLat = observerPos.lat - s.pos.lat
+                              const dLng = observerPos.lng - s.pos.lng
+                              const distKm = Math.sqrt(dLat * dLat + dLng * dLng) * 111.32
+                              return distKm <= fp.radiusKm
+                            } catch { return false }
+                          }).length === 0 ? (
+                            <Typography variant="caption" color="text.secondary">None currently visible</Typography>
+                          ) : (
+                            satellites.filter((s) => {
+                              if (!s.pos || s.footprint.length === 0) return false
+                              try {
+                                const fp = calculateVisibilityFootprint({ latitude: s.pos.lat, longitude: s.pos.lng, altitude: s.pos.alt })
+                                const dLat = observerPos.lat - s.pos.lat
+                                const dLng = observerPos.lng - s.pos.lng
+                                const distKm = Math.sqrt(dLat * dLat + dLng * dLng) * 111.32
+                                return distKm <= fp.radiusKm
+                              } catch { return false }
+                            }).map((s) => (
+                              <Box key={s.id} sx={{ display: 'flex', alignItems: 'center', gap: 1, py: 0.5, borderBottom: '1px solid', borderColor: 'divider' }}>
+                                <Box sx={{ width: 8, height: 8, borderRadius: '50%', bgcolor: s.color, flexShrink: 0 }} />
+                                <Typography variant="caption" sx={{ fontFamily: 'monospace' }}>{s.tle.name}</Typography>
+                              </Box>
+                            ))
+                          )}
+                        </Box>
+
+                        <Typography variant="caption" color="text.secondary" sx={{ fontSize: '0.68rem', fontStyle: 'italic' }}>
+                          Drag the marker on the map to update the observer position.
+                        </Typography>
                       </Box>
                     </>
                   )
@@ -1253,9 +1356,34 @@ export const SatelliteMap = () => {
                   scale: 9, fillColor: s.color, fillOpacity: 1,
                   strokeColor: '#fff', strokeWeight: 2,
                 }}
-                onClick={() => setSelectedId(s.id === selectedId ? null : s.id)}
+                onClick={() => {
+                  setSelectedId(s.id === selectedId ? null : s.id)
+                  if (s.id !== selectedId) { setSidebarOpen(true); setDetailView('satellite') }
+                }}
               />
             ))}
+
+            {/* Observer marker — draggable, distinct orange pin */}
+            <Marker
+              key="observer"
+              position={observerPos}
+              draggable
+              title={`Observer — drag to move\n${fmtCoord(observerPos.lat, 'N', 'S')}, ${fmtCoord(observerPos.lng, 'E', 'W')}`}
+              zIndex={50}
+              icon={{
+                path: 'M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z',
+                fillColor: '#FF6B35',
+                fillOpacity: 1,
+                strokeColor: '#fff',
+                strokeWeight: 1.5,
+                scale: 1.6,
+                anchor: new window.google.maps.Point(12, 22),
+              }}
+              onDragEnd={(e) => {
+                if (e.latLng) setObserverPos({ lat: e.latLng.lat(), lng: e.latLng.lng() })
+              }}
+              onClick={() => { setSidebarOpen(true); setDetailView('observer') }}
+            />
 
             </>} {/* end mapInstance guard */}
           </GoogleMap>
