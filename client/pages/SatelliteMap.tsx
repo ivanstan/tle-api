@@ -432,6 +432,7 @@ export const SatelliteMap = () => {
   // Map / UI state
   const [selectedId, setSelectedId]       = useState<number | null>(null)
   const [sidebarOpen, setSidebarOpen]     = useState(true)
+  const [overlaysReady, setOverlaysReady] = useState(false)
   const [sidebarTab,  setSidebarTab]      = useState<'info' | 'settings'>('info')
 
   // ── Persisted settings ────────────────────────────────────────────────────
@@ -633,7 +634,12 @@ export const SatelliteMap = () => {
     return () => clearTimeout(t)
   }, [selectorInput])
 
-  const onMapLoad = useCallback((m: google.maps.Map) => setMapInstance(m), [])
+  const onMapLoad = useCallback((m: google.maps.Map) => {
+    setMapInstance(m)
+    // Wait for the first 'idle' event — fires when tiles are loaded and the
+    // map is fully settled. Only after this point are overlays reliably painted.
+    window.google.maps.event.addListenerOnce(m, 'idle', () => setOverlaysReady(true))
+  }, [])
   const selectedSat = satellites.find((s) => s.id === selectedId) ?? null
 
   // ── Selector derived values ──────────────────────────────────────────────────
@@ -1044,10 +1050,11 @@ export const SatelliteMap = () => {
           <GoogleMap mapContainerStyle={MAP_CONTAINER_STYLE} center={DEFAULT_CENTER} zoom={2}
             options={MAP_OPTIONS} onLoad={onMapLoad}>
 
-            {/* All overlays are gated on mapInstance so they only mount after
-                onLoad fires — prevents silent failures when settings are already
-                true from localStorage on the very first render. */}
-            {mapInstance && <>
+            {/* All overlays are gated on overlaysReady (set on first map 'idle'
+                event) so they only mount once Google Maps has fully settled and
+                can reliably paint every overlay — including those restored from
+                localStorage on the very first render. */}
+            {overlaysReady && <>
 
             {/* Night hemisphere overlay */}
             {showNightOverlay && nightPolygon.length > 2 && (
